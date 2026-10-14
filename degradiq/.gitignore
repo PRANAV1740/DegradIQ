@@ -1,0 +1,6 @@
+# Generated locally by FastF1/training; keep all generated content inside this package.
+/cache/
+/reports/first_stop_training_rows.csv
+__pycache__/
+*.py[cod]
+.pytest_cache/

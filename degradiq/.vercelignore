@@ -1,0 +1,11 @@
+# Keep the deployed Python function lean. The trained artifact in artifacts/ is intentionally included.
+.backup/
+cache/
+reports/
+tests/
+scripts/
+dashboard.py
+requirements-dashboard.txt
+requirements-train.txt
+__pycache__/
+*.py[cod]

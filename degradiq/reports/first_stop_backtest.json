@@ -1,0 +1,6 @@
+{
+  "status":"not available",
+  "reason":"Need both pre-2025 training rows and 2025 holdout rows.",
+  "train_rows":10301,
+  "holdout_rows":0
+}

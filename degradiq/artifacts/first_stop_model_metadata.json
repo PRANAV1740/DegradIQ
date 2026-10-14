@@ -1,0 +1,31 @@
+{
+  "feature_columns": [
+    "LapNumber",
+    "RaceLaps",
+    "LapFraction",
+    "TyreLife",
+    "GridPosition",
+    "Position",
+    "RecentPaceLoss_s",
+    "Compound",
+    "Driver",
+    "Team",
+    "EventName"
+  ],
+  "trained_at_utc": "2026-10-14T20:39:28.974598+00:00",
+  "training_rows": 10301,
+  "positive_rows": 558,
+  "negative_rows": 9743,
+  "positive_rate": 0.05416949810697991,
+  "training_seasons": [
+    2022,
+    2023
+  ],
+  "chronological_backtest": {
+    "status": "not available",
+    "reason": "Need both pre-2025 training rows and 2025 holdout rows.",
+    "train_rows": 10301,
+    "holdout_rows": 0
+  },
+  "model_file": "first_stop_model.joblib"
+}
