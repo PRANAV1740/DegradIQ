@@ -1,0 +1,32 @@
+{
+  "include": [
+    "degradiq",
+    "src"
+  ],
+  "exclude": [
+    "**/__pycache__"
+  ],
+  "executionEnvironments": [
+    {
+      "root": "src",
+      "extraPaths": [
+        "src",
+        "."
+      ]
+    },
+    {
+      "root": "degradiq",
+      "extraPaths": [
+        ".",
+        "degradiq"
+      ]
+    }
+  ],
+  "extraPaths": [
+    ".",
+    "degradiq",
+    "src"
+  ],
+  "pythonVersion": "3.13",
+  "pythonPlatform": "Windows"
+}

@@ -1,0 +1,69 @@
+year,round,event,status,rows,positive_rows,negative_rows,censored_rows,error
+2022,1,Bahrain Grand Prix,loaded,250,16,234,0,
+2022,2,Saudi Arabian Grand Prix,loaded,282,16,266,0,
+2022,3,Australian Grand Prix,loaded,289,17,272,0,
+2022,4,Emilia Romagna Grand Prix,loaded,233,18,215,0,
+2022,5,Miami Grand Prix,loaded,430,17,413,0,
+2022,6,Spanish Grand Prix,loaded,159,14,145,0,
+2022,7,Monaco Grand Prix,loaded,185,13,172,0,
+2022,8,Azerbaijan Grand Prix,loaded,251,17,234,0,
+2022,9,Canadian Grand Prix,loaded,287,13,274,0,
+2022,10,British Grand Prix,no eligible rows,0,0,0,0,
+2022,11,Austrian Grand Prix,loaded,307,19,288,0,
+2022,12,French Grand Prix,loaded,326,18,308,0,
+2022,13,Hungarian Grand Prix,loaded,260,19,241,0,
+2022,14,Belgian Grand Prix,loaded,157,18,139,0,
+2022,15,Dutch Grand Prix,loaded,239,20,219,0,
+2022,16,Italian Grand Prix,loaded,368,18,350,0,
+2022,17,Singapore Grand Prix,loaded,343,8,335,0,
+2022,18,Japanese Grand Prix,loaded,63,13,50,0,
+2022,19,United States Grand Prix,loaded,214,18,196,0,
+2022,20,Mexico City Grand Prix,loaded,607,20,587,0,
+2022,21,São Paulo Grand Prix,loaded,213,15,198,0,
+2022,22,Abu Dhabi Grand Prix,loaded,313,20,293,0,
+2023,1,Bahrain Grand Prix,loaded,188,19,169,0,
+2023,2,Saudi Arabian Grand Prix,loaded,230,12,218,0,
+2023,3,Australian Grand Prix,loaded,443,4,439,0,
+2023,4,Azerbaijan Grand Prix,loaded,331,12,319,0,
+2023,5,Miami Grand Prix,loaded,411,19,392,0,
+2023,6,Monaco Grand Prix,loaded,686,16,670,0,
+2023,7,Spanish Grand Prix,loaded,261,19,242,0,
+2023,8,Canadian Grand Prix,loaded,264,15,249,0,
+2023,9,Austrian Grand Prix,no eligible rows,0,0,0,0,
+2023,10,British Grand Prix,loaded,486,16,470,0,
+2023,11,Hungarian Grand Prix,loaded,248,18,230,0,
+2023,12,Belgian Grand Prix,loaded,128,19,109,0,
+2023,13,Dutch Grand Prix,loaded,93,6,87,0,
+2023,14,Italian Grand Prix,loaded,312,19,293,0,
+2023,15,Singapore Grand Prix,loaded,322,4,318,0,
+2023,16,Japanese Grand Prix,loaded,122,13,109,0,
+2023,17,Qatar Grand Prix,loaded,109,13,96,0,
+2023,18,United States Grand Prix,loaded,272,18,254,0,
+2023,19,Mexico City Grand Prix,loaded,387,16,371,0,
+2023,20,São Paulo Grand Prix,no eligible rows,0,0,0,0,
+2023,21,Las Vegas Grand Prix,loaded,121,11,110,0,
+2023,22,Abu Dhabi Grand Prix,loaded,275,20,255,0,
+2024,1,Bahrain Grand Prix,loaded,193,16,177,0,
+2024,2,Saudi Arabian Grand Prix,loaded,186,8,178,0,
+2024,3,Australian Grand Prix,loaded,151,18,133,0,
+2024,4,Japanese Grand Prix,unavailable (offline mode),0,0,0,0,Offline mode
+2024,5,Chinese Grand Prix,unavailable (offline mode),0,0,0,0,Offline mode
+2024,6,Miami Grand Prix,unavailable (offline mode),0,0,0,0,Offline mode
+2024,7,Emilia Romagna Grand Prix,unavailable (offline mode),0,0,0,0,Offline mode
+2024,8,Monaco Grand Prix,unavailable (offline mode),0,0,0,0,Offline mode
+2024,9,Canadian Grand Prix,unavailable (offline mode),0,0,0,0,Offline mode
+2024,10,Spanish Grand Prix,loaded,266,20,246,0,
+2024,11,Austrian Grand Prix,unavailable (offline mode),0,0,0,0,Offline mode
+2024,12,British Grand Prix,unavailable (offline mode),0,0,0,0,Offline mode
+2024,13,Hungarian Grand Prix,unavailable (offline mode),0,0,0,0,Offline mode
+2024,14,Belgian Grand Prix,unavailable (offline mode),0,0,0,0,Offline mode
+2024,15,Dutch Grand Prix,unavailable (offline mode),0,0,0,0,Offline mode
+2024,16,Italian Grand Prix,loaded,285,19,266,0,
+2024,17,Azerbaijan Grand Prix,unavailable (offline mode),0,0,0,0,Offline mode
+2024,18,Singapore Grand Prix,unavailable (offline mode),0,0,0,0,Offline mode
+2024,19,United States Grand Prix,unavailable (offline mode),0,0,0,0,Offline mode
+2024,20,Mexico City Grand Prix,unavailable (offline mode),0,0,0,0,Offline mode
+2024,21,São Paulo Grand Prix,unavailable (offline mode),0,0,0,0,Offline mode
+2024,22,Las Vegas Grand Prix,unavailable (offline mode),0,0,0,0,Offline mode
+2024,23,Qatar Grand Prix,unavailable (offline mode),0,0,0,0,Offline mode
+2024,24,Abu Dhabi Grand Prix,unavailable (offline mode),0,0,0,0,Offline mode

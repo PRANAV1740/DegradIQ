@@ -15,11 +15,11 @@ class FirstStopModelSmokeTest(unittest.TestCase):
         for index, driver in enumerate(drivers):
             stop_lap = 13 + (index % 8)
             for lap in range(1, 33):
-                pit = pd.Timedelta(seconds=lap * 90) if lap == stop_lap else pd.NaT
+                pit = pd.Timedelta(lap * 90, unit="s") if lap == stop_lap else pd.NaT
                 rows.append({
                     "Driver": driver,
                     "LapNumber": lap,
-                    "LapTime": pd.Timedelta(seconds=90 + 0.04 * lap + 0.01 * index),
+                    "LapTime": pd.Timedelta(90 + 0.04 * lap + 0.01 * index, unit="s"),
                     "Compound": ["SOFT", "MEDIUM", "HARD"][index % 3],
                     "TyreLife": lap,
                     "Stint": 1 if lap <= stop_lap else 2,

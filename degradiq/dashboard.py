@@ -33,6 +33,7 @@ try:
 except Exception as exc:
     st.error(f"Could not retrieve the 2026 calendar from FastF1: {exc}")
     st.stop()
+    raise
 
 def event_label(row):
     date = row.get("EventDate")

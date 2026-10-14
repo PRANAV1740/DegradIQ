@@ -17,7 +17,7 @@ except ImportError:  # Vercel root directory may be this package directory.
 def _seconds(series: pd.Series) -> pd.Series:
     """Convert timedelta-like FastF1 values to seconds without raising on NaT."""
     if pd.api.types.is_timedelta64_dtype(series):
-        return series.dt.total_seconds()
+        return series.dt.total_seconds()  # type: ignore[attr-defined]
     return pd.to_numeric(series, errors="coerce")
 
 

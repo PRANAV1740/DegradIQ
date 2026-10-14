@@ -21,7 +21,7 @@ class ServerlessDecouplingTest(unittest.TestCase):
         self._blocked = {}
         for mod in ("fastf1", "fastf1.core", "fastf1.api", "matplotlib", "matplotlib.pyplot"):
             self._blocked[mod] = sys.modules.get(mod)
-            sys.modules[mod] = None
+            sys.modules[mod] = None  # type: ignore[assignment]
 
     def tearDown(self):
         # Restore blocked modules

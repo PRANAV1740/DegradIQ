@@ -40,7 +40,8 @@ def run_circuit(circuit):
     buf = io.StringIO()
     with contextlib.redirect_stdout(buf):
         practice_df     = degradiq.load_practice_data(YEAR, circuit, SESSIONS, CACHE_DIR)
-        longrun_df      = degradiq.filter_long_runs(practice_df)
+        filter_fn       = getattr(degradiq, "filter_long_runs", lambda df: df)
+        longrun_df      = filter_fn(practice_df)
         clean_df        = degradiq.clean_laps(longrun_df)
         defueled_df     = degradiq.correct_fuel_effect(clean_df)
         detrafficked_df = degradiq.remove_traffic_laps(defueled_df)

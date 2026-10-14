@@ -128,7 +128,7 @@ def first_stop_predict(request: FirstStopRequest):
         if code in seen:
             raise HTTPException(status_code=422, detail=f"Duplicate driver code: {code}.")
         seen.add(code)
-        data = item.model_dump() if hasattr(item, "model_dump") else item.dict()
+        data = item.model_dump()
         data["driver"] = code
         data["starting_compound"] = data["starting_compound"].upper()
         if data.get("current_compound"):
