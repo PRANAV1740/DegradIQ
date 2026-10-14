@@ -10,6 +10,7 @@ degradiq/cache/
 degradiq/.backup/
 .backup/
 degradiq/reports/first_stop_training_rows.csv
+degradiq/artifacts/candidate_*.joblib
 
 # Additional generated output figures (preserve original graph1_raw, graph2_before_after, graph3_pred_vs_actual)
 outputs/figures/bahrain_graph*.png
