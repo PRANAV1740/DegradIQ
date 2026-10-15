@@ -108,17 +108,34 @@ def build_hazard_rows(laps: pd.DataFrame, results: pd.DataFrame | None = None,
         if len(g) < 2:
             continue
         pit_flags = g["PitInTime"].notna().to_numpy()
-        # When stint metadata exists, require evidence that the pit visit led to a new
-        # tyre stint. This avoids labelling a drive-through or non-tyre pit visit as a tyre stop.
+        # Require evidence that the pit visit is a genuine strategic tyre stop:
+        # 1. Distinguish strategic stops from compulsory red-flag race suspensions or safety car pass-throughs on Lap <= 2.
+        # 2. Exclude non-tyre changes (safety car pit-lane pass-throughs, drive-throughs) where compound didn't change and tyre life didn't reset.
         if "Stint" in g.columns:
             for pit_idx in np.flatnonzero(pit_flags):
                 if pit_idx + 1 >= len(g):
                     pit_flags[pit_idx] = False
                     continue
+                lap_num = g.iloc[pit_idx]["LapNumber"]
+                t_status = str(g.iloc[pit_idx].get("TrackStatus", ""))
+                old_c = str(g.iloc[pit_idx].get("Compound", "")).upper()
+                new_c = str(g.iloc[pit_idx + 1].get("Compound", "")).upper()
+                old_age = g.iloc[pit_idx].get("TyreLife", np.nan)
+                new_age = g.iloc[pit_idx + 1].get("TyreLife", np.nan)
+
+                # Compulsory race suspension or safety-car routing on Lap 1 or 2:
+                if lap_num <= 2 and ("5" in t_status or "4" in t_status):
+                    pit_flags[pit_idx] = False
+                    continue
+
                 old_stint, new_stint = g.iloc[pit_idx]["Stint"], g.iloc[pit_idx + 1]["Stint"]
                 stint_changed = pd.notna(old_stint) and pd.notna(new_stint) and old_stint != new_stint
-                compound_changed = str(g.iloc[pit_idx]["Compound"]).upper() != str(g.iloc[pit_idx + 1]["Compound"]).upper()
+                compound_changed = bool(old_c and new_c and old_c != new_c and old_c != "UNKNOWN" and new_c != "UNKNOWN")
+                tyre_reset = bool(pd.notna(new_age) and pd.notna(old_age) and new_age < old_age)
+
                 if not (stint_changed or compound_changed):
+                    pit_flags[pit_idx] = False
+                elif not compound_changed and not tyre_reset and ("4" in t_status or "5" in t_status):
                     pit_flags[pit_idx] = False
         pit_indices = np.flatnonzero(pit_flags)
         first_pit_idx = int(pit_indices[0]) if len(pit_indices) else None

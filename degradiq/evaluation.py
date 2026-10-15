@@ -202,7 +202,7 @@ class MarginalHazardBaseline:
 
 
 def compute_calibration_diagnostics(y_true: np.ndarray, y_prob: np.ndarray, n_bins: int = 5) -> dict[str, Any]:
-    """Calculate calibration error across quantile bins."""
+    """Calculate calibration error across linear and populated quantile bins with sparsity flags."""
     bins = np.linspace(0.0, 1.0, n_bins + 1)
     bin_indices = np.digitize(y_prob, bins) - 1
     bin_diagnostics = []
@@ -225,10 +225,46 @@ def compute_calibration_diagnostics(y_true: np.ndarray, y_prob: np.ndarray, n_bi
             "observed_frequency": round(actual_rate, 4),
             "predicted_probability": round(pred_rate, 4),
             "abs_error": round(error, 4),
+            "is_sparse": bool(count < 50),
         })
 
     ece = float(total_abs_error / max(1, valid_samples))
+
+    # Quantile-based reliability analysis (ensures populated bins)
+    quantile_diagnostics = []
+    try:
+        # Generate 5 quantile bins on predicted probabilities
+        quantiles = np.quantile(y_prob, np.linspace(0.0, 1.0, n_bins + 1))
+        # Remove duplicate edges if probabilities are concentrated
+        unique_quantiles = np.unique(quantiles)
+        if len(unique_quantiles) >= 3:
+            q_indices = np.digitize(y_prob, unique_quantiles) - 1
+            for qi in range(len(unique_quantiles) - 1):
+                q_mask = q_indices == qi
+                q_count = int(np.sum(q_mask))
+                if q_count == 0:
+                    continue
+                q_actual = float(np.mean(y_true[q_mask]))
+                q_pred = float(np.mean(y_prob[q_mask]))
+                q_err = abs(q_actual - q_pred)
+                quantile_diagnostics.append({
+                    "quantile_bin": qi + 1,
+                    "prob_range": [round(float(unique_quantiles[qi]), 4), round(float(unique_quantiles[qi + 1]), 4)],
+                    "count": q_count,
+                    "observed_frequency": round(q_actual, 4),
+                    "predicted_probability": round(q_pred, 4),
+                    "abs_error": round(q_err, 4),
+                })
+    except Exception:
+        quantile_diagnostics = []
+
     return {
         "expected_calibration_error": round(ece, 4),
         "binned_calibration": bin_diagnostics,
+        "quantile_calibration": quantile_diagnostics,
+        "calibration_notes": (
+            "Per-lap hazard rates are naturally concentrated under 0.20. Standard uniform bins above 0.20 "
+            "contain sparse samples (<50 rows), making bin-specific error estimates volatile. "
+            "Quantile calibration provides evenly populated reliability bins across the distribution."
+        ),
     }

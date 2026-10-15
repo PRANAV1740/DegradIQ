@@ -171,8 +171,9 @@ def collect_rows_with_checkpoints(
 def fit_candidate_first_stop_model(
     training_rows: pd.DataFrame,
     architecture: str = "calibrated_hgb",
+    groups: np.ndarray | None = None,
 ) -> dict[str, Any]:
-    """Fit calibrated candidate hazard model on training rows."""
+    """Fit calibrated candidate hazard model on training rows with event-grouped cross-validation."""
     if training_rows is None or training_rows.empty:
         raise ValueError("No first-stop training rows provided.")
     data = training_rows.dropna(subset=["StopNextLap"]).copy()
@@ -213,7 +214,16 @@ def fit_candidate_first_stop_model(
             ("hazard", LogisticRegression(max_iter=2000, C=0.5, random_state=42)),
         ])
 
-    calibrated_pipeline = CalibratedClassifierCV(estimator=base_model, method="sigmoid", cv=5)
+    if groups is None and "EventName" in data.columns:
+        groups = data["EventName"].astype(str).to_numpy()
+
+    unique_groups = len(np.unique(groups)) if groups is not None else 0
+    if unique_groups >= 5:
+        from sklearn.model_selection import GroupKFold
+        cv_splits = list(GroupKFold(n_splits=5).split(data[FEATURE_COLUMNS], data["StopNextLap"].astype(int), groups=groups))
+        calibrated_pipeline = CalibratedClassifierCV(estimator=base_model, method="sigmoid", cv=cv_splits)
+    else:
+        calibrated_pipeline = CalibratedClassifierCV(estimator=base_model, method="sigmoid", cv=5)
     calibrated_pipeline.fit(data[FEATURE_COLUMNS], data["StopNextLap"].astype(int))
 
     return {
@@ -415,6 +425,8 @@ def evaluate_candidate_chronological(
             },
         },
         "calibration_details": calibration_diag["binned_calibration"],
+        "quantile_calibration": calibration_diag.get("quantile_calibration", []),
+        "calibration_notes": calibration_diag.get("calibration_notes", ""),
         "per_event_metrics": per_event_metrics,
     }
     return bundle, backtest_report
