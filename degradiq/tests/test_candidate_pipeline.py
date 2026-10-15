@@ -106,6 +106,11 @@ class RateLimiterAndCheckpointTests(unittest.TestCase):
         self.assertTrue(loaded_df.empty)
         self.assertEqual(meta["status"], "no eligible rows")
 
+    def test_failed_session_not_valid_checkpoint(self):
+        # Transient failure must not prevent future retry
+        self.checkpoint_mgr.save_checkpoint(2024, 3, "Failed GP", pd.DataFrame(), status="unavailable", error="HTTP 503")
+        self.assertFalse(self.checkpoint_mgr.has_valid_checkpoint(2024, 3, FEATURE_COLUMNS, event_name="Failed GP"))
+
 
 class PipelineAndBaselineTests(unittest.TestCase):
     def make_synthetic_stints(self, season: int, event_name: str) -> pd.DataFrame:
@@ -146,6 +151,55 @@ class PipelineAndBaselineTests(unittest.TestCase):
         hazard_df = build_hazard_rows(laps, race_laps=50)
         # Drive-through on lap 10 with same stint 1 and same compound must not be labelled as pit stop
         self.assertEqual(int(hazard_df["StopNextLap"].sum()), 0)
+
+    def test_retirement_treated_as_right_censored(self):
+        """Verify driver retiring without pit stop is right-censored with zero positive stops."""
+        laps = pd.DataFrame([
+            {"Driver": "ALB", "LapNumber": lap, "LapTime": pd.Timedelta(92, unit="s"), "Compound": "HARD", "TyreLife": lap, "Stint": 1, "PitInTime": pd.NaT, "Position": 12, "IsAccurate": True, "TrackStatus": "1"}
+            for lap in range(1, 15)
+        ])
+        hazard_df = build_hazard_rows(laps, race_laps=50)
+        # 14 laps total -> 13 hazard transition rows
+        self.assertEqual(len(hazard_df), 13)
+        # No pit stops occurred: all rows are right-censored non-stops
+        self.assertEqual(int(hazard_df["StopNextLap"].sum()), 0)
+        # No post-retirement laps exist
+        self.assertEqual(hazard_df["LapNumber"].max(), 13.0)
+
+    def test_pre_race_features_contain_no_post_start_information(self):
+        """Verify pre-race feature generation does not leak post-start pace or position telemetry."""
+        from degradiq.pit_strategy import _lap_features
+        driver_state = {
+            "driver": "NOR",
+            "grid_position": 3,
+            "starting_compound": "MEDIUM",
+            "starting_tyre_age": 1,
+            "current_position": 1,  # Post-start information
+            "recent_pace_loss_s": 0.45,  # Post-start telemetry
+        }
+        feat = _lap_features(driver_state, lap_number=15, race_laps=57, event_name="Bahrain Grand Prix", mode="pre-race")
+        # Pre-race must ignore current_position and recent_pace_loss_s
+        self.assertEqual(feat["Position"], 3.0)
+        self.assertTrue(np.isnan(feat["RecentPaceLoss_s"]))
+        self.assertEqual(feat["Compound"], "MEDIUM")
+
+    def test_live_features_strictly_use_current_lap_information(self):
+        """Verify live feature generation uses current lap state without future knowledge."""
+        from degradiq.pit_strategy import _lap_features
+        driver_state = {
+            "driver": "HAM",
+            "grid_position": 8,
+            "current_lap": 12,
+            "current_position": 5,
+            "current_compound": "HARD",
+            "current_tyre_age": 12,
+            "recent_pace_loss_s": 0.18,
+        }
+        feat = _lap_features(driver_state, lap_number=13, race_laps=57, event_name="Bahrain Grand Prix", mode="live")
+        self.assertEqual(feat["Position"], 5.0)
+        self.assertEqual(feat["RecentPaceLoss_s"], 0.18)
+        self.assertEqual(feat["Compound"], "HARD")
+        self.assertEqual(feat["TyreLife"], 12.0)
 
     def test_zero_leakage_and_baseline_evaluation(self):
         train_df1 = self.make_synthetic_stints(2022, "Bahrain GP")

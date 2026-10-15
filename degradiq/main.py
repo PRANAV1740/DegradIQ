@@ -1,2 +1,4 @@
-"""Vercel FastAPI entrypoint when the Vercel Root Directory is `degradiq`."""
-from api import app  # noqa: F401
+try:
+    from api import app  # noqa: F401
+except ImportError:
+    from .api import app  # noqa: F401

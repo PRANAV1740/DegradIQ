@@ -2,54 +2,37 @@
   "status": "incomplete",
   "holdout_year": 2024,
   "total_scheduled_events": 24,
-  "loaded_events": 5,
+  "loaded_events": 22,
   "missing_events": [
     "Japanese Grand Prix",
-    "Chinese Grand Prix",
-    "Miami Grand Prix",
-    "Emilia Romagna Grand Prix",
-    "Monaco Grand Prix",
-    "Canadian Grand Prix",
-    "Austrian Grand Prix",
-    "British Grand Prix",
-    "Hungarian Grand Prix",
-    "Belgian Grand Prix",
-    "Dutch Grand Prix",
-    "Azerbaijan Grand Prix",
-    "Singapore Grand Prix",
-    "United States Grand Prix",
-    "Mexico City Grand Prix",
-    "S\u00e3o Paulo Grand Prix",
-    "Las Vegas Grand Prix",
-    "Qatar Grand Prix",
-    "Abu Dhabi Grand Prix"
+    "Monaco Grand Prix"
   ],
   "train_rows": 11465,
-  "holdout_rows": 1081,
-  "holdout_positive_rows": 81,
-  "drivers_with_observed_first_stop": 81,
+  "holdout_rows": 7155,
+  "holdout_positive_rows": 370,
+  "drivers_with_observed_first_stop": 370,
   "metrics": {
     "candidate_model": {
-      "brier_score": 0.06660901297275952,
-      "log_loss": 0.24992444763617183,
-      "roc_auc": 0.7328641975308642,
-      "first_stop_lap_mae": 6.185185185185185,
-      "interval_coverage_10_90": 0.8395061728395061,
-      "mean_predicted_hazard": 0.04805892094153061,
-      "observed_stop_rate": 0.07493061979648474,
-      "expected_calibration_error": 0.0269
+      "brier_score": 0.047368029216510364,
+      "log_loss": 0.18585169125737472,
+      "roc_auc": 0.7461016949152542,
+      "first_stop_lap_mae": 6.681081081081081,
+      "interval_coverage_10_90": 0.8648648648648649,
+      "mean_predicted_hazard": 0.06319023356529832,
+      "observed_stop_rate": 0.0517120894479385,
+      "expected_calibration_error": 0.0115
     },
     "baseline_1_historical_median": {
-      "first_stop_lap_mae": 6.839506172839506,
-      "drivers_evaluated": 81
+      "first_stop_lap_mae": 7.856756756756757,
+      "drivers_evaluated": 370
     },
     "baseline_2_empirical_hazard": {
-      "brier_score": 0.07023594003358022,
-      "log_loss": 0.5667716764961295
+      "brier_score": 0.05222052309921639,
+      "log_loss": 0.3675987775992283
     },
     "baseline_3_marginal_hazard": {
-      "brier_score": 0.06969461400636304,
-      "log_loss": 0.2694833504641331,
+      "brier_score": 0.049052095049299665,
+      "log_loss": 0.20366382199858765,
       "marginal_rate": 0.05547317924116878
     }
   },
@@ -59,29 +42,50 @@
         0.0,
         0.2
       ],
-      "count": 1067,
-      "observed_frequency": 0.0722,
-      "predicted_probability": 0.0458,
-      "abs_error": 0.0263
+      "count": 6944,
+      "observed_frequency": 0.0493,
+      "predicted_probability": 0.0583,
+      "abs_error": 0.0091
     },
     {
       "bin_range": [
         0.2,
         0.4
       ],
-      "count": 14,
-      "observed_frequency": 0.2857,
-      "predicted_probability": 0.2177,
-      "abs_error": 0.068
+      "count": 211,
+      "observed_frequency": 0.1327,
+      "predicted_probability": 0.2233,
+      "abs_error": 0.0906
     }
   ],
   "per_event_metrics": {
+    "Abu Dhabi Grand Prix": {
+      "drivers_evaluated": 17,
+      "candidate_lap_mae": 6.176470588235294,
+      "baseline_median_lap_mae": 6.882352941176471,
+      "interval_coverage_10_90": 0.8823529411764706,
+      "brier_score": 0.0616505392296665
+    },
     "Australian Grand Prix": {
       "drivers_evaluated": 18,
       "candidate_lap_mae": 8.722222222222221,
       "baseline_median_lap_mae": 12.61111111111111,
       "interval_coverage_10_90": 0.8333333333333334,
       "brier_score": 0.11199327069781909
+    },
+    "Austrian Grand Prix": {
+      "drivers_evaluated": 18,
+      "candidate_lap_mae": 3.6666666666666665,
+      "baseline_median_lap_mae": 5.944444444444445,
+      "interval_coverage_10_90": 1.0,
+      "brier_score": 0.05130464087997329
+    },
+    "Azerbaijan Grand Prix": {
+      "drivers_evaluated": 15,
+      "candidate_lap_mae": 3.0,
+      "baseline_median_lap_mae": 3.8666666666666667,
+      "interval_coverage_10_90": 1.0,
+      "brier_score": 0.035954200629547184
     },
     "Bahrain Grand Prix": {
       "drivers_evaluated": 16,
@@ -90,12 +94,89 @@
       "interval_coverage_10_90": 0.9375,
       "brier_score": 0.06902201183138004
     },
+    "Belgian Grand Prix": {
+      "drivers_evaluated": 19,
+      "candidate_lap_mae": 2.8421052631578947,
+      "baseline_median_lap_mae": 2.473684210526316,
+      "interval_coverage_10_90": 1.0,
+      "brier_score": 0.0894665626872589
+    },
+    "British Grand Prix": {
+      "drivers_evaluated": 19,
+      "candidate_lap_mae": 5.052631578947368,
+      "baseline_median_lap_mae": 3.6052631578947367,
+      "interval_coverage_10_90": 1.0,
+      "brier_score": 0.03665700258331792
+    },
+    "Canadian Grand Prix": {
+      "drivers_evaluated": 9,
+      "candidate_lap_mae": 11.222222222222221,
+      "baseline_median_lap_mae": 10.666666666666666,
+      "interval_coverage_10_90": 0.7777777777777778,
+      "brier_score": 0.023854841769763428
+    },
+    "Chinese Grand Prix": {
+      "drivers_evaluated": 18,
+      "candidate_lap_mae": 4.833333333333333,
+      "baseline_median_lap_mae": 3.7777777777777777,
+      "interval_coverage_10_90": 1.0,
+      "brier_score": 0.07787516231885137
+    },
+    "Dutch Grand Prix": {
+      "drivers_evaluated": 20,
+      "candidate_lap_mae": 7.55,
+      "baseline_median_lap_mae": 12.1,
+      "interval_coverage_10_90": 1.0,
+      "brier_score": 0.03778873650173379
+    },
+    "Emilia Romagna Grand Prix": {
+      "drivers_evaluated": 20,
+      "candidate_lap_mae": 7.85,
+      "baseline_median_lap_mae": 9.8,
+      "interval_coverage_10_90": 0.9,
+      "brier_score": 0.046982506781863616
+    },
+    "Hungarian Grand Prix": {
+      "drivers_evaluated": 19,
+      "candidate_lap_mae": 5.368421052631579,
+      "baseline_median_lap_mae": 7.052631578947368,
+      "interval_coverage_10_90": 0.9473684210526315,
+      "brier_score": 0.0617439033080563
+    },
     "Italian Grand Prix": {
       "drivers_evaluated": 19,
       "candidate_lap_mae": 5.526315789473684,
       "baseline_median_lap_mae": 5.105263157894737,
       "interval_coverage_10_90": 0.9473684210526315,
       "brier_score": 0.06109328765566901
+    },
+    "Las Vegas Grand Prix": {
+      "drivers_evaluated": 20,
+      "candidate_lap_mae": 4.95,
+      "baseline_median_lap_mae": 4.45,
+      "interval_coverage_10_90": 0.95,
+      "brier_score": 0.09363187653792827
+    },
+    "Mexico City Grand Prix": {
+      "drivers_evaluated": 17,
+      "candidate_lap_mae": 8.882352941176471,
+      "baseline_median_lap_mae": 11.0,
+      "interval_coverage_10_90": 0.7058823529411765,
+      "brier_score": 0.03251685656572968
+    },
+    "Miami Grand Prix": {
+      "drivers_evaluated": 18,
+      "candidate_lap_mae": 5.055555555555555,
+      "baseline_median_lap_mae": 7.361111111111111,
+      "interval_coverage_10_90": 0.9444444444444444,
+      "brier_score": 0.04618651836767326
+    },
+    "Qatar Grand Prix": {
+      "drivers_evaluated": 16,
+      "candidate_lap_mae": 17.5625,
+      "baseline_median_lap_mae": 20.375,
+      "interval_coverage_10_90": 0.125,
+      "brier_score": 0.046585265207289075
     },
     "Saudi Arabian Grand Prix": {
       "drivers_evaluated": 8,
@@ -104,12 +185,33 @@
       "interval_coverage_10_90": 0.0,
       "brier_score": 0.04351332079984953
     },
+    "Singapore Grand Prix": {
+      "drivers_evaluated": 20,
+      "candidate_lap_mae": 6.25,
+      "baseline_median_lap_mae": 10.4,
+      "interval_coverage_10_90": 1.0,
+      "brier_score": 0.035813471734956484
+    },
     "Spanish Grand Prix": {
       "drivers_evaluated": 20,
       "candidate_lap_mae": 2.7,
       "baseline_median_lap_mae": 3.5,
       "interval_coverage_10_90": 1.0,
       "brier_score": 0.06115430907552007
+    },
+    "S\u00e3o Paulo Grand Prix": {
+      "drivers_evaluated": 6,
+      "candidate_lap_mae": 9.0,
+      "baseline_median_lap_mae": 8.166666666666666,
+      "interval_coverage_10_90": 1.0,
+      "brier_score": 0.01581961141069177
+    },
+    "United States Grand Prix": {
+      "drivers_evaluated": 18,
+      "candidate_lap_mae": 11.444444444444445,
+      "baseline_median_lap_mae": 12.666666666666666,
+      "interval_coverage_10_90": 0.5,
+      "brier_score": 0.04839570340887408
     }
   }
 }

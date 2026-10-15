@@ -40,7 +40,10 @@ class ServerlessDecouplingTest(unittest.TestCase):
 
         import main
         from fastapi import FastAPI
-        from fastapi.testclient import TestClient
+        import warnings
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", message=".*starlette\\.testclient.*")
+            from fastapi.testclient import TestClient
 
         self.assertIsInstance(main.app, FastAPI)
         client = TestClient(main.app)

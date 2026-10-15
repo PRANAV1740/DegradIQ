@@ -200,7 +200,7 @@ class CheckpointManager:
                     continue
                 if meta.get("year") != year:
                     continue
-                if meta.get("status") in ("no eligible rows", "unavailable"):
+                if meta.get("status") == "no eligible rows":
                     return True
                 cpath = self.checkpoint_path(year, candidate_id)
                 if not cpath.exists():

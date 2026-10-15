@@ -46,24 +46,24 @@ year,round,event,status,rows,positive_rows,negative_rows,censored_rows,error
 2024,1,Bahrain Grand Prix,loaded,193,16,177,0,
 2024,2,Saudi Arabian Grand Prix,loaded,186,8,178,0,
 2024,3,Australian Grand Prix,loaded,151,18,133,0,
-2024,4,Japanese Grand Prix,unavailable (offline mode),0,0,0,0,Offline mode
-2024,5,Chinese Grand Prix,unavailable (offline mode),0,0,0,0,Offline mode
-2024,6,Miami Grand Prix,unavailable (offline mode),0,0,0,0,Offline mode
-2024,7,Emilia Romagna Grand Prix,unavailable (offline mode),0,0,0,0,Offline mode
-2024,8,Monaco Grand Prix,unavailable (offline mode),0,0,0,0,Offline mode
-2024,9,Canadian Grand Prix,unavailable (offline mode),0,0,0,0,Offline mode
+2024,4,Japanese Grand Prix,no eligible rows,0,0,0,0,
+2024,5,Chinese Grand Prix,loaded,205,18,187,0,
+2024,6,Miami Grand Prix,loaded,356,18,338,0,
+2024,7,Emilia Romagna Grand Prix,loaded,396,20,376,0,
+2024,8,Monaco Grand Prix,no eligible rows,0,0,0,0,
+2024,9,Canadian Grand Prix,loaded,433,9,424,0,
 2024,10,Spanish Grand Prix,loaded,266,20,246,0,
-2024,11,Austrian Grand Prix,unavailable (offline mode),0,0,0,0,Offline mode
-2024,12,British Grand Prix,unavailable (offline mode),0,0,0,0,Offline mode
-2024,13,Hungarian Grand Prix,unavailable (offline mode),0,0,0,0,Offline mode
-2024,14,Belgian Grand Prix,unavailable (offline mode),0,0,0,0,Offline mode
-2024,15,Dutch Grand Prix,unavailable (offline mode),0,0,0,0,Offline mode
+2024,11,Austrian Grand Prix,loaded,302,18,284,0,
+2024,12,British Grand Prix,loaded,431,19,412,0,
+2024,13,Hungarian Grand Prix,loaded,273,19,254,0,
+2024,14,Belgian Grand Prix,loaded,181,19,162,0,
+2024,15,Dutch Grand Prix,loaded,466,20,446,0,
 2024,16,Italian Grand Prix,loaded,285,19,266,0,
-2024,17,Azerbaijan Grand Prix,unavailable (offline mode),0,0,0,0,Offline mode
-2024,18,Singapore Grand Prix,unavailable (offline mode),0,0,0,0,Offline mode
-2024,19,United States Grand Prix,unavailable (offline mode),0,0,0,0,Offline mode
-2024,20,Mexico City Grand Prix,unavailable (offline mode),0,0,0,0,Offline mode
-2024,21,São Paulo Grand Prix,unavailable (offline mode),0,0,0,0,Offline mode
-2024,22,Las Vegas Grand Prix,unavailable (offline mode),0,0,0,0,Offline mode
-2024,23,Qatar Grand Prix,unavailable (offline mode),0,0,0,0,Offline mode
-2024,24,Abu Dhabi Grand Prix,unavailable (offline mode),0,0,0,0,Offline mode
+2024,17,Azerbaijan Grand Prix,loaded,377,15,362,0,
+2024,18,Singapore Grand Prix,loaded,502,20,482,0,
+2024,19,United States Grand Prix,loaded,346,18,328,0,
+2024,20,Mexico City Grand Prix,loaded,464,17,447,0,
+2024,21,São Paulo Grand Prix,loaded,487,6,481,0,
+2024,22,Las Vegas Grand Prix,loaded,190,20,170,0,
+2024,23,Qatar Grand Prix,loaded,414,16,398,0,
+2024,24,Abu Dhabi Grand Prix,loaded,251,17,234,0,
