@@ -10,7 +10,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from degradiq.rate_limiter import RateLimiter, install_rate_limiter, CheckpointManager
-from degradiq.pit_strategy import build_hazard_rows, PACKAGE_DIR
+from degradiq.pit_strategy import build_hazard_rows, PACKAGE_DIR, LABEL_DEFINITION_VERSION
 
 CACHE = PACKAGE_DIR / "cache" / "fastf1"
 CACHE.mkdir(parents=True, exist_ok=True)
@@ -42,10 +42,16 @@ for _, event in schedule.iterrows():
         results = getattr(session, "results", pd.DataFrame())
         max_lap = pd.to_numeric(laps.get("LapNumber", pd.Series(dtype=float)), errors="coerce").max()
         race_distance = int(max_lap) if pd.notna(max_lap) else None
-        rows = build_hazard_rows(laps, results, name, race_distance)
+        diag_sink: list = []
+        rows = build_hazard_rows(laps, results, name, race_distance,
+                                 track_status=getattr(session, "track_status", None),
+                                 diagnostics_sink=diag_sink)
+        diag = diag_sink[-1] if diag_sink else None
         n_stops = int(rows["StopNextLap"].sum()) if not rows.empty else 0
-        mgr.save_checkpoint(2025, round_id, name, rows, status="loaded")
-        mgr.save_checkpoint(2025, name.replace(" ", "_"), name, rows, status="loaded")
+        mgr.save_checkpoint(2025, round_id, name, rows, status="loaded",
+                            label_definition_version=LABEL_DEFINITION_VERSION, diagnostics=diag)
+        mgr.save_checkpoint(2025, name.replace(" ", "_"), name, rows, status="loaded",
+                            label_definition_version=LABEL_DEFINITION_VERSION, diagnostics=diag)
         print(f"[Success] 2025 Round {round_id} ({name}): {len(rows)} rows, {n_stops} stops.")
     except Exception as exc:
         err = f"{type(exc).__name__}: {exc}"

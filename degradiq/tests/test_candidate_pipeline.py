@@ -24,7 +24,8 @@ from degradiq.evaluation import (
     compute_calibration_diagnostics,
 )
 from degradiq.pit_strategy import (
-    FEATURE_COLUMNS, build_hazard_rows, fit_first_stop_model, ARTIFACT_DIR, MODEL_PATH
+    FEATURE_COLUMNS, build_hazard_rows, fit_first_stop_model, ARTIFACT_DIR, MODEL_PATH,
+    LABEL_DEFINITION_VERSION,
 )
 from degradiq.scripts.train_first_stop import (
     evaluate_candidate_chronological, save_candidate_model, fit_candidate_first_stop_model
@@ -138,6 +139,9 @@ class PipelineAndBaselineTests(unittest.TestCase):
                     "EventName": event_name,
                     "StopNextLap": is_stop,
                     "Season": season,
+                    # Synthetic data is generated under the current label definition, so it
+                    # carries the certification the fail-closed training API now requires.
+                    "LabelDefVersion": LABEL_DEFINITION_VERSION,
                 })
         return pd.DataFrame(rows)
 

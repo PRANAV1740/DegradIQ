@@ -56,26 +56,119 @@ def _first_valid(row: pd.Series, keys: tuple[str, ...], default: Any = np.nan) -
     return default
 
 
+# FastF1 TrackStatus codes. Lap-level laps["TrackStatus"] concatenates every code
+# seen during a lap (e.g. "451"), so it is NOT safe for red-flag classification;
+# use the timestamped session.track_status timeline instead.
+_RED_FLAG = "5"
+# States under which an observation row may be used to predict the next lap, per the
+# FROZEN target contract: green (1), Safety Car (4), VSC (6) and VSC-ending (7). Ordinary
+# yellow (2) is NOT eligible and red (5) is excluded. Changing this set requires a
+# separate documented contract review.
+_ELIGIBLE_OBSERVATION_STATES = {"1", "4", "6", "7"}
+
+# Label-definition version: identifies the reviewed target + label-generation semantics.
+# Persisted in checkpoint metadata so training can refuse to mix incompatible label
+# versions. Bump this whenever the label contract or generation logic changes.
+LABEL_DEFINITION_VERSION = "2.0-strategic-green-vsc-sc"
+
+# Extra (non-feature) output column flagging a missing/invalid lap time on an
+# observation row. It is intentionally NOT part of FEATURE_COLUMNS so it cannot
+# change the input schema of the already-trained production/candidate models; a
+# future retrain may promote it into the feature set.
+EXTRA_OUTPUT_COLUMNS = ["StopNextLap", "LapTimeMissing"]
+
+
+def _build_status_intervals(track_status: pd.DataFrame | None) -> list[tuple[Any, str]]:
+    """Return sorted (session_time, status_code) changes from a track_status frame.
+
+    Times are session-relative (Timedelta). Returns [] when the timeline is
+    unavailable so callers fall back to a conservative, clearly-marked path.
+    """
+    if track_status is None or len(track_status) == 0:
+        return []
+    if "Time" not in track_status.columns or "Status" not in track_status.columns:
+        return []
+    ts = track_status.dropna(subset=["Time"]).sort_values("Time")
+    return [(r["Time"], str(r["Status"])) for _, r in ts.iterrows()]
+
+
+def _confirmed_state_at(intervals: list[tuple[Any, str]], t: Any) -> str | None:
+    """Confirmed track-status code active at session-time t, or None if unresolved.
+
+    Deterministic: the last status change at or before t wins. None means the
+    state cannot be established (no timeline, or t missing) and must not be guessed.
+    """
+    if not intervals or t is None or pd.isna(t):
+        return None
+    code = None
+    for start, status in intervals:
+        if start <= t:
+            code = status
+        else:
+            break
+    return code
+
+
 def build_hazard_rows(laps: pd.DataFrame, results: pd.DataFrame | None = None,
-                      event_name: str = "Unknown", race_laps: int | None = None) -> pd.DataFrame:
+                      event_name: str = "Unknown", race_laps: int | None = None,
+                      track_status: pd.DataFrame | None = None,
+                      diagnostics_sink: list | None = None) -> pd.DataFrame:
     """Convert raw FastF1 race laps into next-lap first-stop hazard examples.
 
-    Features at lap k predict whether the driver's first pit-in occurs on lap k+1.
-    Rows after the first stop are excluded. The final observed lap is excluded
-    because there is no next-lap outcome to label.
+    Target contract (frozen): predict each driver's first genuine strategic
+    tyre-changing stop. Discretionary stops under green, VSC or Safety Car are
+    in scope; drive-throughs and pass-throughs without a real tyre change are
+    excluded, as are pit entries confirmed (by timestamp) to occur during an
+    active red flag, and the existing lap<=2 SC/red compulsory-stop exclusion.
+
+    Horizon: an observation at the end of lap k predicts whether the first
+    strategic pit entry occurs on lap k+1. Positive labels are anchored to the
+    actual pit-entry lap number; they are never relocated to an earlier lap.
+
+    Event detection is kept strictly separate from feature-row eligibility:
+      * Pit events are detected from raw timing/stint/compound/tyre-age evidence
+        BEFORE any lap-time validity filtering, so a pit-entry lap with a missing
+        LapTime (e.g. Magnussen, Austria 2023) does not erase the event.
+      * Observation feature rows are emitted only for laps strictly before the
+        first target stop; no lap at or after the stop is ever emitted.
+
+    Eligible observation states are green, Safety Car and VSC (codes 1/4/6/7);
+    ordinary yellow (2) and red (5) are not eligible. `track_status` is the
+    timestamped session.track_status frame; when absent, states cannot be
+    confirmed and the function falls back to a documented green-only rule
+    (`timeline_available=False` in diagnostics), never classifying from the
+    concatenated lap status string.
+
+    Diagnostics: a structured per-event record (event, label_definition_version,
+    timeline_available, unresolved_count, unresolved_events, reason) is appended to
+    `diagnostics_sink` when provided — a reliable channel that, unlike
+    `DataFrame.attrs`, survives aggregation. The record is also mirrored on
+    `.attrs["diagnostics"]`/`.attrs["unresolved_events"]` for single-frame use.
     """
+    def _empty(reason: str = "no_rows") -> pd.DataFrame:
+        out = pd.DataFrame(columns=FEATURE_COLUMNS + EXTRA_OUTPUT_COLUMNS)
+        out.attrs["unresolved_events"] = []
+        diag = {"event": str(event_name), "label_definition_version": LABEL_DEFINITION_VERSION,
+                "timeline_available": None, "unresolved_count": 0, "unresolved_events": [], "reason": reason}
+        out.attrs["diagnostics"] = diag
+        if diagnostics_sink is not None:
+            diagnostics_sink.append(diag)
+        return out
+
     if laps is None or laps.empty:
-        return pd.DataFrame(columns=FEATURE_COLUMNS + ["StopNextLap"])
+        return _empty("empty_laps")
     df = laps.copy()
     required = {"Driver", "LapNumber", "LapTime", "Compound", "TyreLife"}
     if not required.issubset(df.columns):
-        return pd.DataFrame(columns=FEATURE_COLUMNS + ["StopNextLap"])
+        return _empty("missing_required_columns")
 
     df["LapNumber"] = pd.to_numeric(df["LapNumber"], errors="coerce")
     df["TyreLife"] = pd.to_numeric(df["TyreLife"], errors="coerce")
     df["LapTime_s"] = df["LapTime"].map(_to_seconds)
-    df = df.dropna(subset=["Driver", "LapNumber", "TyreLife", "LapTime_s", "Compound"])
-    df = df[df["LapTime_s"] > 0].copy()
+    # DETECTION frame: keep rows even when LapTime is missing/invalid. The lap-time
+    # validity gate is applied per-feature later, not as a row filter, so a pit-entry
+    # lap with NaT LapTime survives for event detection and next-lap adjacency.
+    df = df.dropna(subset=["Driver", "LapNumber", "TyreLife", "Compound"]).copy()
     if "PitInTime" not in df.columns:
         df["PitInTime"] = pd.NaT
     if "Position" not in df.columns:
@@ -100,45 +193,88 @@ def build_hazard_rows(laps: pd.DataFrame, results: pd.DataFrame | None = None,
     if race_laps is None:
         race_laps = int(df["LapNumber"].max()) if not df.empty else 0
     if race_laps <= 0:
-        return pd.DataFrame(columns=FEATURE_COLUMNS + ["StopNextLap"])
+        return _empty("no_race_distance")
 
+    intervals = _build_status_intervals(track_status)
     rows: list[dict[str, Any]] = []
+    unresolved: list[dict[str, Any]] = []
+
     for driver, group in df.groupby("Driver", sort=False):
         g = group.sort_values("LapNumber").drop_duplicates("LapNumber", keep="last").reset_index(drop=True)
         if len(g) < 2:
             continue
-        pit_flags = g["PitInTime"].notna().to_numpy()
-        # Require evidence that the pit visit is a genuine strategic tyre stop:
-        # 1. Distinguish strategic stops from compulsory red-flag race suspensions or safety car pass-throughs on Lap <= 2.
-        # 2. Exclude non-tyre changes (safety car pit-lane pass-throughs, drive-throughs) where compound didn't change and tyre life didn't reset.
+
+        # ---------------- EVENT DETECTION (raw; before lap-time filtering) ----------------
+        # Step through pit entries in lap order; take the first genuine strategic
+        # tyre-changing candidate, classifying its CONFIRMED state at the pit-entry
+        # timestamp. Red-flag changes are skipped (not strategic); a candidate whose
+        # entry state cannot be confirmed is kept as an UNRESOLVED stop (fail-safe:
+        # it truncates the risk set but produces no label).
+        first_pit_lap = None
+        first_pit_resolved = True
         if "Stint" in g.columns:
-            for pit_idx in np.flatnonzero(pit_flags):
-                if pit_idx + 1 >= len(g):
-                    pit_flags[pit_idx] = False
-                    continue
-                lap_num = g.iloc[pit_idx]["LapNumber"]
-                t_status = str(g.iloc[pit_idx].get("TrackStatus", ""))
+            # Candidate pit-entry laps come from a PitInTime OR a stint increase on the
+            # next lap (a tyre change can leave stint/compound evidence even when the
+            # pit-entry timestamp is missing). Iterate in lap order.
+            pit_present = g["PitInTime"].notna().to_numpy()
+            stint_vals = g["Stint"].to_numpy()
+            candidate_idx = []
+            for i in range(len(g) - 1):
+                nxt = pd.notna(stint_vals[i]) and pd.notna(stint_vals[i + 1]) and stint_vals[i] != stint_vals[i + 1]
+                if pit_present[i] or nxt:
+                    candidate_idx.append(i)
+
+            for pit_idx in candidate_idx:
+                lap_num = float(g.iloc[pit_idx]["LapNumber"])
+                t_status_str = str(g.iloc[pit_idx].get("TrackStatus", ""))
                 old_c = str(g.iloc[pit_idx].get("Compound", "")).upper()
                 new_c = str(g.iloc[pit_idx + 1].get("Compound", "")).upper()
                 old_age = g.iloc[pit_idx].get("TyreLife", np.nan)
                 new_age = g.iloc[pit_idx + 1].get("TyreLife", np.nan)
+                has_pit_time = pd.notna(g.iloc[pit_idx].get("PitInTime", pd.NaT))
 
-                # Compulsory race suspension or safety-car routing on Lap 1 or 2:
-                if lap_num <= 2 and ("5" in t_status or "4" in t_status):
-                    pit_flags[pit_idx] = False
+                # Preserve existing compulsory opening-lap exclusion (lap<=2 under SC/red).
+                if lap_num <= 2 and ("5" in t_status_str or "4" in t_status_str):
                     continue
 
+                # Genuine tyre change: stint or compound change on the out-lap. The new
+                # stint's compound/tyre age legitimately appear on the out-lap (pit_idx+1),
+                # not on the pit-entry row; the pit-entry lap remains the target event.
                 old_stint, new_stint = g.iloc[pit_idx]["Stint"], g.iloc[pit_idx + 1]["Stint"]
                 stint_changed = pd.notna(old_stint) and pd.notna(new_stint) and old_stint != new_stint
                 compound_changed = bool(old_c and new_c and old_c != new_c and old_c != "UNKNOWN" and new_c != "UNKNOWN")
                 tyre_reset = bool(pd.notna(new_age) and pd.notna(old_age) and new_age < old_age)
-
                 if not (stint_changed or compound_changed):
-                    pit_flags[pit_idx] = False
-                elif not compound_changed and not tyre_reset and ("4" in t_status or "5" in t_status):
-                    pit_flags[pit_idx] = False
-        pit_indices = np.flatnonzero(pit_flags)
-        first_pit_idx = int(pit_indices[0]) if len(pit_indices) else None
+                    continue  # drive-through / pass-through, no tyre change
+                if not compound_changed and not tyre_reset and ("4" in t_status_str or "5" in t_status_str):
+                    continue  # pass-through under caution with no tyre evidence
+
+                # Classify the CONFIRMED state at the pit-entry timestamp (never via the
+                # concatenated lap status string). An unconfirmable state (no usable
+                # PitInTime, or a timestamp the timeline does not cover) is NOT evidence
+                # that no red flag was active -> fail safe to an UNRESOLVED stop.
+                if intervals:
+                    entry_state = _confirmed_state_at(intervals, g.iloc[pit_idx].get("PitInTime", pd.NaT)) if has_pit_time else None
+                    if entry_state == _RED_FLAG:
+                        continue  # confirmed red-flag change: not strategic; try the next pit
+                    if entry_state is None:
+                        first_pit_lap = lap_num
+                        first_pit_resolved = False
+                        unresolved.append({"driver": str(driver), "event": str(event_name), "stop_lap": lap_num,
+                                           "reason": "pit_entry_state_unconfirmed" if has_pit_time
+                                                     else "pit_entry_timestamp_missing"})
+                        break
+                    first_pit_lap = lap_num  # confirmed non-red eligible state
+                    first_pit_resolved = True
+                    break
+                else:
+                    # No timestamped timeline: red cannot be confirmed. Documented fallback
+                    # (event-level `timeline_available=False`): accept the candidate and apply
+                    # green-only observation eligibility below.
+                    first_pit_lap = lap_num
+                    first_pit_resolved = True
+                    break
+
         meta = result_map.get(str(driver), {})
         grid = pd.to_numeric(pd.Series([meta.get("GridPosition", np.nan)]), errors="coerce").iloc[0]
         team = meta.get("Team", "Unknown")
@@ -151,21 +287,55 @@ def build_hazard_rows(laps: pd.DataFrame, results: pd.DataFrame | None = None,
         lap_nums = g["LapNumber"].to_numpy(float)
         positions = g["Position"].to_numpy(float)
         stints = g["Stint"].to_numpy() if "Stint" in g.columns else np.zeros(len(g))
+        lap_set = set(float(x) for x in lap_nums)
+
+        # If a target stop exists but its predicting lap (first_pit_lap - 1) is absent
+        # from the frame, the one-step observation cannot be established. Do not relocate
+        # the label; record the event as unresolved (the driver is censored here).
+        if first_pit_lap is not None and first_pit_resolved and (first_pit_lap - 1) not in lap_set:
+            first_pit_resolved = False
+            unresolved.append({"driver": str(driver), "event": str(event_name),
+                               "stop_lap": first_pit_lap, "reason": "predicting_row_absent"})
+
+        def _flag_unresolved(next_lap: float, reason: str) -> None:
+            if first_pit_lap is not None and next_lap == first_pit_lap:
+                unresolved.append({"driver": str(driver), "event": str(event_name),
+                                   "stop_lap": first_pit_lap, "reason": reason})
 
         for i in range(len(g) - 1):
-            # Only pre-first-stop states are training examples.
-            if first_pit_idx is not None and i >= first_pit_idx:
-                break
             current_lap = lap_nums[i]
             next_lap = lap_nums[i + 1]
+            # Truncate the first-stop risk set at the actual stop lap: never emit a lap
+            # at or after the driver's first target stop.
+            if first_pit_lap is not None and current_lap >= first_pit_lap:
+                break
             if not np.isfinite(current_lap) or next_lap != current_lap + 1:
                 continue
-            # Avoid training on inaccurate/yellow-flag state laps when those flags exist.
+            # Unresolved stop: never emit a guessed positive OR negative for the row
+            # that would predict it (the unresolved record was already logged in detection).
+            if first_pit_lap is not None and not first_pit_resolved and next_lap == first_pit_lap:
+                continue
+
             row = g.iloc[i]
+            # Observation-state eligibility at the end of lap k (the cutoff).
+            if intervals:
+                obs_state = _confirmed_state_at(intervals, row.get("Time", pd.NaT))
+                if obs_state is None:
+                    _flag_unresolved(next_lap, "observation_state_unresolved")
+                    continue
+                if obs_state == _RED_FLAG or obs_state not in _ELIGIBLE_OBSERVATION_STATES:
+                    _flag_unresolved(next_lap, f"predicting_lap_state_{obs_state}")
+                    continue
+            else:
+                # No timestamped timeline: cannot confirm VSC/SC; fall back to green-only.
+                if "TrackStatus" in g.columns and str(row.get("TrackStatus")) != "1":
+                    _flag_unresolved(next_lap, "predicting_lap_nongreen_no_timeline")
+                    continue
+
             if "IsAccurate" in g.columns and pd.notna(row.get("IsAccurate")) and not bool(row.get("IsAccurate")):
+                _flag_unresolved(next_lap, "predicting_lap_inaccurate")
                 continue
-            if "TrackStatus" in g.columns and str(row.get("TrackStatus")) != "1":
-                continue
+
             # Baseline only uses laps from the current stint and never future laps.
             same_stint_indices = [j for j in range(i + 1) if stints[j] == stints[i]]
             recent_indices = same_stint_indices[-3:]
@@ -173,7 +343,9 @@ def build_hazard_rows(laps: pd.DataFrame, results: pd.DataFrame | None = None,
             recent_median = float(np.nanmedian(times[recent_indices])) if recent_indices else np.nan
             baseline_median = float(np.nanmedian(times[baseline_indices])) if baseline_indices else np.nan
             pace_loss = recent_median - baseline_median if np.isfinite(recent_median) and np.isfinite(baseline_median) else np.nan
-            target = int(bool(pit_flags[i + 1]))
+            lap_time_missing = int(not (np.isfinite(times[i]) and times[i] > 0))
+            # Label anchored to the ACTUAL pit-entry lap number, not a row position.
+            target = int(first_pit_lap is not None and next_lap == first_pit_lap)
             rows.append({
                 "LapNumber": float(current_lap),
                 "RaceLaps": float(race_laps),
@@ -187,8 +359,23 @@ def build_hazard_rows(laps: pd.DataFrame, results: pd.DataFrame | None = None,
                 "Team": str(team),
                 "EventName": str(event_name),
                 "StopNextLap": target,
+                "LapTimeMissing": lap_time_missing,
             })
-    return pd.DataFrame(rows, columns=FEATURE_COLUMNS + ["StopNextLap"])
+
+    out = pd.DataFrame(rows, columns=FEATURE_COLUMNS + EXTRA_OUTPUT_COLUMNS)
+    diagnostics = {
+        "event": str(event_name),
+        "label_definition_version": LABEL_DEFINITION_VERSION,
+        "timeline_available": bool(intervals),
+        "unresolved_count": len(unresolved),
+        "unresolved_events": unresolved,
+        "reason": "ok",
+    }
+    out.attrs["unresolved_events"] = unresolved
+    out.attrs["diagnostics"] = diagnostics
+    if diagnostics_sink is not None:
+        diagnostics_sink.append(diagnostics)
+    return out
 
 
 def fit_first_stop_model(training_rows: pd.DataFrame) -> dict[str, Any]:
