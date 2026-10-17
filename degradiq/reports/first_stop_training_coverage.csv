@@ -1,0 +1,48 @@
+year,event,status,rows,positive_rows,error
+2022,Bahrain Grand Prix,loaded,250,16.0,
+2022,Saudi Arabian Grand Prix,loaded,282,16.0,
+2022,Australian Grand Prix,loaded,289,17.0,
+2022,Emilia Romagna Grand Prix,loaded,233,18.0,
+2022,Miami Grand Prix,loaded,430,17.0,
+2022,Spanish Grand Prix,loaded,159,14.0,
+2022,Monaco Grand Prix,loaded,185,13.0,
+2022,Azerbaijan Grand Prix,loaded,251,17.0,
+2022,Canadian Grand Prix,loaded,287,13.0,
+2022,British Grand Prix,no eligible rows,0,0.0,
+2022,Austrian Grand Prix,loaded,307,19.0,
+2022,French Grand Prix,loaded,326,18.0,
+2022,Hungarian Grand Prix,loaded,260,19.0,
+2022,Belgian Grand Prix,loaded,157,18.0,
+2022,Dutch Grand Prix,loaded,239,20.0,
+2022,Italian Grand Prix,loaded,368,18.0,
+2022,Singapore Grand Prix,loaded,343,8.0,
+2022,Japanese Grand Prix,loaded,63,13.0,
+2022,United States Grand Prix,loaded,214,18.0,
+2022,Mexico City Grand Prix,loaded,607,20.0,
+2022,São Paulo Grand Prix,loaded,213,15.0,
+2022,Abu Dhabi Grand Prix,loaded,313,20.0,
+2023,Bahrain Grand Prix,loaded,188,19.0,
+2023,Saudi Arabian Grand Prix,loaded,230,12.0,
+2023,Australian Grand Prix,loaded,443,4.0,
+2023,Azerbaijan Grand Prix,loaded,331,12.0,
+2023,Miami Grand Prix,loaded,411,19.0,
+2023,Monaco Grand Prix,loaded,686,16.0,
+2023,Spanish Grand Prix,loaded,261,19.0,
+2023,Canadian Grand Prix,loaded,264,15.0,
+2023,Austrian Grand Prix,no eligible rows,0,0.0,
+2023,British Grand Prix,loaded,486,16.0,
+2023,Hungarian Grand Prix,loaded,248,18.0,
+2023,Belgian Grand Prix,loaded,128,19.0,
+2023,Dutch Grand Prix,loaded,93,6.0,
+2023,Italian Grand Prix,loaded,312,19.0,
+2023,Singapore Grand Prix,loaded,322,4.0,
+2023,Japanese Grand Prix,loaded,122,13.0,
+2023,Qatar Grand Prix,unavailable,0,,RateLimitExceededError: any API: 500 calls/h
+2023,United States Grand Prix,unavailable,0,,RateLimitExceededError: any API: 500 calls/h
+2023,Mexico City Grand Prix,unavailable,0,,RateLimitExceededError: any API: 500 calls/h
+2023,São Paulo Grand Prix,unavailable,0,,RateLimitExceededError: any API: 500 calls/h
+2023,Las Vegas Grand Prix,unavailable,0,,RateLimitExceededError: any API: 500 calls/h
+2023,Abu Dhabi Grand Prix,unavailable,0,,RateLimitExceededError: any API: 500 calls/h
+2024,*,schedule unavailable,0,,RateLimitExceededError: any API: 500 calls/h
+2025,*,schedule unavailable,0,,RateLimitExceededError: any API: 500 calls/h
+2026,*,schedule unavailable,0,,RateLimitExceededError: any API: 500 calls/h

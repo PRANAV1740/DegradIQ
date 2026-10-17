@@ -1,0 +1,25 @@
+year,round,event,status,rows,positive_rows,error
+2025,1,Australian Grand Prix,loaded,424,11,
+2025,2,Chinese Grand Prix,loaded,205,18,
+2025,3,Japanese Grand Prix,loaded,441,20,
+2025,4,Bahrain Grand Prix,loaded,201,20,
+2025,5,Saudi Arabian Grand Prix,loaded,430,16,
+2025,6,Miami Grand Prix,loaded,399,6,
+2025,7,Emilia Romagna Grand Prix,loaded,343,16,
+2025,8,Monaco Grand Prix,loaded,281,15,
+2025,9,Spanish Grand Prix,loaded,247,19,
+2025,10,Canadian Grand Prix,loaded,518,19,
+2025,11,Austrian Grand Prix,loaded,281,17,
+2025,12,British Grand Prix,unrecovered / data collection in progress,0,0,Session checkpoint not completed within execution window
+2025,13,Belgian Grand Prix,unrecovered / data collection in progress,0,0,Session checkpoint not completed within execution window
+2025,14,Hungarian Grand Prix,unrecovered / data collection in progress,0,0,Session checkpoint not completed within execution window
+2025,15,Dutch Grand Prix,unrecovered / data collection in progress,0,0,Session checkpoint not completed within execution window
+2025,16,Italian Grand Prix,unrecovered / data collection in progress,0,0,Session checkpoint not completed within execution window
+2025,17,Azerbaijan Grand Prix,unrecovered / data collection in progress,0,0,Session checkpoint not completed within execution window
+2025,18,Singapore Grand Prix,unrecovered / data collection in progress,0,0,Session checkpoint not completed within execution window
+2025,19,United States Grand Prix,unrecovered / data collection in progress,0,0,Session checkpoint not completed within execution window
+2025,20,Mexico City Grand Prix,unrecovered / data collection in progress,0,0,Session checkpoint not completed within execution window
+2025,21,São Paulo Grand Prix,unrecovered / data collection in progress,0,0,Session checkpoint not completed within execution window
+2025,22,Las Vegas Grand Prix,unrecovered / data collection in progress,0,0,Session checkpoint not completed within execution window
+2025,23,Qatar Grand Prix,unrecovered / data collection in progress,0,0,Session checkpoint not completed within execution window
+2025,24,Abu Dhabi Grand Prix,unrecovered / data collection in progress,0,0,Session checkpoint not completed within execution window
