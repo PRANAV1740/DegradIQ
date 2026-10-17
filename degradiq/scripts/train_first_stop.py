@@ -59,6 +59,36 @@ def _event_date(row: pd.Series):
     return pd.to_datetime(value, errors="coerce", utc=True)
 
 
+_RACE_TIMING_MARKERS = ("_extended_timing_data.ff1pkl", "timing_app_data.ff1pkl")
+
+
+def _race_timing_cached(cache_root, year, event_date, event_name: str) -> bool:
+    """True iff a Race session's lap-timing payload is cached locally.
+
+    Distinguishes a genuine cache miss (only lightweight files like session_info present,
+    or the event dir absent) from a processing failure of locally-available data. Checks
+    for a `*_Race` subdir containing a real timing file, not just the event directory.
+    """
+    root = Path(cache_root) / str(year)
+    if not root.is_dir():
+        return False
+    candidates = []
+    if event_date is not None and pd.notna(event_date):
+        try:
+            candidates.append(root / f"{pd.Timestamp(event_date):%Y-%m-%d}_{event_name.replace(' ', '_')}")
+        except Exception:
+            pass
+    # Fallback: any dir whose name ends with the underscored event name.
+    suffix = "_" + event_name.replace(" ", "_")
+    candidates += [d for d in root.glob("*") if d.is_dir() and d.name.endswith(suffix)]
+    for ev_dir in candidates:
+        if ev_dir.is_dir():
+            for sub in ev_dir.glob("*_Race"):
+                if any((sub / m).exists() for m in _RACE_TIMING_MARKERS):
+                    return True
+    return False
+
+
 def _status_row(year, round_id, name, status, *, rows=0, positive_rows=0, negative_rows=0,
                 error="", label_definition_version=None, label_compatible=None,
                 diagnostic_status="", unresolved_count=None, diagnostics_complete=None,
@@ -221,9 +251,14 @@ def collect_rows_with_checkpoints(
             except Exception as exc:
                 err_msg = f"{type(exc).__name__}: {exc}"
                 logger.warning("Failed session for %d %s: %s", year, name, err_msg)
+                # Distinguish a genuine cache miss (timing payload absent locally) from a
+                # processing failure of data that IS present locally. Do not treat a broad
+                # load exception as proof of a cache miss.
+                cached_locally = _race_timing_cached(CACHE, year, event_date, name)
+                diag = "processing_failure" if cached_locally else "cache_miss"
                 checkpoint_mgr.save_checkpoint(year, round_id, name, pd.DataFrame(), status="unavailable", error=err_msg)
                 statuses.append(_status_row(year, round_id, name, "unavailable", error=err_msg,
-                                            diagnostic_status="processing_failure"))
+                                            diagnostic_status=diag))
 
     combined = pd.concat(all_rows, ignore_index=True) if all_rows else pd.DataFrame()
     status_df = pd.DataFrame(statuses)
