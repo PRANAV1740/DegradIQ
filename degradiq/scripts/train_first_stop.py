@@ -226,6 +226,15 @@ def fit_candidate_first_stop_model(
         calibrated_pipeline = CalibratedClassifierCV(estimator=base_model, method="sigmoid", cv=5)
     calibrated_pipeline.fit(data[FEATURE_COLUMNS], data["StopNextLap"].astype(int))
 
+    # Derive the training seasons directly from the data actually fitted so saved
+    # metadata can never drift from the rows the model was trained on.
+    if "Season" in data.columns:
+        training_seasons = sorted(
+            int(s) for s in pd.to_numeric(data["Season"], errors="coerce").dropna().unique()
+        )
+    else:
+        training_seasons = []
+
     return {
         "pipeline": calibrated_pipeline,
         "feature_columns": FEATURE_COLUMNS,
@@ -235,6 +244,7 @@ def fit_candidate_first_stop_model(
         "negative_rows": negatives,
         "positive_rate": float(positives / len(data)),
         "architecture": architecture,
+        "training_seasons": training_seasons,
     }
 
 
@@ -311,10 +321,12 @@ def evaluate_candidate_chronological(
         starting_compound = str(first.get("Compound", "MEDIUM"))
         actual_lap = int(positives["LapNumber"].iloc[0]) + 1
 
-        # Historical median baseline error
+        # Historical median baseline error. Computed here but only appended in the
+        # same block as the candidate error below, so the baseline and candidate
+        # populations always contain exactly the same drivers even if a later
+        # eligibility guard skips this driver's candidate forecast.
         base_lap = median_baseline.predict_lap(event_name_str, starting_compound)
         base_err = abs(base_lap - actual_lap)
-        baseline_median_errors.append(base_err)
 
         # Candidate model pre-race forecast horizon simulation
         driver_state = {
@@ -350,6 +362,7 @@ def evaluate_candidate_chronological(
         predicted_lap = int(laps[min(np.searchsorted(cdf, 0.50), len(laps) - 1)])
         cand_err = abs(predicted_lap - actual_lap)
         candidate_errors.append(cand_err)
+        baseline_median_errors.append(base_err)  # paired 1:1 with the candidate error
 
         # 10th - 90th percentile interval
         p10_lap = int(laps[min(np.searchsorted(cdf, 0.10), len(laps) - 1)])
@@ -362,6 +375,14 @@ def evaluate_candidate_chronological(
         event_groups[event_name_str]["cand_errors"].append(cand_err)
         event_groups[event_name_str]["base_errors"].append(base_err)
         event_groups[event_name_str]["hits"].append(hit)
+
+    # Candidate, baseline-median, and interval samples must describe the same
+    # drivers; a mismatch would make the reported MAE comparison invalid.
+    assert len(candidate_errors) == len(baseline_median_errors) == len(interval_hits), (
+        "Evaluation population mismatch: candidate, baseline-median, and interval "
+        f"samples must align (got {len(candidate_errors)}, {len(baseline_median_errors)}, "
+        f"{len(interval_hits)})."
+    )
 
     candidate_lap_mae = float(np.mean(candidate_errors)) if candidate_errors else None
     baseline_lap_mae = float(np.mean(baseline_median_errors)) if baseline_median_errors else None
@@ -427,6 +448,13 @@ def evaluate_candidate_chronological(
         "calibration_details": calibration_diag["binned_calibration"],
         "quantile_calibration": calibration_diag.get("quantile_calibration", []),
         "calibration_notes": calibration_diag.get("calibration_notes", ""),
+        "evaluation_qualifications": {
+            "probabilistic_metrics": "Brier score, log loss and ROC-AUC are measured over all eligible per-lap hazard rows in the holdout set.",
+            "expected_calibration_error": "ECE is a count-weighted error over uniform probability bins; because per-lap hazards concentrate below 0.20 it is dominated by the lowest bin. See quantile_calibration for evenly populated reliability bins.",
+            "stop_lap_mae": "Stop-lap MAE is conditional on an observed first stop; drivers without an observed first stop are right-censored and excluded. Baseline and candidate MAE are measured on the identical driver set.",
+            "interval_coverage_10_90": "10th-90th interval coverage is conditional on observed stopping and uses the per-driver stop-lap distribution renormalised to sum to 1 within race distance.",
+            "coverage_vs_nominal": "Empirical 10-90 coverage above the 80% nominal target indicates overcoverage (conservative/wide intervals), not exact calibration.",
+        },
         "per_event_metrics": per_event_metrics,
     }
     return bundle, backtest_report
@@ -444,8 +472,15 @@ def _json_default(obj: Any) -> Any:
     raise TypeError(f"Object of type {type(obj).__name__} is not JSON serializable")
 
 
-def save_candidate_model(bundle: dict[str, Any], metadata_extra: dict[str, Any], version: str = "") -> None:
-    """Save candidate model separately without touching production artifacts."""
+def save_candidate_model(bundle: dict[str, Any], metadata_extra: dict[str, Any], version: str = "",
+                         training_seasons: list[int] | None = None) -> None:
+    """Save candidate model separately without touching production artifacts.
+
+    `training_seasons`, when provided, overrides the value recorded in metadata.
+    Otherwise the seasons derived by `fit_candidate_first_stop_model` (from the
+    rows actually fitted) are used, falling back to [2022, 2023] only if neither
+    is available. This prevents stale hardcoded season lists in saved metadata.
+    """
     import joblib
     ARTIFACT_DIR.mkdir(parents=True, exist_ok=True)
     suffix = f"_{version}" if version else ""
@@ -460,7 +495,11 @@ def save_candidate_model(bundle: dict[str, Any], metadata_extra: dict[str, Any],
         "positive_rows": bundle.get("positive_rows"),
         "negative_rows": bundle.get("negative_rows"),
         "positive_rate": bundle.get("positive_rate"),
-        "training_seasons": bundle.get("training_seasons", [2022, 2023]),
+        "training_seasons": (
+            training_seasons
+            if training_seasons is not None
+            else (bundle.get("training_seasons") or [2022, 2023])
+        ),
         "model_file": candidate_model_path.name,
         "architecture": bundle.get("architecture", "calibrated_lr"),
     }

@@ -1,6 +1,6 @@
 """Evaluate frozen candidate first-stop model on 2025 season holdout data.
 
-Trains frozen candidate and baselines strictly on 2022-2024 (24 events per season, 70 events total).
+Trains frozen candidate and baselines strictly on 2022-2024 (22 events in 2022, 22 in 2023, 24 in 2024; 68 events total).
 Evaluates on all recovered 2025 holdout events.
 Generates full 24-event 2025 coverage report and frozen holdout backtest report.
 """
@@ -85,10 +85,10 @@ def run_2025_holdout_evaluation():
                 "year": 2025,
                 "round": round_id,
                 "event": name,
-                "status": "unrecovered / data collection in progress",
+                "status": "not ingested locally (season complete)",
                 "rows": 0,
                 "positive_rows": 0,
-                "error": "Session checkpoint not completed within execution window",
+                "error": "No local checkpoint present; race not ingested in this workspace",
             })
 
     cov_2025_df = pd.DataFrame(cov_records)
@@ -151,9 +151,10 @@ def run_2025_holdout_evaluation():
         compound = str(first.get("Compound", "MEDIUM"))
         actual_lap = int(positives["LapNumber"].iloc[0]) + 1
 
+        # Baseline error computed here but appended with the candidate error below,
+        # so baseline and candidate populations always contain the same drivers.
         base_lap = median_baseline.predict_lap(event_str, compound)
         base_err = abs(base_lap - actual_lap)
-        baseline_median_errors.append(base_err)
 
         driver_state = {
             "driver": str(first["Driver"]),
@@ -186,6 +187,7 @@ def run_2025_holdout_evaluation():
         pred_lap = int(laps[min(np.searchsorted(cdf, 0.50), len(laps) - 1)])
         cand_err = abs(pred_lap - actual_lap)
         candidate_errors.append(cand_err)
+        baseline_median_errors.append(base_err)  # paired 1:1 with the candidate error
 
         p10 = int(laps[min(np.searchsorted(cdf, 0.10), len(laps) - 1)])
         p90 = int(laps[min(np.searchsorted(cdf, 0.90), len(laps) - 1)])
@@ -197,6 +199,13 @@ def run_2025_holdout_evaluation():
         event_groups[event_str]["cand_errors"].append(cand_err)
         event_groups[event_str]["base_errors"].append(base_err)
         event_groups[event_str]["hits"].append(hit)
+
+    # Candidate, baseline-median, and interval samples must describe the same drivers.
+    assert len(candidate_errors) == len(baseline_median_errors) == len(interval_hits), (
+        "Evaluation population mismatch: candidate, baseline-median, and interval "
+        f"samples must align (got {len(candidate_errors)}, {len(baseline_median_errors)}, "
+        f"{len(interval_hits)})."
+    )
 
     candidate_lap_mae = float(np.mean(candidate_errors)) if candidate_errors else None
     baseline_lap_mae = float(np.mean(baseline_median_errors)) if baseline_median_errors else None
@@ -261,6 +270,14 @@ def run_2025_holdout_evaluation():
         "calibration_details": calibration_diag["binned_calibration"],
         "quantile_calibration": calibration_diag.get("quantile_calibration", []),
         "calibration_notes": calibration_diag.get("calibration_notes", ""),
+        "evaluation_qualifications": {
+            "probabilistic_metrics": "Brier score, log loss and ROC-AUC are measured over all eligible per-lap hazard rows in the recovered holdout set.",
+            "expected_calibration_error": "ECE is a count-weighted error over uniform probability bins; because per-lap hazards concentrate below 0.20 it is dominated by the lowest bin. See quantile_calibration for evenly populated reliability bins.",
+            "stop_lap_mae": "Stop-lap MAE is conditional on an observed first stop; drivers without an observed first stop are right-censored and excluded. Baseline and candidate MAE are measured on the identical driver set.",
+            "interval_coverage_10_90": "10th-90th interval coverage is conditional on observed stopping and uses the per-driver stop-lap distribution renormalised to sum to 1 within race distance.",
+            "coverage_vs_nominal": "Empirical 10-90 coverage above the 80% nominal target indicates overcoverage (conservative/wide intervals), not exact calibration.",
+            "season_completeness": f"Partial 2025 holdout: {loaded_events} of {total_scheduled} rounds ingested locally. Evaluation remains incomplete and is not a full-season result.",
+        },
         "per_event_metrics": per_event_metrics,
     }
 

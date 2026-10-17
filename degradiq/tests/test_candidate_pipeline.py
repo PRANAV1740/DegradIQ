@@ -27,7 +27,7 @@ from degradiq.pit_strategy import (
     FEATURE_COLUMNS, build_hazard_rows, fit_first_stop_model, ARTIFACT_DIR, MODEL_PATH
 )
 from degradiq.scripts.train_first_stop import (
-    evaluate_candidate_chronological, save_candidate_model
+    evaluate_candidate_chronological, save_candidate_model, fit_candidate_first_stop_model
 )
 
 
@@ -234,6 +234,60 @@ class PipelineAndBaselineTests(unittest.TestCase):
         self.assertIsNotNone(metrics["baseline_1_historical_median"]["first_stop_lap_mae"])
         self.assertIsNotNone(metrics["candidate_model"]["brier_score"])
         self.assertIsNotNone(metrics["baseline_2_empirical_hazard"]["brier_score"])
+
+    def test_fit_candidate_derives_training_seasons_from_data(self):
+        """Candidate bundle records the seasons actually fitted, not a hardcoded default."""
+        combined = pd.concat([
+            self.make_synthetic_stints(2022, "Bahrain GP"),
+            self.make_synthetic_stints(2023, "Saudi GP"),
+            self.make_synthetic_stints(2024, "Australia GP"),
+        ], ignore_index=True)
+        bundle = fit_candidate_first_stop_model(combined, architecture="calibrated_hgb")
+        self.assertEqual(bundle["training_seasons"], [2022, 2023, 2024])
+
+    def test_save_candidate_model_records_correct_training_seasons(self):
+        """Explicit season list and bundle-derived seasons both override the stale default."""
+        train_df = self.make_synthetic_stints(2022, "Bahrain GP")
+
+        # (a) Explicit parameter wins.
+        bundle = fit_first_stop_model(train_df)  # no training_seasons key
+        save_candidate_model(bundle, {"test_note": "season_param"}, version="season_explicit_tmp",
+                             training_seasons=[2022, 2023, 2024])
+        meta_a = ARTIFACT_DIR / "candidate_first_stop_model_season_explicit_tmp_metadata.json"
+        model_a = ARTIFACT_DIR / "candidate_first_stop_model_season_explicit_tmp.joblib"
+
+        # (b) Bundle-derived seasons used when no explicit parameter is given.
+        bundle_b = dict(bundle)
+        bundle_b["training_seasons"] = [2022, 2023]
+        save_candidate_model(bundle_b, {"test_note": "season_bundle"}, version="season_bundle_tmp")
+        meta_b = ARTIFACT_DIR / "candidate_first_stop_model_season_bundle_tmp_metadata.json"
+        model_b = ARTIFACT_DIR / "candidate_first_stop_model_season_bundle_tmp.joblib"
+
+        try:
+            self.assertEqual(json.loads(meta_a.read_text())["training_seasons"], [2022, 2023, 2024])
+            self.assertEqual(json.loads(meta_b.read_text())["training_seasons"], [2022, 2023])
+        finally:
+            for p in (meta_a, model_a, meta_b, model_b):
+                if p.exists():
+                    p.unlink()
+
+    def test_baseline_and_candidate_evaluated_on_identical_drivers(self):
+        """Reported baseline and candidate MAE populations must contain the same drivers."""
+        combined = pd.concat([
+            self.make_synthetic_stints(2022, "Bahrain GP"),
+            self.make_synthetic_stints(2023, "Saudi GP"),
+            self.make_synthetic_stints(2024, "Australia GP"),
+        ], ignore_index=True)
+        coverage = pd.DataFrame([
+            {"year": 2022, "event": "Bahrain GP", "status": "loaded"},
+            {"year": 2023, "event": "Saudi GP", "status": "loaded"},
+            {"year": 2024, "event": "Australia GP", "status": "loaded"},
+        ])
+        _, report = evaluate_candidate_chronological(combined, coverage, holdout_year=2024)
+        self.assertEqual(
+            report["metrics"]["baseline_1_historical_median"]["drivers_evaluated"],
+            report["drivers_with_observed_first_stop"],
+        )
 
     def test_candidate_artifacts_do_not_overwrite_production(self):
         prod_model_path = ARTIFACT_DIR / "first_stop_model.joblib"

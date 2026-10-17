@@ -19,7 +19,8 @@
   "positive_rate": 0.05178510875357264,
   "training_seasons": [
     2022,
-    2023
+    2023,
+    2024
   ],
   "model_file": "candidate_first_stop_model_2025_holdout.joblib",
   "architecture": "calibrated_hgb",
