@@ -19,7 +19,7 @@ from degradiq.rate_limiter import CheckpointManager, RateLimiter
 from degradiq.scripts.train_first_stop import (
     label_compatibility_report, _incompatible_contributing_events,
     assert_training_label_compatibility, fit_candidate_first_stop_model,
-    _fit_calibrated_hazard_model, collect_rows_with_checkpoints,
+    _fit_calibrated_hazard_model, collect_rows_with_checkpoints, _race_timing_cached,
 )
 
 
@@ -446,6 +446,60 @@ class VersionGateAndDiagnosticsPersistenceTests(unittest.TestCase):
             self.assertEqual(rep["compatibility"].iloc[0], "legacy_unknown")
         finally:
             shutil.rmtree(tmp, ignore_errors=True)
+
+
+class CacheMissClassificationTests(unittest.TestCase):
+    """Phase 4-5 audit: a genuine cache miss (timing payload absent) must classify as
+    cache_miss, not processing_failure; locally-present data that fails classifies as
+    processing_failure."""
+
+    def _event_dir(self, root, year, date, name):
+        d = Path(root) / str(year) / f"{date}_{name.replace(' ', '_')}" / f"{date}_Race"
+        d.mkdir(parents=True, exist_ok=True)
+        return d
+
+    def test_absent_timing_is_cache_miss(self):
+        tmp = Path(tempfile.mkdtemp())
+        try:
+            # Event dir exists with only a lightweight session_info file (no timing payload).
+            d = self._event_dir(tmp, 2025, "2025-07-06", "British Grand Prix")
+            (d / "session_info.ff1pkl").write_bytes(b"x")
+            self.assertFalse(_race_timing_cached(tmp, 2025, pd.Timestamp("2025-07-06"), "British Grand Prix"))
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+
+    def test_missing_event_dir_is_cache_miss(self):
+        tmp = Path(tempfile.mkdtemp())
+        try:
+            (Path(tmp) / "2025").mkdir(parents=True, exist_ok=True)
+            self.assertFalse(_race_timing_cached(tmp, 2025, pd.Timestamp("2025-07-06"), "British Grand Prix"))
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+
+    def test_present_timing_is_not_cache_miss(self):
+        tmp = Path(tempfile.mkdtemp())
+        try:
+            d = self._event_dir(tmp, 2025, "2025-03-16", "Australian Grand Prix")
+            (d / "_extended_timing_data.ff1pkl").write_bytes(b"x")  # real timing payload present
+            self.assertTrue(_race_timing_cached(tmp, 2025, pd.Timestamp("2025-03-16"), "Australian Grand Prix"))
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+
+    def test_present_timing_without_eventdate_fallback(self):
+        tmp = Path(tempfile.mkdtemp())
+        try:
+            d = self._event_dir(tmp, 2024, "2024-09-15", "Azerbaijan Grand Prix")
+            (d / "timing_app_data.ff1pkl").write_bytes(b"x")
+            # event_date None -> name-suffix fallback still finds it
+            self.assertTrue(_race_timing_cached(tmp, 2024, None, "Azerbaijan Grand Prix"))
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+
+    def test_schedule_unavailable_status_path_exists(self):
+        # The schedule-unavailable status is still emitted explicitly (not reclassified).
+        src = (Path(__file__).resolve().parents[1] / "scripts/train_first_stop.py").read_text(encoding="utf-8")
+        self.assertIn('diagnostic_status="schedule_unavailable"', src)
+        self.assertIn('diag = "processing_failure" if cached_locally else "cache_miss"', src)
 
 
 if __name__ == "__main__":
