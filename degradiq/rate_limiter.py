@@ -31,6 +31,10 @@ if not logger.handlers:
 logger.setLevel(logging.INFO)
 
 SCHEMA_VERSION = "1.0"
+# Version of the diagnostic metadata block persisted in checkpoint sidecars. Its
+# presence certifies that unresolved-event diagnostics were fully computed and stored;
+# its absence means legacy/unknown (never "zero unresolved").
+DIAGNOSTICS_SCHEMA_VERSION = "1.0"
 CHECKPOINT_DIR = Path(__file__).resolve().parent / "cache" / "hazard_checkpoints"
 
 
@@ -234,6 +238,50 @@ class CheckpointManager:
                 return df, meta
         return pd.DataFrame(), {}
 
+    def checkpoint_label_version(self, year: int, round_id: Any, event_name: str | None = None) -> str | None:
+        """Return the persisted label-definition version of a checkpoint, or None.
+
+        None means the checkpoint predates versioning (legacy/unknown) or is absent;
+        callers must treat None as "unknown", never as "no unresolved cases".
+        """
+        for candidate_id in [round_id, event_name]:
+            if candidate_id is None:
+                continue
+            mpath = self.metadata_path(year, candidate_id)
+            if mpath.exists():
+                try:
+                    with open(mpath, "r", encoding="utf-8") as f:
+                        return json.load(f).get("label_definition_version")
+                except Exception:
+                    return None
+        return None
+
+    def checkpoint_diagnostics(self, year: int, round_id: Any, event_name: str | None = None) -> dict | None:
+        """Return the persisted diagnostic block for a checkpoint, or None if absent.
+
+        None (or diagnostics_complete=False) means diagnostics were never recorded
+        (legacy) and must be treated as UNKNOWN, never as zero unresolved cases.
+        """
+        for candidate_id in [round_id, event_name]:
+            if candidate_id is None:
+                continue
+            mpath = self.metadata_path(year, candidate_id)
+            if mpath.exists():
+                try:
+                    with open(mpath, "r", encoding="utf-8") as f:
+                        meta = json.load(f)
+                except Exception:
+                    return None
+                if not meta.get("diagnostics_complete"):
+                    return None
+                return {
+                    "diagnostics_schema_version": meta.get("diagnostics_schema_version"),
+                    "unresolved_count": meta.get("unresolved_count"),
+                    "unresolved_reasons": meta.get("unresolved_reasons") or {},
+                    "timeline_available": meta.get("timeline_available"),
+                }
+        return None
+
     def save_checkpoint(
         self,
         year: int,
@@ -242,12 +290,26 @@ class CheckpointManager:
         rows: pd.DataFrame,
         status: str = "loaded",
         error: str = "",
+        label_definition_version: str | None = None,
+        diagnostics: dict | None = None,
     ) -> None:
-        """Atomically write parquet data and metadata sidecar."""
+        """Atomically write parquet data and metadata sidecar.
+
+        `label_definition_version` and `diagnostics` are persisted in the JSON sidecar
+        (a reliable channel, unlike DataFrame.attrs) so training can refuse to mix label
+        versions and so unresolved-event diagnostics survive checkpoint reuse. A missing
+        diagnostics block is recorded as such (never as zero unresolved cases).
+        """
         cpath = self.checkpoint_path(year, round_id)
         mpath = self.metadata_path(year, round_id)
         tmp_cpath = cpath.with_suffix(".parquet.tmp")
         tmp_mpath = mpath.with_suffix(".json.tmp")
+
+        reason_counts: dict[str, int] = {}
+        if diagnostics is not None:
+            for u in diagnostics.get("unresolved_events", []) or []:
+                r = str(u.get("reason", "unknown"))
+                reason_counts[r] = reason_counts.get(r, 0) + 1
 
         meta = {
             "schema_version": SCHEMA_VERSION,
@@ -258,6 +320,13 @@ class CheckpointManager:
             "row_count": len(rows) if rows is not None else 0,
             "positive_count": int(rows["StopNextLap"].sum()) if rows is not None and "StopNextLap" in rows.columns else 0,
             "error": error,
+            "label_definition_version": label_definition_version,
+            # Diagnostic block: present only when diagnostics were fully computed.
+            "diagnostics_schema_version": DIAGNOSTICS_SCHEMA_VERSION if diagnostics is not None else None,
+            "diagnostics_complete": bool(diagnostics is not None),
+            "unresolved_count": (int(diagnostics.get("unresolved_count", 0)) if diagnostics is not None else None),
+            "unresolved_reasons": (reason_counts if diagnostics is not None else None),
+            "timeline_available": (diagnostics.get("timeline_available") if diagnostics is not None else None),
             "saved_at_utc": pd.Timestamp.now(tz="UTC").isoformat(),
         }
 

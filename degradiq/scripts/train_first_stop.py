@@ -45,7 +45,7 @@ from degradiq.evaluation import (
 )
 from degradiq.pit_strategy import (
     PACKAGE_DIR, FEATURE_COLUMNS, NUMERIC_FEATURES, CATEGORICAL_FEATURES,
-    build_hazard_rows, fit_first_stop_model, _lap_features,
+    build_hazard_rows, fit_first_stop_model, _lap_features, LABEL_DEFINITION_VERSION,
 )
 
 logger = logging.getLogger("degradiq.train_first_stop")
@@ -59,14 +59,55 @@ def _event_date(row: pd.Series):
     return pd.to_datetime(value, errors="coerce", utc=True)
 
 
+def _status_row(year, round_id, name, status, *, rows=0, positive_rows=0, negative_rows=0,
+                error="", label_definition_version=None, label_compatible=None,
+                diagnostic_status="", unresolved_count=None, diagnostics_complete=None,
+                train_compatible=False) -> dict[str, Any]:
+    """Build a coverage/status record with explicit diagnostic fields.
+
+    `unresolved_count=None` means UNKNOWN (e.g. legacy checkpoint); it must never be
+    silently read as zero. `train_compatible` is True only for an event whose rows are
+    safe for the standard training path (current label version AND complete diagnostics).
+    """
+    return {
+        "year": year, "round": str(round_id), "event": name, "status": status,
+        "rows": rows, "positive_rows": positive_rows, "negative_rows": negative_rows,
+        "censored_rows": 0, "error": error,
+        "label_definition_version": label_definition_version,
+        "label_compatible": label_compatible,
+        "diagnostics_complete": diagnostics_complete,
+        "diagnostic_status": diagnostic_status,
+        "unresolved_count": unresolved_count,
+        "train_compatible": bool(train_compatible),
+    }
+
+
 def collect_rows_with_checkpoints(
     start_year: int,
     end_year: int,
     checkpoint_mgr: CheckpointManager,
     limiter: RateLimiter,
     offline: bool = False,
+    mode: str = "train",
+    required_label_version: str = LABEL_DEFINITION_VERSION,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Collect hazard rows across seasons using checkpoints and rate-paced ingestion."""
+    """Collect hazard rows across seasons using checkpoints and rate-paced ingestion.
+
+    Fail-closed by default. `mode="train"` (the default) REQUIRES every row-contributing
+    event to be train-compatible (current label-definition version AND complete
+    diagnostics) and raises a clear RuntimeError otherwise, BEFORE returning a dataset —
+    so incompatible/legacy/mixed rows can never reach model fitting, without any caller
+    having to set a flag. `mode="inspect"` is read-only: it never raises, returns the
+    coverage/diagnostics for legacy checkpoints too, and attaches NO training-ready
+    certification (callers must not feed an inspect-mode dataset to fitting).
+
+    Per-event diagnostics (label version, unresolved counts, status) are captured in the
+    returned coverage frame BEFORE per-event frames are concatenated, so they are not
+    lost by aggregation; for reused checkpoints they are reconstructed from persisted
+    sidecar metadata.
+    """
+    if mode not in ("train", "inspect"):
+        raise ValueError("mode must be 'train' or 'inspect'")
     CACHE.mkdir(parents=True, exist_ok=True)
     fastf1.Cache.enable_cache(str(CACHE))
     install_rate_limiter(limiter)
@@ -79,11 +120,9 @@ def collect_rows_with_checkpoints(
             schedule = fastf1.get_event_schedule(year, include_testing=False)
         except Exception as exc:
             logger.error("Schedule unavailable for %d: %s", year, exc)
-            statuses.append({
-                "year": year, "round": "*", "event": "*", "status": "schedule unavailable",
-                "rows": 0, "positive_rows": 0, "negative_rows": 0, "censored_rows": 0,
-                "error": f"{type(exc).__name__}: {exc}"
-            })
+            statuses.append(_status_row(year, "*", "*", "schedule unavailable",
+                                        error=f"{type(exc).__name__}: {exc}",
+                                        diagnostic_status="schedule_unavailable"))
             continue
 
         for _, event in schedule.iterrows():
@@ -94,10 +133,8 @@ def collect_rows_with_checkpoints(
 
             event_date = _event_date(event)
             if pd.notna(event_date) and event_date > now:
-                statuses.append({
-                    "year": year, "round": str(round_id), "event": name, "status": "future/pending",
-                    "rows": 0, "positive_rows": 0, "negative_rows": 0, "censored_rows": 0, "error": ""
-                })
+                statuses.append(_status_row(year, round_id, name, "future/pending",
+                                            diagnostic_status="unavailable"))
                 continue
 
             # 1. Check existing durable checkpoint first
@@ -110,20 +147,35 @@ def collect_rows_with_checkpoints(
                 if not df_cp.empty:
                     df_cp["Season"] = year
                     all_rows.append(df_cp)
-                statuses.append({
-                    "year": year, "round": str(round_id), "event": name, "status": status,
-                    "rows": row_count, "positive_rows": pos_count, "negative_rows": neg_count,
-                    "censored_rows": 0, "error": meta.get("error", "")
-                })
-                print(f"[Checkpoint] {year} Round {round_id} ({name}): {row_count} rows, {pos_count} stops")
+                cp_version = checkpoint_mgr.checkpoint_label_version(year, round_id, event_name=name)
+                cp_diag = checkpoint_mgr.checkpoint_diagnostics(year, round_id, event_name=name)
+                version_ok = cp_version == required_label_version
+                diag_present = cp_diag is not None
+                train_ok = version_ok and diag_present
+                # A known-but-old version, OR a current version with MISSING diagnostics,
+                # is legacy_unknown (never silently "zero unresolved").
+                if train_ok:
+                    n_unres = cp_diag.get("unresolved_count")
+                    diag_status = "has_unresolved" if (n_unres or 0) else "resolved"
+                    unresolved_count = n_unres
+                elif cp_version is not None and not version_ok:
+                    diag_status, unresolved_count = "stale_label_version", None
+                else:
+                    diag_status, unresolved_count = "legacy_unknown", None
+                statuses.append(_status_row(
+                    year, round_id, name, status, rows=row_count, positive_rows=pos_count,
+                    negative_rows=neg_count, error=meta.get("error", ""),
+                    label_definition_version=cp_version, label_compatible=version_ok,
+                    diagnostics_complete=diag_present, diagnostic_status=diag_status,
+                    unresolved_count=unresolved_count, train_compatible=train_ok))
+                print(f"[Checkpoint] {year} Round {round_id} ({name}): {row_count} rows, {pos_count} stops "
+                      f"[label={cp_version or 'legacy/unknown'}, diag={'yes' if diag_present else 'no'}]")
                 continue
 
-            # 2. Checkpoint missing: if offline, record skip; otherwise load session with rate-limiter protection
+            # 2. Checkpoint missing: if offline, record skip; otherwise load session
             if offline:
-                statuses.append({
-                    "year": year, "round": str(round_id), "event": name, "status": "unavailable (offline mode)",
-                    "rows": 0, "positive_rows": 0, "negative_rows": 0, "censored_rows": 0, "error": "Offline mode"
-                })
+                statuses.append(_status_row(year, round_id, name, "unavailable (offline mode)",
+                                            error="Offline mode", diagnostic_status="unavailable"))
                 continue
 
             try:
@@ -134,7 +186,12 @@ def collect_rows_with_checkpoints(
                 results = getattr(session, "results", pd.DataFrame())
                 max_lap = pd.to_numeric(laps.get("LapNumber", pd.Series(dtype=float)), errors="coerce").max()
                 race_distance = int(max_lap) if pd.notna(max_lap) else None
-                rows = build_hazard_rows(laps, results, name, race_distance)
+                diag_sink: list = []
+                rows = build_hazard_rows(laps, results, name, race_distance,
+                                         track_status=getattr(session, "track_status", None),
+                                         diagnostics_sink=diag_sink)
+                diag = diag_sink[-1] if diag_sink else {}
+                n_unresolved = int(diag.get("unresolved_count", 0))
 
                 if not rows.empty:
                     rows["Season"] = year
@@ -142,30 +199,126 @@ def collect_rows_with_checkpoints(
                     pos_count = int(rows["StopNextLap"].sum())
                     neg_count = len(rows) - pos_count
                     status = "loaded"
-                    checkpoint_mgr.save_checkpoint(year, round_id, name, rows, status=status)
+                    checkpoint_mgr.save_checkpoint(year, round_id, name, rows, status=status,
+                                                   label_definition_version=LABEL_DEFINITION_VERSION,
+                                                   diagnostics=diag)
                 else:
                     pos_count = 0
                     neg_count = 0
                     status = "no eligible rows"
-                    checkpoint_mgr.save_checkpoint(year, round_id, name, pd.DataFrame(), status=status)
+                    checkpoint_mgr.save_checkpoint(year, round_id, name, pd.DataFrame(), status=status,
+                                                   label_definition_version=LABEL_DEFINITION_VERSION,
+                                                   diagnostics=diag)
 
-                statuses.append({
-                    "year": year, "round": str(round_id), "event": name, "status": status,
-                    "rows": len(rows), "positive_rows": pos_count, "negative_rows": neg_count,
-                    "censored_rows": 0, "error": ""
-                })
-                print(f"[Loaded] {year} {name}: {len(rows)} rows, {pos_count} stop labels")
+                statuses.append(_status_row(
+                    year, round_id, name, status, rows=len(rows), positive_rows=pos_count,
+                    negative_rows=neg_count, label_definition_version=LABEL_DEFINITION_VERSION,
+                    label_compatible=True, diagnostics_complete=True,
+                    diagnostic_status=("has_unresolved" if n_unresolved else "resolved"),
+                    unresolved_count=n_unresolved, train_compatible=(status == "loaded")))
+                print(f"[Loaded] {year} {name}: {len(rows)} rows, {pos_count} stop labels, "
+                      f"{n_unresolved} unresolved")
             except Exception as exc:
                 err_msg = f"{type(exc).__name__}: {exc}"
                 logger.warning("Failed session for %d %s: %s", year, name, err_msg)
                 checkpoint_mgr.save_checkpoint(year, round_id, name, pd.DataFrame(), status="unavailable", error=err_msg)
-                statuses.append({
-                    "year": year, "round": str(round_id), "event": name, "status": "unavailable",
-                    "rows": 0, "positive_rows": 0, "negative_rows": 0, "censored_rows": 0, "error": err_msg
-                })
+                statuses.append(_status_row(year, round_id, name, "unavailable", error=err_msg,
+                                            diagnostic_status="processing_failure"))
 
     combined = pd.concat(all_rows, ignore_index=True) if all_rows else pd.DataFrame()
-    return combined, pd.DataFrame(statuses)
+    status_df = pd.DataFrame(statuses)
+
+    offenders = _incompatible_contributing_events(status_df)
+    if mode == "train":
+        # Fail-closed: incompatible/legacy/mixed rows must never reach model fitting.
+        if offenders:
+            raise RuntimeError(
+                "Fail-closed: incompatible/legacy checkpoints cannot enter candidate training at "
+                f"label version '{required_label_version}'. Regenerate these events first: "
+                + "; ".join(f"{y} {ev} (label={v or 'legacy/unknown'})" for y, ev, v in offenders))
+        # Certify the training dataset: a single, consistent label version stamped per row
+        # (a column survives aggregation; fit_candidate_first_stop_model re-checks it).
+        if not combined.empty:
+            combined["LabelDefVersion"] = required_label_version
+    # inspect mode: never raises and attaches NO certification -> not training-ready.
+    return combined, status_df
+
+
+def _incompatible_contributing_events(status_df: pd.DataFrame,
+                                      required_version: str = LABEL_DEFINITION_VERSION) -> list:
+    """Row-contributing ('loaded') events that are not train-compatible.
+
+    Prefers the explicit `train_compatible` flag (label version AND complete diagnostics);
+    falls back to a label-version-only check when that column is absent.
+    """
+    if status_df is None or status_df.empty:
+        return []
+    contributing = status_df[status_df["status"] == "loaded"] if "status" in status_df.columns else status_df
+    if "train_compatible" in status_df.columns:
+        bad = contributing[contributing["train_compatible"] != True]  # noqa: E712
+    elif "label_definition_version" in status_df.columns:
+        bad = contributing[contributing["label_definition_version"] != required_version]
+    else:
+        return []
+    return [(int(r["year"]), str(r["event"]), r.get("label_definition_version")) for _, r in bad.iterrows()]
+
+
+def assert_training_label_compatibility(status_df: pd.DataFrame,
+                                        required_version: str = LABEL_DEFINITION_VERSION) -> None:
+    """Raise if any row-contributing event is not train-compatible. For callers that
+    build a dataset outside collect_rows and want the same fail-closed guarantee."""
+    offenders = _incompatible_contributing_events(status_df, required_version)
+    if offenders:
+        raise RuntimeError(
+            "Fail-closed: training dataset contains incompatible/legacy events: "
+            + "; ".join(f"{y} {ev} (label={v or 'legacy/unknown'})" for y, ev, v in offenders))
+
+
+def label_compatibility_report(checkpoint_mgr: CheckpointManager, events,
+                               required_version: str = LABEL_DEFINITION_VERSION) -> pd.DataFrame:
+    """Read-only per-event compatibility report. `events`: iterable of
+    (year, round_id, event_name). Writes nothing; regenerates nothing. A current label
+    version with MISSING diagnostics is reported legacy_unknown (not compatible)."""
+    recs = []
+    for year, round_id, name in events:
+        present = checkpoint_mgr.has_valid_checkpoint(year, round_id, FEATURE_COLUMNS, event_name=name)
+        v = checkpoint_mgr.checkpoint_label_version(year, round_id, event_name=name) if present else None
+        d = checkpoint_mgr.checkpoint_diagnostics(year, round_id, event_name=name) if present else None
+        if not present:
+            state = "unavailable"
+        elif v == required_version and d is not None:
+            state = "compatible"
+        elif v is not None and v != required_version:
+            state = "stale"
+        else:
+            state = "legacy_unknown"  # no version, or version present but diagnostics missing
+        recs.append({"year": year, "event": name, "label_definition_version": v,
+                     "diagnostics_present": d is not None, "compatibility": state})
+    return pd.DataFrame(recs)
+
+
+def _require_label_certification(training_rows: pd.DataFrame) -> None:
+    """Fail-closed gate for the STANDARD candidate-training API.
+
+    The input MUST carry a complete, current label-definition certification: a
+    `LabelDefVersion` column, present on every row and uniformly equal to the current
+    LABEL_DEFINITION_VERSION. Missing, null, mixed, or stale certification raises BEFORE
+    any fitting. Build a certified dataset with collect_rows_with_checkpoints(mode='train').
+    """
+    if training_rows is None or training_rows.empty:
+        raise ValueError("No first-stop training rows provided.")
+    if "LabelDefVersion" not in training_rows.columns:
+        raise RuntimeError(
+            "Fail-closed: candidate training requires a 'LabelDefVersion' certification column "
+            f"(current '{LABEL_DEFINITION_VERSION}'); none present. Use "
+            "collect_rows_with_checkpoints(mode='train') to produce a certified dataset.")
+    col = training_rows["LabelDefVersion"]
+    versions = set(pd.Series(col).dropna().unique())
+    if col.isna().any() or versions != {LABEL_DEFINITION_VERSION}:
+        raise RuntimeError(
+            f"Fail-closed: candidate training requires one label version "
+            f"'{LABEL_DEFINITION_VERSION}'; found {sorted(versions)} "
+            f"(nulls present: {bool(col.isna().any())}).")
 
 
 def fit_candidate_first_stop_model(
@@ -173,7 +326,27 @@ def fit_candidate_first_stop_model(
     architecture: str = "calibrated_hgb",
     groups: np.ndarray | None = None,
 ) -> dict[str, Any]:
-    """Fit calibrated candidate hazard model on training rows with event-grouped cross-validation."""
+    """STANDARD candidate-training API (fail-closed).
+
+    Requires a complete, current label-definition certification on `training_rows`
+    (see `_require_label_certification`) and rejects legacy/stale/mixed/uncertified data
+    BEFORE fitting. Delegates the fitting mechanics to `_fit_calibrated_hazard_model`.
+    """
+    _require_label_certification(training_rows)
+    return _fit_calibrated_hazard_model(training_rows, architecture=architecture, groups=groups)
+
+
+def _fit_calibrated_hazard_model(
+    training_rows: pd.DataFrame,
+    architecture: str = "calibrated_hgb",
+    groups: np.ndarray | None = None,
+) -> dict[str, Any]:
+    """Low-level calibrated hazard fitter with NO certification gate.
+
+    For synthetic/unit tests of the fitting mechanics and for internal use by
+    `fit_candidate_first_stop_model`. Never a candidate-training entry point: real
+    training must go through `fit_candidate_first_stop_model`.
+    """
     if training_rows is None or training_rows.empty:
         raise ValueError("No first-stop training rows provided.")
     data = training_rows.dropna(subset=["StopNextLap"]).copy()
