@@ -50,8 +50,12 @@ use in-race per-lap features; stop-lap MAE and 10–90 interval metrics are a
    out** — the model still ranks per-lap stop risk on circuits it has never seen.
 
 2. **The stop-lap TIMING advantage is partly circuit memorisation.** On unseen
-   circuits the pre-race stop-lap MAE beats the historical-median baseline in only
-   **5 of 25 circuits**. The clear MAE edge in the temporal holdout (6.96 vs 8.20)
+   circuits the pre-race stop-lap MAE matches or beats the historical-median
+   baseline in only **5 of 25 circuits** (strictly beats in **4 of 25**); the
+   per-circuit figures and this count are in
+   [`generalization_summary.json`](generalization_summary.json)
+   (`leave_one_circuit_out.per_circuit` / `.timing_mae_vs_baseline`). The clear MAE
+   edge in the temporal holdout (6.96 vs 8.20)
    therefore depends substantially on having seen the circuit before. Best unseen
    circuits: Bahrain (3.8), French (4.1), Spanish (4.2). Worst: Monaco (11.6),
    Canada (11.2), Azerbaijan (9.0), Australia (8.7) — street / variable-strategy

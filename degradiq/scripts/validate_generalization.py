@@ -262,12 +262,28 @@ def run_loco(rows: pd.DataFrame) -> dict[str, Any]:
     p_all = np.concatenate(pooled_p) if pooled_p else np.array([])
     micro = _probabilistic(y_all, p_all) if len(y_all) else {}
     micro_mae = float(np.mean(pooled_errors)) if pooled_errors else None
+
+    # Count where the candidate's pre-race timing MAE matches/beats the historical-
+    # median baseline on the UNSEEN circuit. Reported so this headline claim is
+    # backed by a tracked number, not only prose.
+    evaluable = [v for v in per_circuit.values()
+                 if v["first_stop_lap_mae"] is not None
+                 and v["baseline_historical_median_mae"] is not None]
+    le = sum(1 for v in evaluable
+             if v["first_stop_lap_mae"] <= v["baseline_historical_median_mae"])
+    lt = sum(1 for v in evaluable
+             if v["first_stop_lap_mae"] < v["baseline_historical_median_mae"])
     return {
         "n_circuits": len(per_circuit),
         "micro_pooled": {**micro, "first_stop_lap_mae": micro_mae,
                          "drivers_with_observed_first_stop": len(pooled_errors)},
         "macro_mean_over_circuits": {k: (float(np.mean(v)) if v else None)
                                      for k, v in macro.items()},
+        "timing_mae_vs_baseline": {
+            "circuits_evaluated": len(evaluable),
+            "candidate_le_baseline": le,   # matches or beats (ties included)
+            "candidate_lt_baseline": lt,   # strictly beats
+        },
         "per_circuit": per_circuit,
     }
 
@@ -333,6 +349,8 @@ def main() -> None:
             "n_circuits": loco["n_circuits"],
             "micro_pooled": loco["micro_pooled"],
             "macro_mean_over_circuits": loco["macro_mean_over_circuits"],
+            "timing_mae_vs_baseline": loco["timing_mae_vs_baseline"],
+            "per_circuit": loco["per_circuit"],
         }
     TRACKED_DIR.mkdir(parents=True, exist_ok=True)
     (TRACKED_DIR / "generalization_summary.json").write_text(

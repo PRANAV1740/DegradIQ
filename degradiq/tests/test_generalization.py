@@ -102,6 +102,36 @@ class TrackedSummaryTests(unittest.TestCase):
             self.assertIn("interval_width_10_90_mean", r["candidate"])
         self.assertIn("interval_width_10_90_mean", s["leave_one_circuit_out"]["macro_mean_over_circuits"])
 
+    def test_per_circuit_detail_is_tracked(self):
+        # Every per-circuit number cited in EVALUATION.md must be backed by a tracked
+        # output, not only by a git-ignored full report.
+        s = json.loads((PROV_DIR / "generalization_summary.json").read_text(encoding="utf-8"))
+        loco = s["leave_one_circuit_out"]
+        self.assertIn("per_circuit", loco)
+        self.assertEqual(len(loco["per_circuit"]), loco["n_circuits"])
+        for v in loco["per_circuit"].values():
+            for k in ("first_stop_lap_mae", "baseline_historical_median_mae",
+                      "roc_auc", "interval_width_10_90_mean"):
+                self.assertIn(k, v)
+
+    def test_beats_baseline_count_matches_per_circuit(self):
+        s = json.loads((PROV_DIR / "generalization_summary.json").read_text(encoding="utf-8"))
+        loco = s["leave_one_circuit_out"]
+        pc = loco["per_circuit"].values()
+        evaluable = [v for v in pc if v["first_stop_lap_mae"] is not None
+                     and v["baseline_historical_median_mae"] is not None]
+        le = sum(1 for v in evaluable
+                 if v["first_stop_lap_mae"] <= v["baseline_historical_median_mae"])
+        lt = sum(1 for v in evaluable
+                 if v["first_stop_lap_mae"] < v["baseline_historical_median_mae"])
+        t = loco["timing_mae_vs_baseline"]
+        self.assertEqual(t["candidate_le_baseline"], le)
+        self.assertEqual(t["candidate_lt_baseline"], lt)
+        self.assertEqual(t["circuits_evaluated"], len(evaluable))
+        # EVALUATION.md states "5 of 25" (<=) and "4 of 25" (strict); keep them honest.
+        self.assertEqual(le, 5)
+        self.assertEqual(lt, 4)
+
 
 class EntryPointOfflineTests(unittest.TestCase):
     def test_validate_script_is_offline(self):

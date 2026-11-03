@@ -1,6 +1,6 @@
 {
-  "generated_at_utc": "2026-11-03T18:13:10.989539+00:00",
-  "git_revision": "246bba5ef688efdffe0b85b7183e817e89950a38",
+  "generated_at_utc": "2026-11-03T18:52:25.963749+00:00",
+  "git_revision": "16f47773e0c6d3548d1fdcf76c1e006b47a2f5f9-dirty",
   "label_definition_version": "2.0-strategic-green-vsc-sc",
   "libraries": {
     "python": "3.13.15",
@@ -65,6 +65,288 @@
       "first_stop_lap_mae": 6.926280960326221,
       "interval_coverage_10_90": 0.8466560260995044,
       "interval_width_10_90_mean": 23.265251530036693
+    },
+    "timing_mae_vs_baseline": {
+      "circuits_evaluated": 25,
+      "candidate_le_baseline": 5,
+      "candidate_lt_baseline": 4
+    },
+    "per_circuit": {
+      "Abu Dhabi Grand Prix": {
+        "holdout_rows": 840,
+        "brier_score": 0.06041730304125555,
+        "log_loss": 0.22115203095490293,
+        "roc_auc": 0.8038246958392148,
+        "first_stop_lap_mae": 6.48,
+        "baseline_historical_median_mae": 3.72,
+        "interval_coverage_10_90": 0.88,
+        "interval_width_10_90_mean": 25.52,
+        "drivers_with_observed_first_stop": 25
+      },
+      "Australian Grand Prix": {
+        "holdout_rows": 1450,
+        "brier_score": 0.036988110347989614,
+        "log_loss": 0.16888791574530254,
+        "roc_auc": 0.5966696929679762,
+        "first_stop_lap_mae": 8.68,
+        "baseline_historical_median_mae": 6.16,
+        "interval_coverage_10_90": 0.56,
+        "interval_width_10_90_mean": 20.16,
+        "drivers_with_observed_first_stop": 25
+      },
+      "Austrian Grand Prix": {
+        "holdout_rows": 1107,
+        "brier_score": 0.0503571880302653,
+        "log_loss": 0.18953307098228292,
+        "roc_auc": 0.8117302052785924,
+        "first_stop_lap_mae": 7.607142857142857,
+        "baseline_historical_median_mae": 5.25,
+        "interval_coverage_10_90": 0.8928571428571429,
+        "interval_width_10_90_mean": 28.214285714285715,
+        "drivers_with_observed_first_stop": 28
+      },
+      "Azerbaijan Grand Prix": {
+        "holdout_rows": 837,
+        "brier_score": 0.0514907095640238,
+        "log_loss": 0.20058424278865278,
+        "roc_auc": 0.7312685160247778,
+        "first_stop_lap_mae": 9.04,
+        "baseline_historical_median_mae": 6.48,
+        "interval_coverage_10_90": 0.68,
+        "interval_width_10_90_mean": 22.6,
+        "drivers_with_observed_first_stop": 25
+      },
+      "Bahrain Grand Prix": {
+        "holdout_rows": 858,
+        "brier_score": 0.07266958927737821,
+        "log_loss": 0.24489974213608395,
+        "roc_auc": 0.8305290079418496,
+        "first_stop_lap_mae": 3.793103448275862,
+        "baseline_historical_median_mae": 2.4482758620689653,
+        "interval_coverage_10_90": 1.0,
+        "interval_width_10_90_mean": 19.0,
+        "drivers_with_observed_first_stop": 29
+      },
+      "Belgian Grand Prix": {
+        "holdout_rows": 458,
+        "brier_score": 0.1025579289216977,
+        "log_loss": 0.3521323554537004,
+        "roc_auc": 0.75508800880088,
+        "first_stop_lap_mae": 5.545454545454546,
+        "baseline_historical_median_mae": 4.681818181818182,
+        "interval_coverage_10_90": 0.7272727272727273,
+        "interval_width_10_90_mean": 19.363636363636363,
+        "drivers_with_observed_first_stop": 22
+      },
+      "British Grand Prix": {
+        "holdout_rows": 1204,
+        "brier_score": 0.04168350806202733,
+        "log_loss": 0.1759914250248938,
+        "roc_auc": 0.791966396272299,
+        "first_stop_lap_mae": 7.5,
+        "baseline_historical_median_mae": 8.541666666666666,
+        "interval_coverage_10_90": 0.7916666666666666,
+        "interval_width_10_90_mean": 18.416666666666668,
+        "drivers_with_observed_first_stop": 24
+      },
+      "Canadian Grand Prix": {
+        "holdout_rows": 1509,
+        "brier_score": 0.03777714523928363,
+        "log_loss": 0.1563667575084661,
+        "roc_auc": 0.7325819672131147,
+        "first_stop_lap_mae": 11.148148148148149,
+        "baseline_historical_median_mae": 8.25925925925926,
+        "interval_coverage_10_90": 0.7407407407407407,
+        "interval_width_10_90_mean": 28.555555555555557,
+        "drivers_with_observed_first_stop": 27
+      },
+      "Chinese Grand Prix": {
+        "holdout_rows": 447,
+        "brier_score": 0.07118733656632614,
+        "log_loss": 0.25008099174900916,
+        "roc_auc": 0.8467829143011625,
+        "first_stop_lap_mae": 5.52,
+        "baseline_historical_median_mae": 2.48,
+        "interval_coverage_10_90": 1.0,
+        "interval_width_10_90_mean": 24.44,
+        "drivers_with_observed_first_stop": 25
+      },
+      "Dutch Grand Prix": {
+        "holdout_rows": 839,
+        "brier_score": 0.049171566315372506,
+        "log_loss": 0.1921440088181513,
+        "roc_auc": 0.7619798234552333,
+        "first_stop_lap_mae": 7.391304347826087,
+        "baseline_historical_median_mae": 3.891304347826087,
+        "interval_coverage_10_90": 0.8260869565217391,
+        "interval_width_10_90_mean": 23.956521739130434,
+        "drivers_with_observed_first_stop": 23
+      },
+      "Emilia Romagna Grand Prix": {
+        "holdout_rows": 972,
+        "brier_score": 0.05120714966738629,
+        "log_loss": 0.2032557390614907,
+        "roc_auc": 0.7280117808440248,
+        "first_stop_lap_mae": 6.428571428571429,
+        "baseline_historical_median_mae": 4.178571428571429,
+        "interval_coverage_10_90": 0.9642857142857143,
+        "interval_width_10_90_mean": 25.857142857142858,
+        "drivers_with_observed_first_stop": 28
+      },
+      "French Grand Prix": {
+        "holdout_rows": 283,
+        "brier_score": 0.05273289854713448,
+        "log_loss": 0.1920030492633948,
+        "roc_auc": 0.8350287483414418,
+        "first_stop_lap_mae": 4.117647058823529,
+        "baseline_historical_median_mae": 3.7058823529411766,
+        "interval_coverage_10_90": 1.0,
+        "interval_width_10_90_mean": 23.941176470588236,
+        "drivers_with_observed_first_stop": 17
+      },
+      "Hungarian Grand Prix": {
+        "holdout_rows": 781,
+        "brier_score": 0.06540537333175274,
+        "log_loss": 0.2465521231958485,
+        "roc_auc": 0.7915517241379311,
+        "first_stop_lap_mae": 7.695652173913044,
+        "baseline_historical_median_mae": 4.173913043478261,
+        "interval_coverage_10_90": 0.7391304347826086,
+        "interval_width_10_90_mean": 25.956521739130434,
+        "drivers_with_observed_first_stop": 23
+      },
+      "Italian Grand Prix": {
+        "holdout_rows": 966,
+        "brier_score": 0.05111305199784915,
+        "log_loss": 0.19280922707141354,
+        "roc_auc": 0.7794152276295134,
+        "first_stop_lap_mae": 5.04,
+        "baseline_historical_median_mae": 4.36,
+        "interval_coverage_10_90": 0.92,
+        "interval_width_10_90_mean": 20.88,
+        "drivers_with_observed_first_stop": 25
+      },
+      "Japanese Grand Prix": {
+        "holdout_rows": 832,
+        "brier_score": 0.07462816768143382,
+        "log_loss": 0.2690508494588434,
+        "roc_auc": 0.7555305586801649,
+        "first_stop_lap_mae": 8.407407407407407,
+        "baseline_historical_median_mae": 6.444444444444445,
+        "interval_coverage_10_90": 0.7037037037037037,
+        "interval_width_10_90_mean": 23.814814814814813,
+        "drivers_with_observed_first_stop": 27
+      },
+      "Las Vegas Grand Prix": {
+        "holdout_rows": 324,
+        "brier_score": 0.09308262987176429,
+        "log_loss": 0.3266070207889009,
+        "roc_auc": 0.8064908722109534,
+        "first_stop_lap_mae": 5.818181818181818,
+        "baseline_historical_median_mae": 2.590909090909091,
+        "interval_coverage_10_90": 0.9545454545454546,
+        "interval_width_10_90_mean": 22.59090909090909,
+        "drivers_with_observed_first_stop": 22
+      },
+      "Mexico City Grand Prix": {
+        "holdout_rows": 1511,
+        "brier_score": 0.03341425888492553,
+        "log_loss": 0.14310580829744826,
+        "roc_auc": 0.8230699814433513,
+        "first_stop_lap_mae": 8.64,
+        "baseline_historical_median_mae": 13.48,
+        "interval_coverage_10_90": 0.84,
+        "interval_width_10_90_mean": 23.32,
+        "drivers_with_observed_first_stop": 25
+      },
+      "Miami Grand Prix": {
+        "holdout_rows": 1335,
+        "brier_score": 0.04082537373707883,
+        "log_loss": 0.15942472246211511,
+        "roc_auc": 0.7970392156862746,
+        "first_stop_lap_mae": 6.28,
+        "baseline_historical_median_mae": 5.72,
+        "interval_coverage_10_90": 0.88,
+        "interval_width_10_90_mean": 23.36,
+        "drivers_with_observed_first_stop": 25
+      },
+      "Monaco Grand Prix": {
+        "holdout_rows": 2303,
+        "brier_score": 0.02605259492854159,
+        "log_loss": 0.1257826063926619,
+        "roc_auc": 0.6752198840824233,
+        "first_stop_lap_mae": 11.592592592592593,
+        "baseline_historical_median_mae": 8.87037037037037,
+        "interval_coverage_10_90": 0.7777777777777778,
+        "interval_width_10_90_mean": 26.48148148148148,
+        "drivers_with_observed_first_stop": 27
+      },
+      "Qatar Grand Prix": {
+        "holdout_rows": 590,
+        "brier_score": 0.04871297151299821,
+        "log_loss": 0.1959076972841818,
+        "roc_auc": 0.7100694444444444,
+        "first_stop_lap_mae": 7.65,
+        "baseline_historical_median_mae": 6.45,
+        "interval_coverage_10_90": 0.8,
+        "interval_width_10_90_mean": 23.0,
+        "drivers_with_observed_first_stop": 20
+      },
+      "Saudi Arabian Grand Prix": {
+        "holdout_rows": 1130,
+        "brier_score": 0.04210635026986169,
+        "log_loss": 0.17023160315356603,
+        "roc_auc": 0.8091908091908092,
+        "first_stop_lap_mae": 5.16,
+        "baseline_historical_median_mae": 5.16,
+        "interval_coverage_10_90": 0.76,
+        "interval_width_10_90_mean": 17.24,
+        "drivers_with_observed_first_stop": 25
+      },
+      "Singapore Grand Prix": {
+        "holdout_rows": 1199,
+        "brier_score": 0.037733285421224595,
+        "log_loss": 0.14661635419630087,
+        "roc_auc": 0.8547345767575323,
+        "first_stop_lap_mae": 7.5,
+        "baseline_historical_median_mae": 7.520833333333333,
+        "interval_coverage_10_90": 0.875,
+        "interval_width_10_90_mean": 23.125,
+        "drivers_with_observed_first_stop": 24
+      },
+      "Spanish Grand Prix": {
+        "holdout_rows": 969,
+        "brier_score": 0.0662620829479308,
+        "log_loss": 0.23060938469106643,
+        "roc_auc": 0.8270466199092356,
+        "first_stop_lap_mae": 4.2,
+        "baseline_historical_median_mae": 3.3666666666666667,
+        "interval_coverage_10_90": 0.9333333333333333,
+        "interval_width_10_90_mean": 19.966666666666665,
+        "drivers_with_observed_first_stop": 30
+      },
+      "S\u00e3o Paulo Grand Prix": {
+        "holdout_rows": 1047,
+        "brier_score": 0.03551161963395002,
+        "log_loss": 0.14846697385897953,
+        "roc_auc": 0.7650335775335775,
+        "first_stop_lap_mae": 4.681818181818182,
+        "baseline_historical_median_mae": 4.954545454545454,
+        "interval_coverage_10_90": 1.0,
+        "interval_width_10_90_mean": 26.59090909090909,
+        "drivers_with_observed_first_stop": 22
+      },
+      "United States Grand Prix": {
+        "holdout_rows": 850,
+        "brier_score": 0.0566330079672803,
+        "log_loss": 0.20769936453531626,
+        "roc_auc": 0.8319607295737949,
+        "first_stop_lap_mae": 7.24,
+        "baseline_historical_median_mae": 4.6,
+        "interval_coverage_10_90": 0.92,
+        "interval_width_10_90_mean": 25.28,
+        "drivers_with_observed_first_stop": 25
+      }
     }
   }
 }
