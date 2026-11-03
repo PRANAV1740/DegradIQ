@@ -25,9 +25,9 @@ jobs:
           pip install -r degradiq/requirements-dashboard.txt
           pip install pytest
 
-      - name: Run test suite (offline)
-        env:
-          # The suite is self-contained (synthetic fixtures + tracked artifacts);
-          # no network is required.
-          FASTF1_DISABLE_UPDATE_CHECK: "1"
-        run: pytest degradiq/tests/ -q
+      - name: Run test suite
+        # `python -m pytest` puts the repo root on sys.path so `import degradiq`
+        # resolves (a repo-root conftest.py also guards this). The suite is otherwise
+        # self-contained (synthetic fixtures + tracked artifacts); the one legacy
+        # dashboard smoke test skips itself if the live FastF1 calendar is unreachable.
+        run: python -m pytest degradiq/tests/ -q
