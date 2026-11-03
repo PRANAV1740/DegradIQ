@@ -23,7 +23,9 @@ jobs:
           # Dashboard requirements pull in the full runtime: core model deps plus
           # fastf1, matplotlib, plotly and streamlit, which the test suite imports.
           pip install -r degradiq/requirements-dashboard.txt
-          pip install pytest
+          # pytest, plus httpx for FastAPI's TestClient (a test-only dependency used
+          # by the serverless-entrypoint test; not needed at runtime).
+          pip install pytest httpx
 
       - name: Run test suite
         # `python -m pytest` puts the repo root on sys.path so `import degradiq`
