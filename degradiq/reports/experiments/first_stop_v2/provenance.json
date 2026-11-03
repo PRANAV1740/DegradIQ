@@ -1,0 +1,69 @@
+{
+  "canonical_run_id": "run_v2_20261018",
+  "canonical_candidates": [
+    {
+      "tag": "2024_dev",
+      "holdout_year": 2024,
+      "model_sha256": "51ae3bae90ed96b68dd0725d8d19290d40494beed216a36c56839cf5531e0a5e"
+    },
+    {
+      "tag": "2025_partial",
+      "holdout_year": 2025,
+      "model_sha256": "724ab2eb3368e65b2b9239191c1b026923d5b62c04189cd1be9e4c8359b3be38"
+    }
+  ],
+  "label_definition_version": "2.0-strategic-green-vsc-sc",
+  "diagnostics_schema_version": "1.0",
+  "feature_columns": [
+    "LapNumber",
+    "RaceLaps",
+    "LapFraction",
+    "TyreLife",
+    "GridPosition",
+    "Position",
+    "RecentPaceLoss_s",
+    "Compound",
+    "Driver",
+    "Team",
+    "EventName"
+  ],
+  "libraries": {
+    "python": "3.13.15",
+    "sklearn": "1.9.1",
+    "numpy": "2.5.4",
+    "pandas": "2.3.3",
+    "joblib": "1.6.0"
+  },
+  "reconciliation_counts": {
+    "feature_plus_target": {
+      "identical": 55,
+      "different": 24,
+      "events": 79
+    },
+    "row_membership": {
+      "identical": 31,
+      "different": 48,
+      "events": 79
+    },
+    "strict_rows_features_target": {
+      "identical": 28,
+      "different": 51,
+      "events": 79
+    }
+  },
+  "reproduction_entry_point": "python -m degradiq.scripts.reproduce_first_stop_v2",
+  "last_verified_git_revision": "c9d6db1c70694c2bed206bd1429a5703f9f4de37",
+  "last_verified_within_tolerance": true,
+  "preserved_files": [
+    "manifest.json",
+    "backtest_2024_dev.json",
+    "backtest_2025_partial.json",
+    "candidate_2024_dev_metadata.json",
+    "candidate_2025_partial_metadata.json",
+    "reconciliation_audit.csv",
+    "coverage.csv"
+  ],
+  "superseded_committed_candidate": {
+    "note": "degradiq/artifacts/candidate_first_stop_model* (trained 2026-10-15) and degradiq/reports/candidate_first_stop_backtest*.json describe an EARLIER candidate and are NOT the canonical v2 result. Use the candidates above."
+  }
+}

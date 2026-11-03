@@ -40,6 +40,38 @@ The script:
 
 The training script may take a while and requires network access to FastF1. Missing sessions are logged, not fabricated. Review `degradiq/reports/first_stop_training_coverage.csv` and `first_stop_backtest.json` before deploying. A model artifact is **not included by default** because no live historical-data training was run while preparing this package. Until you train it, the prediction endpoint returns a clear `503 model not trained` response instead of fake predictions.
 
+### Canonical validation experiment (first-stop v2) and reproduction
+
+The authoritative first-stop validation experiment is **`run_v2_20261018`**, label
+version `2.0-strategic-green-vsc-sc`. Its tracked, text-only provenance lives in
+[`degradiq/reports/experiments/first_stop_v2/`](reports/experiments/first_stop_v2/CANONICAL.md)
+(manifests, backtests, candidate metadata with model SHA-256, reconciliation audit,
+and `provenance.json`); the binary artifacts stay in the git-ignored run directory
+under `degradiq/cache/first_stop_v2_runs/`.
+
+Reproduce it **offline, from cached data only (no network)**:
+
+```bash
+python -m degradiq.scripts.reproduce_first_stop_v2 --strict
+```
+
+This re-runs the committed `evaluate_candidate_chronological` logic once per
+chronological holdout (2024 development, 2025 partial), writes an **isolated**
+`run_v2_verify_<timestamp>/` directory (never overwriting the original run or
+production artifacts), and compares regenerated metrics against the historical
+outputs within a declared absolute tolerance of `1e-4`. The canonical candidates,
+metrics, reconciliation counts, and evaluation limitations are documented in
+[`CANONICAL.md`](reports/experiments/first_stop_v2/CANONICAL.md).
+
+> These are **development / partial-validation** results, **not** blind-test
+> performance: 2024/2025 were examined development periods, the 2025 holdout is
+> partial (11/24 events), and circuit-level generalisation to unseen tracks is not
+> established (`EventName` is a feature and circuits recur across seasons).
+>
+> The earlier `degradiq/artifacts/candidate_first_stop_model*` (trained 2026-10-15)
+> and `degradiq/reports/candidate_first_stop_backtest*.json` describe a **superseded**
+> candidate, retained for history only.
+
 ### API endpoints
 
 - `GET /health` — service health.

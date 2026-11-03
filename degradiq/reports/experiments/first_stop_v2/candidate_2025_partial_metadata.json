@@ -1,0 +1,43 @@
+{
+  "tag": "2025_partial",
+  "holdout_year": 2025,
+  "training_seasons": [
+    2022,
+    2023,
+    2024
+  ],
+  "training_rows": 21153,
+  "positive_rows": 1126,
+  "negative_rows": 20027,
+  "label_definition_version": "2.0-strategic-green-vsc-sc",
+  "diagnostics_schema_version": "1.0",
+  "architecture": "calibrated_hgb",
+  "hyperparameters": {
+    "max_iter": 80,
+    "max_leaf_nodes": 12,
+    "min_samples_leaf": 40,
+    "l2_regularization": 3.0,
+    "random_state": 42
+  },
+  "calibration": "CalibratedClassifierCV(sigmoid), GroupKFold(5) by EventName on training only",
+  "feature_columns": [
+    "LapNumber",
+    "RaceLaps",
+    "LapFraction",
+    "TyreLife",
+    "GridPosition",
+    "Position",
+    "RecentPaceLoss_s",
+    "Compound",
+    "Driver",
+    "Team",
+    "EventName"
+  ],
+  "libs": {
+    "python": "3.13.15",
+    "sklearn": "1.9.1",
+    "pandas": "2.3.3",
+    "numpy": "2.5.4"
+  },
+  "model_sha256": "724ab2eb3368e65b2b9239191c1b026923d5b62c04189cd1be9e4c8359b3be38"
+}

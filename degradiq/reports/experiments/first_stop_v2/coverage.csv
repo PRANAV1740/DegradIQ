@@ -1,0 +1,93 @@
+year,round,event,status,rows,positive_rows,negative_rows,censored_rows,error,label_definition_version,label_compatible,diagnostics_complete,diagnostic_status,unresolved_count,train_compatible
+2022,1,Bahrain Grand Prix,loaded,256,18,238,0,,2.0-strategic-green-vsc-sc,True,True,has_unresolved,2.0,True
+2022,2,Saudi Arabian Grand Prix,loaded,283,16,267,0,,2.0-strategic-green-vsc-sc,True,True,has_unresolved,1.0,True
+2022,3,Australian Grand Prix,loaded,290,17,273,0,,2.0-strategic-green-vsc-sc,True,True,has_unresolved,1.0,True
+2022,4,Emilia Romagna Grand Prix,loaded,233,18,215,0,,2.0-strategic-green-vsc-sc,True,True,resolved,0.0,True
+2022,5,Miami Grand Prix,loaded,442,17,425,0,,2.0-strategic-green-vsc-sc,True,True,has_unresolved,2.0,True
+2022,6,Spanish Grand Prix,loaded,195,18,177,0,,2.0-strategic-green-vsc-sc,True,True,has_unresolved,2.0,True
+2022,7,Monaco Grand Prix,loaded,281,18,263,0,,2.0-strategic-green-vsc-sc,True,True,resolved,0.0,True
+2022,8,Azerbaijan Grand Prix,loaded,245,17,228,0,,2.0-strategic-green-vsc-sc,True,True,has_unresolved,2.0,True
+2022,9,Canadian Grand Prix,loaded,289,13,276,0,,2.0-strategic-green-vsc-sc,True,True,has_unresolved,5.0,True
+2022,10,British Grand Prix,loaded,286,16,270,0,,2.0-strategic-green-vsc-sc,True,True,resolved,0.0,True
+2022,11,Austrian Grand Prix,loaded,307,19,288,0,,2.0-strategic-green-vsc-sc,True,True,has_unresolved,1.0,True
+2022,12,French Grand Prix,loaded,283,17,266,0,,2.0-strategic-green-vsc-sc,True,True,has_unresolved,2.0,True
+2022,13,Hungarian Grand Prix,loaded,260,19,241,0,,2.0-strategic-green-vsc-sc,True,True,has_unresolved,1.0,True
+2022,14,Belgian Grand Prix,loaded,127,16,111,0,,2.0-strategic-green-vsc-sc,True,True,has_unresolved,2.0,True
+2022,15,Dutch Grand Prix,loaded,279,20,259,0,,2.0-strategic-green-vsc-sc,True,True,resolved,0.0,True
+2022,16,Italian Grand Prix,loaded,369,18,351,0,,2.0-strategic-green-vsc-sc,True,True,resolved,0.0,True
+2022,17,Singapore Grand Prix,loaded,342,14,328,0,,2.0-strategic-green-vsc-sc,True,True,has_unresolved,1.0,True
+2022,18,Japanese Grand Prix,loaded,22,14,8,0,,2.0-strategic-green-vsc-sc,True,True,has_unresolved,4.0,True
+2022,19,United States Grand Prix,loaded,214,18,196,0,,2.0-strategic-green-vsc-sc,True,True,has_unresolved,1.0,True
+2022,20,Mexico City Grand Prix,loaded,607,20,587,0,,2.0-strategic-green-vsc-sc,True,True,resolved,0.0,True
+2022,21,São Paulo Grand Prix,loaded,228,15,213,0,,2.0-strategic-green-vsc-sc,True,True,has_unresolved,3.0,True
+2022,22,Abu Dhabi Grand Prix,loaded,313,20,293,0,,2.0-strategic-green-vsc-sc,True,True,resolved,0.0,True
+2023,1,Bahrain Grand Prix,loaded,208,19,189,0,,2.0-strategic-green-vsc-sc,True,True,resolved,0.0,True
+2023,2,Saudi Arabian Grand Prix,loaded,230,12,218,0,,2.0-strategic-green-vsc-sc,True,True,has_unresolved,8.0,True
+2023,3,Australian Grand Prix,loaded,656,7,649,0,,2.0-strategic-green-vsc-sc,True,True,has_unresolved,2.0,True
+2023,4,Azerbaijan Grand Prix,loaded,211,12,199,0,,2.0-strategic-green-vsc-sc,True,True,has_unresolved,7.0,True
+2023,5,Miami Grand Prix,loaded,411,19,392,0,,2.0-strategic-green-vsc-sc,True,True,has_unresolved,1.0,True
+2023,6,Monaco Grand Prix,loaded,712,17,695,0,,2.0-strategic-green-vsc-sc,True,True,has_unresolved,3.0,True
+2023,7,Spanish Grand Prix,loaded,261,19,242,0,,2.0-strategic-green-vsc-sc,True,True,has_unresolved,1.0,True
+2023,8,Canadian Grand Prix,loaded,240,17,223,0,,2.0-strategic-green-vsc-sc,True,True,has_unresolved,2.0,True
+2023,9,Austrian Grand Prix,loaded,215,8,207,0,,2.0-strategic-green-vsc-sc,True,True,has_unresolved,12.0,True
+2023,10,British Grand Prix,loaded,487,16,471,0,,2.0-strategic-green-vsc-sc,True,True,has_unresolved,2.0,True
+2023,11,Hungarian Grand Prix,loaded,248,18,230,0,,2.0-strategic-green-vsc-sc,True,True,resolved,0.0,True
+2023,12,Belgian Grand Prix,loaded,147,19,128,0,,2.0-strategic-green-vsc-sc,True,True,resolved,0.0,True
+2023,13,Dutch Grand Prix,loaded,94,6,88,0,,2.0-strategic-green-vsc-sc,True,True,has_unresolved,13.0,True
+2023,14,Italian Grand Prix,loaded,312,19,293,0,,2.0-strategic-green-vsc-sc,True,True,resolved,0.0,True
+2023,15,Singapore Grand Prix,loaded,355,17,338,0,,2.0-strategic-green-vsc-sc,True,True,has_unresolved,1.0,True
+2023,16,Japanese Grand Prix,loaded,166,18,148,0,,2.0-strategic-green-vsc-sc,True,True,has_unresolved,2.0,True
+2023,17,Qatar Grand Prix,loaded,118,14,104,0,,2.0-strategic-green-vsc-sc,True,True,has_unresolved,4.0,True
+2023,18,United States Grand Prix,loaded,272,18,254,0,,2.0-strategic-green-vsc-sc,True,True,resolved,0.0,True
+2023,19,Mexico City Grand Prix,loaded,440,17,423,0,,2.0-strategic-green-vsc-sc,True,True,has_unresolved,1.0,True
+2023,20,São Paulo Grand Prix,loaded,261,15,246,0,,2.0-strategic-green-vsc-sc,True,True,has_unresolved,2.0,True
+2023,21,Las Vegas Grand Prix,loaded,134,14,120,0,,2.0-strategic-green-vsc-sc,True,True,has_unresolved,5.0,True
+2023,22,Abu Dhabi Grand Prix,loaded,275,20,255,0,,2.0-strategic-green-vsc-sc,True,True,resolved,0.0,True
+2024,1,Bahrain Grand Prix,loaded,193,19,174,0,,2.0-strategic-green-vsc-sc,True,True,has_unresolved,1.0,True
+2024,2,Saudi Arabian Grand Prix,loaded,187,8,179,0,,2.0-strategic-green-vsc-sc,True,True,has_unresolved,10.0,True
+2024,3,Australian Grand Prix,loaded,152,18,134,0,,2.0-strategic-green-vsc-sc,True,True,resolved,0.0,True
+2024,4,Japanese Grand Prix,loaded,203,18,185,0,,2.0-strategic-green-vsc-sc,True,True,resolved,0.0,True
+2024,5,Chinese Grand Prix,loaded,205,18,187,0,,2.0-strategic-green-vsc-sc,True,True,has_unresolved,2.0,True
+2024,6,Miami Grand Prix,loaded,356,18,338,0,,2.0-strategic-green-vsc-sc,True,True,has_unresolved,2.0,True
+2024,7,Emilia Romagna Grand Prix,loaded,396,20,376,0,,2.0-strategic-green-vsc-sc,True,True,resolved,0.0,True
+2024,8,Monaco Grand Prix,loaded,1010,6,1004,0,,2.0-strategic-green-vsc-sc,True,True,resolved,0.0,True
+2024,9,Canadian Grand Prix,loaded,457,11,446,0,,2.0-strategic-green-vsc-sc,True,True,has_unresolved,8.0,True
+2024,10,Spanish Grand Prix,loaded,266,20,246,0,,2.0-strategic-green-vsc-sc,True,True,resolved,0.0,True
+2024,11,Austrian Grand Prix,loaded,302,18,284,0,,2.0-strategic-green-vsc-sc,True,True,has_unresolved,2.0,True
+2024,12,British Grand Prix,loaded,431,19,412,0,,2.0-strategic-green-vsc-sc,True,True,resolved,0.0,True
+2024,13,Hungarian Grand Prix,loaded,273,19,254,0,,2.0-strategic-green-vsc-sc,True,True,has_unresolved,1.0,True
+2024,14,Belgian Grand Prix,loaded,184,19,165,0,,2.0-strategic-green-vsc-sc,True,True,resolved,0.0,True
+2024,15,Dutch Grand Prix,loaded,466,20,446,0,,2.0-strategic-green-vsc-sc,True,True,resolved,0.0,True
+2024,16,Italian Grand Prix,loaded,285,19,266,0,,2.0-strategic-green-vsc-sc,True,True,resolved,0.0,True
+2024,17,Azerbaijan Grand Prix,loaded,381,18,363,0,,2.0-strategic-green-vsc-sc,True,True,has_unresolved,2.0,True
+2024,18,Singapore Grand Prix,loaded,502,20,482,0,,2.0-strategic-green-vsc-sc,True,True,resolved,0.0,True
+2024,19,United States Grand Prix,loaded,364,18,346,0,,2.0-strategic-green-vsc-sc,True,True,has_unresolved,1.0,True
+2024,20,Mexico City Grand Prix,loaded,464,17,447,0,,2.0-strategic-green-vsc-sc,True,True,resolved,0.0,True
+2024,21,São Paulo Grand Prix,loaded,558,9,549,0,,2.0-strategic-green-vsc-sc,True,True,has_unresolved,5.0,True
+2024,22,Las Vegas Grand Prix,loaded,190,20,170,0,,2.0-strategic-green-vsc-sc,True,True,resolved,0.0,True
+2024,23,Qatar Grand Prix,loaded,472,18,454,0,,2.0-strategic-green-vsc-sc,True,True,resolved,0.0,True
+2024,24,Abu Dhabi Grand Prix,loaded,252,17,235,0,,2.0-strategic-green-vsc-sc,True,True,has_unresolved,2.0,True
+2025,1,Australian Grand Prix,loaded,352,10,342,0,,2.0-strategic-green-vsc-sc,True,True,has_unresolved,6.0,True
+2025,2,Chinese Grand Prix,loaded,242,18,224,0,,2.0-strategic-green-vsc-sc,True,True,has_unresolved,1.0,True
+2025,3,Japanese Grand Prix,loaded,441,20,421,0,,2.0-strategic-green-vsc-sc,True,True,resolved,0.0,True
+2025,4,Bahrain Grand Prix,loaded,201,20,181,0,,2.0-strategic-green-vsc-sc,True,True,resolved,0.0,True
+2025,5,Saudi Arabian Grand Prix,loaded,430,16,414,0,,2.0-strategic-green-vsc-sc,True,True,resolved,0.0,True
+2025,6,Miami Grand Prix,loaded,126,6,120,0,,2.0-strategic-green-vsc-sc,True,True,has_unresolved,12.0,True
+2025,7,Emilia Romagna Grand Prix,loaded,343,16,327,0,,2.0-strategic-green-vsc-sc,True,True,has_unresolved,4.0,True
+2025,8,Monaco Grand Prix,loaded,300,16,284,0,,2.0-strategic-green-vsc-sc,True,True,has_unresolved,4.0,True
+2025,9,Spanish Grand Prix,loaded,247,19,228,0,,2.0-strategic-green-vsc-sc,True,True,resolved,0.0,True
+2025,10,Canadian Grand Prix,loaded,523,20,503,0,,2.0-strategic-green-vsc-sc,True,True,resolved,0.0,True
+2025,11,Austrian Grand Prix,loaded,283,17,266,0,,2.0-strategic-green-vsc-sc,True,True,resolved,0.0,True
+2025,12,British Grand Prix,unavailable,0,0,0,0,DataNotLoadedError: The data you are trying to access has not been loaded yet. See `Session.load`,,,,processing_failure,,False
+2025,13,Belgian Grand Prix,unavailable,0,0,0,0,DataNotLoadedError: The data you are trying to access has not been loaded yet. See `Session.load`,,,,processing_failure,,False
+2025,14,Hungarian Grand Prix,unavailable,0,0,0,0,DataNotLoadedError: The data you are trying to access has not been loaded yet. See `Session.load`,,,,processing_failure,,False
+2025,15,Dutch Grand Prix,unavailable,0,0,0,0,DataNotLoadedError: The data you are trying to access has not been loaded yet. See `Session.load`,,,,processing_failure,,False
+2025,16,Italian Grand Prix,unavailable,0,0,0,0,DataNotLoadedError: The data you are trying to access has not been loaded yet. See `Session.load`,,,,processing_failure,,False
+2025,17,Azerbaijan Grand Prix,unavailable,0,0,0,0,DataNotLoadedError: The data you are trying to access has not been loaded yet. See `Session.load`,,,,processing_failure,,False
+2025,18,Singapore Grand Prix,unavailable,0,0,0,0,DataNotLoadedError: The data you are trying to access has not been loaded yet. See `Session.load`,,,,processing_failure,,False
+2025,19,United States Grand Prix,unavailable,0,0,0,0,DataNotLoadedError: The data you are trying to access has not been loaded yet. See `Session.load`,,,,processing_failure,,False
+2025,20,Mexico City Grand Prix,unavailable,0,0,0,0,DataNotLoadedError: The data you are trying to access has not been loaded yet. See `Session.load`,,,,processing_failure,,False
+2025,21,São Paulo Grand Prix,unavailable,0,0,0,0,DataNotLoadedError: The data you are trying to access has not been loaded yet. See `Session.load`,,,,processing_failure,,False
+2025,22,Las Vegas Grand Prix,unavailable,0,0,0,0,DataNotLoadedError: The data you are trying to access has not been loaded yet. See `Session.load`,,,,processing_failure,,False
+2025,23,Qatar Grand Prix,unavailable,0,0,0,0,DataNotLoadedError: The data you are trying to access has not been loaded yet. See `Session.load`,,,,processing_failure,,False
+2025,24,Abu Dhabi Grand Prix,unavailable,0,0,0,0,DataNotLoadedError: The data you are trying to access has not been loaded yet. See `Session.load`,,,,processing_failure,,False
