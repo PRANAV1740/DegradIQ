@@ -1,0 +1,70 @@
+{
+  "generated_at_utc": "2026-11-03T18:13:10.989539+00:00",
+  "git_revision": "246bba5ef688efdffe0b85b7183e817e89950a38",
+  "label_definition_version": "2.0-strategic-green-vsc-sc",
+  "libraries": {
+    "python": "3.13.15",
+    "sklearn": "1.9.1",
+    "numpy": "2.5.4",
+    "pandas": "2.3.3"
+  },
+  "dataset_rows": 24641,
+  "dataset_positives": 1304,
+  "regime_note": "temporal_holdout = unseen season, SEEN circuit (EventName recurs). leave_one_circuit_out = UNSEEN circuit. Probabilistic metrics use in-race per-lap features; stop-lap MAE/interval metrics are a pre-race forecast.",
+  "temporal_holdout": [
+    {
+      "tag": "temporal_holdout_2024",
+      "candidate": {
+        "brier_score": 0.0448959986676757,
+        "log_loss": 0.1781926195342184,
+        "roc_auc": 0.743574887274224,
+        "n_rows": 8549,
+        "observed_stop_rate": 0.04760790735758568,
+        "first_stop_lap_mae": 6.963144963144964,
+        "interval_coverage_10_90": 0.8402948402948403,
+        "interval_width_10_90_mean": 21.33906633906634,
+        "interval_width_10_90_median": 21.0,
+        "drivers_with_observed_first_stop": 407,
+        "expected_calibration_error": 0.0184
+      },
+      "baseline_historical_median_mae": 8.201474201474202
+    },
+    {
+      "tag": "temporal_holdout_2025",
+      "candidate": {
+        "brier_score": 0.04636146470187343,
+        "log_loss": 0.1810139480477449,
+        "roc_auc": 0.7544154587732101,
+        "n_rows": 3488,
+        "observed_stop_rate": 0.05103211009174312,
+        "first_stop_lap_mae": 7.792134831460674,
+        "interval_coverage_10_90": 0.8426966292134831,
+        "interval_width_10_90_mean": 22.8876404494382,
+        "interval_width_10_90_median": 22.0,
+        "drivers_with_observed_first_stop": 178,
+        "expected_calibration_error": 0.0075
+      },
+      "baseline_historical_median_mae": 8.665730337078651
+    }
+  ],
+  "leave_one_circuit_out": {
+    "n_circuits": 25,
+    "micro_pooled": {
+      "brier_score": 0.04814331563780377,
+      "log_loss": 0.1874485510448924,
+      "roc_auc": 0.7422610320744515,
+      "n_rows": 24641,
+      "observed_stop_rate": 0.05291993019763808,
+      "first_stop_lap_mae": 6.966019417475728,
+      "drivers_with_observed_first_stop": 618
+    },
+    "macro_mean_over_circuits": {
+      "brier_score": 0.053988848070669275,
+      "log_loss": 0.20439580259491893,
+      "roc_auc": 0.7780725991424228,
+      "first_stop_lap_mae": 6.926280960326221,
+      "interval_coverage_10_90": 0.8466560260995044,
+      "interval_width_10_90_mean": 23.265251530036693
+    }
+  }
+}
