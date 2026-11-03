@@ -47,6 +47,38 @@ New offline, deterministic harness `degradiq/scripts/validate_generalization.py`
   documented plan; a complete 2025 set is still not a clean blind test.
 - Tests: `degradiq/tests/test_generalization.py` + existing provenance/label tests.
 
+## Milestone: PR #5 self-review + merge (done)
+
+Independent re-review of PR #5 found one real defect: the per-circuit LOCO figures
+and the "5/25" timing claim cited in `EVALUATION.md` lived only in a git-ignored
+full report. Fixed by promoting `leave_one_circuit_out.per_circuit` and a
+`timing_mae_vs_baseline` block (5 ≤, 4 strict, of 25) into the tracked
+`generalization_summary.json`, with tests. Science re-verified: LOCO groups are 25
+distinct physical circuits (EventName↔circuit 1:1); held-out circuit excluded from
+train + calibration; temporal split leakage-safe and reproduces 2024 exactly. The
+dashboard-test timeout was **not** reproduced in a clean full run (82 passed) →
+environmental/contention, non-regressive; test left unchanged. Merged to `main`:
+`fae1d3a` (PR #5), underlying `03ccb41`, `16f4777`.
+
+## Milestone: Phase IV — PredictionEngine (started)
+
+- Added `degradiq/prediction_engine.py`: load-once, compatibility-checked interface
+  (`PredictionEngine` + `load_default_engine`). Validates feature schema == current
+  `FEATURE_COLUMNS` (else `IncompatibleModelError`); classifies label version
+  (`current` / `unversioned_legacy` / `stale`); exposes `provenance()` (path, sha256,
+  schema, label status, seasons, architecture) and `predict(...)` which reuses the
+  committed `predict_first_stops` and adds the 10–90 interval **width** per driver
+  plus an `engine` block distinguishing `feature_mode` (pre-race/live) from
+  `context_mode` (historical/replay/live).
+- Integrated `degradiq/api.py` onto the engine (lazy, cached, fail-soft 503). The
+  **production LR model is unchanged and still the default** — no candidate promoted.
+  Response keys are additive (backward compatible); serverless-isolation test passes.
+- Tests: `degradiq/tests/test_prediction_engine.py` (11) + end-to-end API smoke
+  (status + predict 200 with provenance and interval width). Full suite: 93 passed.
+- **Not yet done:** Streamlit dashboard integration; replay point-in-time helper;
+  loading a *validated candidate* (promotion still gated on a tracked artifact +
+  decision). Production LR remains protected.
+
 ## Protected-artifact ledger (unchanged)
 
 `artifacts/` (production + superseded candidate), `cache/hazard_checkpoints/`
@@ -76,6 +108,8 @@ Branch `feat/research-validation`; last commit recorded in git. Resume here.
 - **P3 · Phase VI live adapter**, **Phase VII CI** (run the suite on push),
   **Phase VIII docs/model card**.
 
-**Single most valuable next step:** Phase IV prediction-engine interface serving the
-*validated* candidate — it unblocks the whole application track and removes the
-current unevaluated-LR gap.
+**Single most valuable next step:** wire the Streamlit dashboard onto the
+`PredictionEngine` (overview, tyre degradation, first-stop prediction with interval
+width, race context, point-in-time historical replay, evaluation views), then gate a
+validated-candidate promotion (tracked artifact + model card) before swapping the
+production default. The engine interface (Phase IV core) now exists to build on.
