@@ -7,10 +7,24 @@ from pydantic import BaseModel, Field
 
 try:  # Package import for local development.
     from .config import YEAR, FULL_SEASON_DRIVERS, DRIVER_TEAM_2026
-    from .pit_strategy import load_first_stop_model, predict_first_stops, METADATA_PATH
+    from .prediction_engine import load_default_engine, PredictionEngine
 except ImportError:  # Vercel root directory set to ./degradiq.
     from config import YEAR, FULL_SEASON_DRIVERS, DRIVER_TEAM_2026
-    from pit_strategy import load_first_stop_model, predict_first_stops, METADATA_PATH
+    from prediction_engine import load_default_engine, PredictionEngine
+
+# The prediction engine loads the model artifact once and holds it in memory.
+# Loading is lazy and fail-soft: a missing/incompatible artifact yields None and the
+# endpoints return a clear 503 instead of fake predictions.
+_ENGINE: "PredictionEngine | None" = None
+_ENGINE_LOADED = False
+
+
+def _engine() -> "PredictionEngine | None":
+    global _ENGINE, _ENGINE_LOADED
+    if not _ENGINE_LOADED:
+        _ENGINE = load_default_engine()
+        _ENGINE_LOADED = True
+    return _ENGINE
 
 app = FastAPI(
     title="DegradIQ API",
@@ -82,8 +96,8 @@ def calendar():
 
 @app.get("/strategy/first-stop/status")
 def first_stop_status():
-    bundle = load_first_stop_model()
-    if bundle is None:
+    engine = _engine()
+    if engine is None:
         return {
             "status": "model_not_trained",
             "ready": False,
@@ -92,11 +106,7 @@ def first_stop_status():
     return {
         "status": "ready",
         "ready": True,
-        "trained_at_utc": bundle.get("trained_at_utc"),
-        "training_rows": bundle.get("training_rows"),
-        "positive_rows": bundle.get("positive_rows"),
-        "positive_rate": bundle.get("positive_rate"),
-        "metadata_available": METADATA_PATH.exists(),
+        "provenance": engine.provenance(),
     }
 
 
@@ -113,8 +123,8 @@ def first_stop_lineup():
 
 @app.post("/strategy/first-stop/predict")
 def first_stop_predict(request: FirstStopRequest):
-    bundle = load_first_stop_model()
-    if bundle is None:
+    engine = _engine()
+    if engine is None:
         raise HTTPException(
             status_code=503,
             detail="First-stop model artifact is not available. Train it locally with python -m degradiq.scripts.train_first_stop and deploy the generated artifact.",
@@ -138,8 +148,10 @@ def first_stop_predict(request: FirstStopRequest):
         missing = [d["driver"] for d in drivers if d.get("current_lap") is None]
         if missing:
             raise HTTPException(status_code=422, detail=f"Live mode requires current_lap for every driver. Missing: {', '.join(missing)}")
+    context_mode = "live" if request.mode == "live" else "historical"
     try:
-        return predict_first_stops(bundle, request.event_name, request.race_laps, drivers, request.mode)
+        return engine.predict(request.event_name, request.race_laps, drivers,
+                              mode=request.mode, context_mode=context_mode)
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc))
     except Exception as exc:
