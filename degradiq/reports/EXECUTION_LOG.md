@@ -79,6 +79,22 @@ environmental/contention, non-regressive; test left unchanged. Merged to `main`:
   loading a *validated candidate* (promotion still gated on a tracked artifact +
   decision). Production LR remains protected.
 
+## Milestone: Phase V — first-stop dashboard (started)
+
+- Added `degradiq/dashboard_first_stop.py`: an offline, engine-driven Streamlit page
+  (`streamlit run degradiq/dashboard_first_stop.py`). Sections: model status +
+  provenance (label-version badge, sha256, seasons); first-stop prediction
+  (per-driver P(stop), most-likely/median lap, 10–90 window and **width**, plus a
+  cumulative-probability chart); and model evaluation read from the tracked
+  `generalization_summary.json` (temporal vs LOCO, with the honest 5/25-timing and
+  wide-interval caveats). No fake predictions — a missing artifact is stated.
+- Deliberately a **separate** page from the existing network-heavy tyre-degradation
+  dashboard (`dashboard.py`, unchanged) so it stays offline and testable.
+- Tests: `degradiq/tests/test_dashboard_first_stop.py` (AppTest). Full suite: 95 passed.
+- **Not yet done:** merge the two dashboards into one multipage app; tyre-degradation
+  + race-context + point-in-time historical replay sections for the engine page;
+  live adapter (Phase VI); CI (Phase VII); model card (Phase VIII).
+
 ## Protected-artifact ledger (unchanged)
 
 `artifacts/` (production + superseded candidate), `cache/hazard_checkpoints/`
