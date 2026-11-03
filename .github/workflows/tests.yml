@@ -1,0 +1,33 @@
+name: tests
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          # Dashboard requirements pull in the full runtime: core model deps plus
+          # fastf1, matplotlib, plotly and streamlit, which the test suite imports.
+          pip install -r degradiq/requirements-dashboard.txt
+          pip install pytest
+
+      - name: Run test suite (offline)
+        env:
+          # The suite is self-contained (synthetic fixtures + tracked artifacts);
+          # no network is required.
+          FASTF1_DISABLE_UPDATE_CHECK: "1"
+        run: pytest degradiq/tests/ -q
