@@ -1,0 +1,20 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "first-stop-dashboard",
+      "runtimeExecutable": "streamlit",
+      "runtimeArgs": [
+        "run",
+        "degradiq/dashboard_first_stop.py",
+        "--server.port",
+        "8501",
+        "--server.headless",
+        "true",
+        "--browser.gatherUsageStats",
+        "false"
+      ],
+      "port": 8501
+    }
+  ]
+}
