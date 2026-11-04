@@ -75,6 +75,13 @@ metrics, reconciliation counts, and evaluation limitations are documented in
 > and `degradiq/reports/candidate_first_stop_backtest*.json` describe a **superseded**
 > candidate, retained for history only.
 
+The app now serves the **promoted validated HGB candidate**
+(`degradiq/artifacts/first_stop_model_v2_hgb.joblib`), produced with
+`python -m degradiq.scripts.promote_candidate`. The engine prefers it only because it
+is label-version `current` and schema-compatible; the production logistic-regression
+model (`first_stop_model.joblib`) is left untouched and is used automatically if the
+promoted file is removed. See the [model card](reports/experiments/first_stop_v2/MODEL_CARD.md).
+
 ### API endpoints
 
 - `GET /health` — service health.

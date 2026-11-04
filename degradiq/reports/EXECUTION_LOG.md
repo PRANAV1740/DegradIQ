@@ -125,6 +125,20 @@ environmental/contention, non-regressive; test left unchanged. Merged to `main`:
 - Tests: `degradiq/tests/test_live_adapter.py` (7). Full suite: 104 passed.
 - CI (added in the previous PR) is green on `main`.
 
+## Milestone: candidate promotion (done)
+
+- The validated HGB candidate (2025_partial, train 2022–2024, sha256 `724ab2eb…`)
+  **passed validation** (temporal + LOCO + model card), so it was promoted to a
+  tracked served artifact `artifacts/first_stop_model_v2_hgb.joblib` via a new
+  auditable `scripts/promote_candidate.py` (three gates: load+schema+label-current,
+  hash-no-drift, and a reload check). The engine's `load_default_engine` now **prefers
+  the promoted model** (label `current`, calibrated_hgb) and falls back to the
+  **untouched** production LR if the promoted file is removed — fully reversible.
+- The app (API + dashboards) therefore now serves the **same validated engine** as the
+  research pipeline, closing the research→app gap.
+- Tests: `degradiq/tests/test_promotion.py` (served model is promoted + current; LR
+  untouched + legacy; provenance recorded). Full suite: 108 passed.
+
 ## Protected-artifact ledger (unchanged)
 
 `artifacts/` (production + superseded candidate), `cache/hazard_checkpoints/`

@@ -1,0 +1,38 @@
+{
+  "model_file": "first_stop_model_v2_hgb.joblib",
+  "feature_columns": [
+    "LapNumber",
+    "RaceLaps",
+    "LapFraction",
+    "TyreLife",
+    "GridPosition",
+    "Position",
+    "RecentPaceLoss_s",
+    "Compound",
+    "Driver",
+    "Team",
+    "EventName"
+  ],
+  "label_definition_version": "2.0-strategic-green-vsc-sc",
+  "architecture": "calibrated_hgb",
+  "training_seasons": [
+    2022,
+    2023,
+    2024
+  ],
+  "training_rows": 21153,
+  "model_sha256": "724ab2eb3368e65b2b9239191c1b026923d5b62c04189cd1be9e4c8359b3be38",
+  "trained_at_utc": null,
+  "promoted_at_utc": "2026-11-04T09:18:38.018043+00:00",
+  "promoted_from": {
+    "run_id": "run_v2_20261018",
+    "candidate": "candidate_2025_partial.joblib",
+    "tag": "2025_partial"
+  },
+  "evaluation": {
+    "temporal_and_loco": "reports/experiments/first_stop_v2/generalization_summary.json",
+    "backtest": "reports/experiments/first_stop_v2/backtest_2025_partial.json",
+    "model_card": "reports/experiments/first_stop_v2/MODEL_CARD.md"
+  },
+  "note": "Promoted validated candidate. The production logistic-regression model (first_stop_model.joblib) is unchanged; remove this file to revert."
+}
