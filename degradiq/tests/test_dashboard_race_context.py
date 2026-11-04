@@ -17,7 +17,7 @@ class RaceContextPageTest(unittest.TestCase):
         self.assertFalse(at.exception, f"Race-context page threw: {at.exception}")
         self.assertEqual(at.title[0].value, "DegradIQ Race Context")
         labels = [m.label for m in at.metric]
-        self.assertIn("Predicted-vs-actual MAE", labels)
+        self.assertIn("Pred-vs-actual MAE (in-sample)", labels)
 
     def test_app_has_race_context_page(self):
         src = Path(APP).read_text(encoding="utf-8")

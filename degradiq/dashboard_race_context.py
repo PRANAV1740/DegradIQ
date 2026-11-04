@@ -36,6 +36,11 @@ st.title("DegradIQ Race Context")
 st.caption("First-stop context and predicted-vs-actual for recorded 2024 races, scored "
            "with the shared prediction engine. Weather / safety-car / traffic context is "
            "not available in the dataset and is not shown.")
+st.info("**Retrospective / in-sample view.** These 2024 races are inside the served "
+        "model's 2022–2024 training window, so the predicted-vs-actual shown here is a "
+        "fit on data the model has already seen — **not** out-of-sample accuracy. For "
+        "honest generalisation (unseen circuits/seasons), use the First-Stop page's "
+        "Model Evaluation section and `PHASE3_TIMING.md`.")
 
 engine = load_default_engine()
 
@@ -87,7 +92,7 @@ else:
         c1, c2, c3 = st.columns(3)
         c1.metric("Drivers (with a first stop)", len(drivers))
         c2.metric("Median actual first-stop lap", int(drivers["ActualStopLap"].median()))
-        c3.metric("Predicted-vs-actual MAE", f"{mae:.1f} laps" if mae is not None else "–")
+        c3.metric("Pred-vs-actual MAE (in-sample)", f"{mae:.1f} laps" if mae is not None else "–")
 
         try:
             import plotly.express as px
@@ -98,7 +103,8 @@ else:
                 lo = int(min(paired["ActualStopLap"].min(), paired["PredictedStopLap"].min()))
                 hi = int(max(paired["ActualStopLap"].max(), paired["PredictedStopLap"].max()))
                 fig = px.scatter(paired, x="ActualStopLap", y="PredictedStopLap",
-                                 text="Driver", title="Predicted vs actual first-stop lap")
+                                 text="Driver",
+                                 title="Predicted vs actual first-stop lap (retrospective / in-sample)")
                 fig.add_trace(go.Scatter(x=[lo, hi], y=[lo, hi], mode="lines",
                                          name="perfect", line=dict(dash="dash")))
                 fig.update_traces(textposition="top center", selector=dict(mode="markers+text"))
