@@ -189,6 +189,20 @@ class PredictionEngine:
         return result
 
 
+    def score_rows(self, frame: "Any") -> "Any":
+        """Per-row P(first stop on the next lap) for actual feature rows.
+
+        Unlike ``predict`` (which forecasts synthetic future laps), this scores an
+        existing frame of observed per-lap rows — used by point-in-time historical
+        replay, where each row's features are exactly what was known at the end of
+        that lap. The frame must contain the current ``FEATURE_COLUMNS``.
+        """
+        missing = [c for c in self.feature_columns if c not in getattr(frame, "columns", [])]
+        if missing:
+            raise ValueError(f"score_rows: frame is missing feature columns: {missing}")
+        return self._bundle["pipeline"].predict_proba(frame[self.feature_columns])[:, 1]
+
+
 def load_default_engine(require_current_label_version: bool = False) -> PredictionEngine | None:
     """Load the production engine, or None if the artifact is absent/incompatible.
 

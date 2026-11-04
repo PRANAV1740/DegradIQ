@@ -95,6 +95,23 @@ environmental/contention, non-regressive; test left unchanged. Merged to `main`:
   + race-context + point-in-time historical replay sections for the engine page;
   live adapter (Phase VI); CI (Phase VII); model card (Phase VIII).
 
+## Milestone: replay + model card + CI (done)
+
+- **Historical replay (point-in-time):** added `PredictionEngine.score_rows()` (scores
+  actual per-lap rows) and a replay section in `dashboard_first_stop.py` driven by a
+  tracked offline fixture `experiments/first_stop_v2/replay_sample_spanish_2024.csv`
+  (Spanish GP 2024, 266 rows, 20 drivers). A lap slider reveals per-lap hazard +
+  cumulative stop probability using only laps ≤ the replay lap, with the actual first
+  stop marked once reached. Fully offline and tested.
+- **Model card (Phase VIII):** `experiments/first_stop_v2/MODEL_CARD.md` — details,
+  intended use, data, metrics (temporal + LOCO), and honest limitations, all backed by
+  tracked JSON.
+- **CI (Phase VII):** `.github/workflows/tests.yml` runs the full suite on push/PR
+  (Python 3.13, dashboard requirements). The suite is self-contained (synthetic
+  fixtures + tracked artifacts); no network needed.
+- Tests: `test_prediction_engine.py` extended (score_rows on the fixture + missing-cols
+  guard). Full suite: 97 passed.
+
 ## Protected-artifact ledger (unchanged)
 
 `artifacts/` (production + superseded candidate), `cache/hazard_checkpoints/`

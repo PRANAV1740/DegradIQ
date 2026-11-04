@@ -72,6 +72,19 @@ class ProductionModelTests(unittest.TestCase):
     def test_load_default_engine(self):
         self.assertIsInstance(load_default_engine(), PredictionEngine)
 
+    def test_score_rows_on_replay_fixture(self):
+        fixture = (Path(__file__).resolve().parents[1] / "reports" / "experiments"
+                   / "first_stop_v2" / "replay_sample_spanish_2024.csv")
+        self.assertTrue(fixture.exists(), "replay fixture missing")
+        df = pd.read_csv(fixture)
+        p = self.engine.score_rows(df)
+        self.assertEqual(len(p), len(df))
+        self.assertTrue(((p >= 0) & (p <= 1)).all())
+
+    def test_score_rows_missing_columns_raises(self):
+        with self.assertRaises(ValueError):
+            self.engine.score_rows(pd.DataFrame({"LapNumber": [1, 2]}))
+
 
 class CompatibilityGuardTests(unittest.TestCase):
     def _dump(self, obj, name="m.joblib") -> Path:

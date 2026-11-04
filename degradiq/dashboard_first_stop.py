@@ -121,6 +121,66 @@ else:
             except Exception:
                 pass
 
+# ---- Historical replay (point-in-time) -------------------------------------
+REPLAY_PATH = (Path(__file__).resolve().parent / "reports" / "experiments"
+               / "first_stop_v2" / "replay_sample_spanish_2024.csv")
+st.subheader("Historical replay (point-in-time)")
+st.caption("Spanish Grand Prix 2024. At each replay lap the model sees only the "
+           "feature rows available up to that lap; the actual first stop is revealed "
+           "for comparison. Scored with the loaded model via its per-lap hazard.")
+if engine is None:
+    st.info("Load a model to run replay.")
+elif not REPLAY_PATH.exists():
+    st.info("Replay sample not found.")
+else:
+    import numpy as np
+    import plotly.graph_objects as go
+
+    replay = pd.read_csv(REPLAY_PATH)
+    drv = st.selectbox("Replay driver", sorted(replay["Driver"].unique()))
+    d = replay[replay["Driver"] == drv].sort_values("LapNumber").reset_index(drop=True)
+    # Actual first stop = the predicting lap with StopNextLap==1, plus one.
+    pos = d[d["StopNextLap"] == 1]
+    actual_stop_lap = int(pos["LapNumber"].iloc[0]) + 1 if not pos.empty else None
+
+    try:
+        hazards = engine.score_rows(d)
+    except Exception as exc:
+        st.error(f"Replay scoring failed: {type(exc).__name__}: {exc}")
+        hazards = None
+
+    if hazards is not None and len(d):
+        laps = d["LapNumber"].astype(int).to_numpy()
+        surv = np.cumprod(1.0 - np.asarray(hazards, dtype=float))
+        cum_stopped = 1.0 - surv  # P(stopped by end of each lap)
+        max_lap = int(laps.max())
+        replay_lap = st.slider("Replay lap", int(laps.min()), max_lap, int(laps.min()))
+
+        shown = laps <= replay_lap
+        c1, c2, c3 = st.columns(3)
+        c1.metric("Replay lap", replay_lap)
+        c2.metric("Model P(stopped by now)", f"{cum_stopped[shown][-1]:.2f}" if shown.any() else "–")
+        c3.metric("Actual first stop lap",
+                  str(actual_stop_lap) if (actual_stop_lap is not None and actual_stop_lap <= replay_lap)
+                  else "not yet (hidden)")
+
+        fig = go.Figure()
+        fig.add_trace(go.Bar(x=laps[shown], y=np.asarray(hazards)[shown],
+                             name="Per-lap hazard", marker_color="#8899ff"))
+        fig.add_trace(go.Scatter(x=laps[shown], y=cum_stopped[shown], yaxis="y2",
+                                 mode="lines+markers", name="Cumulative P(stopped)",
+                                 line=dict(color="#ff6b6b")))
+        if actual_stop_lap is not None and actual_stop_lap <= replay_lap:
+            fig.add_vline(x=actual_stop_lap, line_dash="dash", line_color="#2ecc71",
+                          annotation_text="actual stop")
+        fig.update_layout(
+            title=f"{drv}: per-lap hazard and cumulative stop probability (through lap {replay_lap})",
+            xaxis_title="Lap", yaxis=dict(title="Per-lap hazard"),
+            yaxis2=dict(title="Cumulative P(stopped)", overlaying="y", side="right", range=[0, 1]))
+        st.plotly_chart(fig, use_container_width=True)
+        st.caption("Point-in-time: only laps ≤ the replay lap inform the displayed curve. "
+                   "The green line marks the actual first stop once reached.")
+
 # ---- Model evaluation (from tracked generalisation summary) ----------------
 st.subheader("Model evaluation (independent validation)")
 if not SUMMARY_PATH.exists():

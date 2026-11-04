@@ -324,7 +324,16 @@ class PipelineAndBaselineTests(unittest.TestCase):
 
 class StreamlitDashboardTest(unittest.TestCase):
     def test_dashboard_renders_without_exceptions(self):
-        at = AppTest.from_file(r"p:\DegradIQ\degradiq\dashboard.py", default_timeout=20)
+        # The legacy degradation dashboard fetches the live FastF1 calendar on load;
+        # skip this UI smoke test when that external dependency is unreachable (e.g. a
+        # sandboxed CI runner) rather than fail on an outage unrelated to the code.
+        try:
+            from degradiq.ingest import get_calendar
+            get_calendar(2026)
+        except Exception as exc:  # network / FastF1 schedule unavailable
+            self.skipTest(f"2026 FastF1 calendar unavailable in this environment: {exc}")
+        dashboard = str(Path(__file__).resolve().parents[1] / "dashboard.py")
+        at = AppTest.from_file(dashboard, default_timeout=20)
         at.run()
         self.assertFalse(at.exception, f"Dashboard threw unexpected exception: {at.exception}")
         self.assertTrue(len(at.title) > 0)
