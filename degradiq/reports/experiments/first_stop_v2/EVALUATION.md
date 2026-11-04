@@ -91,6 +91,13 @@ that has not influenced model development (e.g. 2026, in progress), with the
 evaluation protocol pre-registered before the locked results are inspected. See the
 continuation checkpoint for the isolated-recovery and locked-holdout plan.
 
+**Update — 2025 blind-test attempt (pending on data):** a scripted recovery of the 13
+unavailable 2025 events (`scripts/blind_2025_eval.py`, isolated dir, frozen model)
+**recovered 0 of 13**: FastF1's timing host `livetiming.formula1.com` returns HTTP 403
+from this environment, so un-cached races cannot be downloaded. The 11 evaluable events
+are the previously examined set, not a blind test. See
+[`BLIND_TEST_2025.md`](BLIND_TEST_2025.md).
+
 ## FU-1 (Austria 2023 label count) — still open
 
 An offline probe (cache present) tabulated each driver's first `PitInTime` lap and

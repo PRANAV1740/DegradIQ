@@ -148,6 +148,21 @@ environmental/contention, non-regressive; test left unchanged. Merged to `main`:
 - Test: `degradiq/tests/test_app.py` (AppTest renders the default page). README
   updated. Committed directly to `main` per request (fewer PRs).
 
+## Milestone: 2025 blind-season test — attempted, blocked (documented)
+
+- Added `scripts/blind_2025_eval.py`: recovers the 13 previously unavailable 2025
+  events into an **isolated** checkpoint dir and evaluates the frozen 2022–2024 model
+  on them (blind-13) vs the examined-11, without retraining/tuning.
+- **Outcome: 0 of 13 recovered.** FastF1's timing host `livetiming.formula1.com`
+  returns **HTTP 403** from this environment, so no un-cached race can be downloaded
+  (schedule API works; timing payloads do not). All 13 stay `cache_miss`. The 11
+  evaluated events are the *previously examined* set — **not** a blind test — and
+  reproduce the 2025-partial numbers (MAE 7.79 / AUC 0.754 / Brier 0.0464).
+- Honest write-up: `experiments/first_stop_v2/BLIND_TEST_2025.md` +
+  `blind_2025_summary.json` (`recovered_events: []`). Production/legacy/original-run
+  artifacts untouched (isolated run dir only). The blind test is **pending on data
+  availability**; the clean alternative is a locked 2026 prospective holdout.
+
 ## Protected-artifact ledger (unchanged)
 
 `artifacts/` (production + superseded candidate), `cache/hazard_checkpoints/`
