@@ -21,6 +21,7 @@ HERE = Path(__file__).resolve().parent
 pages = [
     st.Page(str(HERE / "dashboard_first_stop.py"), title="First-Stop Prediction",
             icon="🏁", default=True),
+    st.Page(str(HERE / "dashboard_race_context.py"), title="Race Context", icon="📊"),
     st.Page(str(HERE / "dashboard.py"), title="Tyre Degradation", icon="🛞"),
 ]
 
