@@ -11,10 +11,15 @@ lap, and derives a predicted stop lap with an uncertainty window.
   (`CalibratedClassifierCV(sigmoid)`, calibrated with `GroupKFold(5)` by `EventName`
   on training data only). Hyperparameters and `model_sha256` are in
   [`provenance.json`](provenance.json) / `candidate_*_metadata.json`.
-- **Currently deployed in the app:** the **production logistic-regression** model
-  (`degradiq/artifacts/first_stop_model.joblib`), which predates label versioning
-  (status `unversioned_legacy`). The validated HGB candidate is **not** promoted;
-  promotion remains gated on a tracked artifact and this card.
+- **Currently served by the app:** the **promoted validated HGB candidate**
+  (`degradiq/artifacts/first_stop_model_v2_hgb.joblib`, label version
+  `2.0-strategic-green-vsc-sc`, trained 2022–2024, sha256 `724ab2eb…3be38`). It was
+  promoted via `python -m degradiq.scripts.promote_candidate` after passing the
+  temporal + leave-one-circuit-out evaluation below. The **production
+  logistic-regression** model (`first_stop_model.joblib`, `unversioned_legacy`) is
+  **untouched** and remains the automatic fallback — delete the promoted file to
+  revert. The engine prefers the promoted model only because it is label-version
+  `current` and schema-compatible.
 - **Features (11):** `LapNumber, RaceLaps, LapFraction, TyreLife, GridPosition,
   Position, RecentPaceLoss_s, Compound, Driver, Team, EventName`. All are available
   at the end of the lap being scored (no future information).

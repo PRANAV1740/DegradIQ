@@ -45,6 +45,12 @@ import json
 CONTEXT_MODES = ("historical", "replay", "live")
 FEATURE_MODES = ("pre-race", "live")
 
+# A promoted, validated candidate (if present) is a separate tracked artifact; the
+# production logistic-regression model (MODEL_PATH) is never overwritten and serves as
+# the fallback. Removing the promoted file reverts the app to the protected LR.
+PROMOTED_MODEL_PATH = Path(MODEL_PATH).with_name("first_stop_model_v2_hgb.joblib")
+PROMOTED_METADATA_PATH = Path(MODEL_PATH).with_name("first_stop_model_v2_hgb_metadata.json")
+
 
 class IncompatibleModelError(RuntimeError):
     """Raised when a model's feature schema or label version is incompatible."""
@@ -204,10 +210,19 @@ class PredictionEngine:
 
 
 def load_default_engine(require_current_label_version: bool = False) -> PredictionEngine | None:
-    """Load the production engine, or None if the artifact is absent/incompatible.
+    """Load the served engine, or None if no compatible artifact is available.
 
-    Mirrors the fail-soft behaviour the API expects (503 'model not trained').
+    Prefers a promoted, validated candidate when present; otherwise uses the protected
+    production logistic-regression model. If the promoted model is unexpectedly
+    incompatible, it falls back to the production model. Mirrors the fail-soft
+    behaviour the API expects (503 'model not trained').
     """
+    if PROMOTED_MODEL_PATH.exists():
+        try:
+            return PredictionEngine(PROMOTED_MODEL_PATH, PROMOTED_METADATA_PATH,
+                                    require_current_label_version=require_current_label_version)
+        except IncompatibleModelError:
+            pass  # fall back to the protected production model below
     try:
         return PredictionEngine(
             MODEL_PATH, METADATA_PATH,
