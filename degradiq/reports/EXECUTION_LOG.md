@@ -112,6 +112,19 @@ environmental/contention, non-regressive; test left unchanged. Merged to `main`:
 - Tests: `test_prediction_engine.py` extended (score_rows on the fixture + missing-cols
   guard). Full suite: 97 passed.
 
+## Milestone: Phase VI — live/replay data-source adapter (done)
+
+- Added `degradiq/live_adapter.py`: a `LiveSource` boundary separating *where* per-lap
+  feature rows come from from *how* they are scored. `UnavailableLiveSource` is the
+  honest default (no real-time feed — FastF1 is historical, and the official
+  live-timing endpoint needs per-session auth, 401 unauthenticated); it returns no
+  rows and says why. `ReplayLiveSource` drives point-in-time replay from a recorded
+  frame (never exposes future laps) with status/freshness. `refresh_prediction()`
+  scores only what a source can currently provide — no fabricated predictions.
+- Dashboard shows an honest **live-data-unavailable** banner.
+- Tests: `degradiq/tests/test_live_adapter.py` (7). Full suite: 104 passed.
+- CI (added in the previous PR) is green on `main`.
+
 ## Protected-artifact ledger (unchanged)
 
 `artifacts/` (production + superseded candidate), `cache/hazard_checkpoints/`
