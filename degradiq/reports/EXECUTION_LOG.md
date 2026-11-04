@@ -148,6 +148,28 @@ environmental/contention, non-regressive; test left unchanged. Merged to `main`:
 - Test: `degradiq/tests/test_app.py` (AppTest renders the default page). README
   updated. Committed directly to `main` per request (fewer PRs).
 
+## Milestone: Phase III timing comparison + Phase IV engine check (done)
+
+- **Phase III** (`scripts/timing_model_comparison.py`, `PHASE3_TIMING.md`): diagnosed
+  the unseen-circuit timing weakness (worst on tight-window circuits — Hungary, Dutch,
+  Las Vegas, China — where the hazard median is too diffuse). Fairly compared the served
+  calibrated-HGB hazard model against a **direct quantile stop-lap regressor** under the
+  same LOCO + temporal splits and baseline. Result: the quantile model **sharpens
+  intervals (16 vs 23 laps) and beats the baseline on 11/25 circuits (vs 5/25)** and
+  edges the HGB on temporal 2024 (6.50 vs 6.96), but unseen-circuit **MAE ties (~6.9)**
+  and its intervals are **under-covered (0.64 vs 0.80)**. EventName ablation: removing
+  circuit identity barely changes LOCO (circuit one-hot is all-zero for unseen tracks).
+  **Decision: no promotion** — not a sufficient improvement; served HGB preserved.
+  Recommended next: conformalised quantile regression + static circuit-descriptive
+  features (the real lever; needs a curated source, not FastF1 timing).
+- **Phase IV** engine check: `PredictionEngine` already satisfies the checklist — loads
+  model once, validates feature-schema + label-version compatibility, per-lap +
+  cumulative probabilities, predicted lap + interval (with width), provenance,
+  missing-column handling (`score_rows`), and historical/replay/live modes; FastAPI and
+  Streamlit both use it. No rewrite needed.
+- Tests: `tests/test_timing_comparison.py` (season-keying + quantile monotonicity).
+  Full suite: 113 passed.
+
 ## Protected-artifact ledger (unchanged)
 
 `artifacts/` (production + superseded candidate), `cache/hazard_checkpoints/`
