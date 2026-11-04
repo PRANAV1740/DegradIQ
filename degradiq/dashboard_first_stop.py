@@ -26,6 +26,7 @@ if str(ROOT) not in sys.path:
 
 from degradiq.config import YEAR, FULL_SEASON_DRIVERS, DRIVER_TEAM_2026
 from degradiq.prediction_engine import load_default_engine, PredictionEngine
+from degradiq.live_adapter import UnavailableLiveSource
 
 SUMMARY_PATH = (Path(__file__).resolve().parent / "reports" / "experiments"
                 / "first_stop_v2" / "generalization_summary.json")
@@ -34,6 +35,12 @@ st.set_page_config(page_title="DegradIQ First-Stop", page_icon="🏁", layout="w
 st.title("DegradIQ First-Stop")
 st.caption(f"{YEAR} first genuine strategic pit-stop forecasts from the validated "
            "discrete-hazard engine. Probabilistic risk, not a guaranteed strategy.")
+
+# Honest data-source indicator (Phase VI): no real-time feed is available, so the
+# page offers pre-race forecasts and historical replay, never invented live timing.
+_live_status = UnavailableLiveSource().status()
+if not _live_status.available:
+    st.warning(f"**Live data: {_live_status.source}.** {_live_status.reason}")
 
 
 @st.cache_resource(show_spinner=False)
