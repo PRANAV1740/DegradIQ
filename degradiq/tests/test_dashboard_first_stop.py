@@ -25,6 +25,15 @@ class FirstStopDashboardTest(unittest.TestCase):
         self.assertFalse(at.exception)
         self.assertTrue(len(at.subheader) >= 1)
 
+    def test_multi_event_replay_fixture(self):
+        import pandas as pd
+        fx = (Path(__file__).resolve().parents[1] / "reports" / "experiments"
+              / "first_stop_v2" / "replay_events_2024.csv")
+        self.assertTrue(fx.exists(), "multi-event replay fixture missing")
+        df = pd.read_csv(fx)
+        self.assertGreater(df["EventName"].nunique(), 1)  # several replayable events
+        self.assertIn("StopNextLap", df.columns)
+
 
 if __name__ == "__main__":
     unittest.main()

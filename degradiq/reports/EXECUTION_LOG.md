@@ -185,6 +185,20 @@ environmental/contention, non-regressive; test left unchanged. Merged to `main`:
 - Tests: `tests/test_timing_comparison.py` (season-keying + quantile monotonicity).
   Full suite: 113 passed.
 
+## Milestone: Phase V app + deployment readiness (in progress)
+
+- **Multiple replay events:** added a tracked multi-event fixture
+  `experiments/first_stop_v2/replay_events_2024.csv` (Spanish, Monaco, Bahrain,
+  Canadian, Hungarian — a mix of tight and wide stop windows). The first-stop
+  dashboard replay now has an **event selector** (falls back to the single Spanish
+  fixture if absent). Shared engine unchanged.
+- **Deployment readiness** (`degradiq/DEPLOYMENT.md`): verified locally — deps spec,
+  backend import + `/health` 200, **end-to-end** `/predict` 200 (served `calibrated_hgb`,
+  returns interval width), dashboard AppTest renders, no secrets / no API keys, ~4 MB
+  artifact bundle, lean `.vercelignore`. A real Vercel deploy is the owner's action
+  (needs account access); documented but not performed.
+- Tests: multi-event replay fixture check added. Full suite: 114 passed.
+
 ## Protected-artifact ledger (unchanged)
 
 `artifacts/` (production + superseded candidate), `cache/hazard_checkpoints/`
