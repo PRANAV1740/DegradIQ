@@ -1,0 +1,413 @@
+{
+  "generated_at_utc": "2026-11-04T18:57:57.385821+00:00",
+  "label_definition_version": "2.0-strategic-green-vsc-sc",
+  "note": "Timing-only comparison. quantile_gbr = direct gradient-boosted quantile regression of the first-stop LAP (pinball loss at 0.1/0.5/0.9). It is conditional on an observed stop (censoring ignored), same as the hazard model's stop-lap MAE. Baseline = historical-median stop lap. hazard_hgb_loco is read from generalization_summary.json (not re-fit).",
+  "quantile_gbr": {
+    "loco": {
+      "micro_pooled": {
+        "n": 1304,
+        "mae": 6.862784340358389,
+        "baseline_mae": 6.904141104294479,
+        "interval_coverage_10_90": 0.6426380368098159,
+        "interval_width_10_90_mean": 16.312511464168665
+      },
+      "macro_mean": {
+        "mae": 6.950138687621407,
+        "baseline_mae": 7.009812864470997,
+        "interval_coverage_10_90": 0.635187681102954,
+        "interval_width_10_90_mean": 16.37337710696538
+      },
+      "circuits_evaluated": 25,
+      "circuits_candidate_le_baseline": 11,
+      "per_circuit": {
+        "Abu Dhabi Grand Prix": {
+          "n": 57,
+          "mae": 4.165914971608793,
+          "baseline_mae": 4.087719298245614,
+          "interval_coverage_10_90": 0.9298245614035088,
+          "interval_width_10_90_mean": 17.77210568628223
+        },
+        "Australian Grand Prix": {
+          "n": 52,
+          "mae": 8.461995304220398,
+          "baseline_mae": 8.0,
+          "interval_coverage_10_90": 0.40384615384615385,
+          "interval_width_10_90_mean": 14.194086661164546
+        },
+        "Austrian Grand Prix": {
+          "n": 62,
+          "mae": 7.163561713040125,
+          "baseline_mae": 5.758064516129032,
+          "interval_coverage_10_90": 0.7741935483870968,
+          "interval_width_10_90_mean": 20.996430115170906
+        },
+        "Azerbaijan Grand Prix": {
+          "n": 47,
+          "mae": 8.139430997719037,
+          "baseline_mae": 7.957446808510638,
+          "interval_coverage_10_90": 0.425531914893617,
+          "interval_width_10_90_mean": 16.43801501092659
+        },
+        "Bahrain Grand Prix": {
+          "n": 76,
+          "mae": 2.4997045494703882,
+          "baseline_mae": 2.4473684210526314,
+          "interval_coverage_10_90": 0.9342105263157895,
+          "interval_width_10_90_mean": 14.297863403867728
+        },
+        "Belgian Grand Prix": {
+          "n": 54,
+          "mae": 3.7738986294390098,
+          "baseline_mae": 6.203703703703703,
+          "interval_coverage_10_90": 0.6296296296296297,
+          "interval_width_10_90_mean": 15.195990550912256
+        },
+        "British Grand Prix": {
+          "n": 51,
+          "mae": 10.929868160857232,
+          "baseline_mae": 9.156862745098039,
+          "interval_coverage_10_90": 0.3333333333333333,
+          "interval_width_10_90_mean": 14.808062516021428
+        },
+        "Canadian Grand Prix": {
+          "n": 61,
+          "mae": 8.308981462718053,
+          "baseline_mae": 7.508196721311475,
+          "interval_coverage_10_90": 0.5901639344262295,
+          "interval_width_10_90_mean": 16.14841580200379
+        },
+        "Chinese Grand Prix": {
+          "n": 36,
+          "mae": 4.944756644974398,
+          "baseline_mae": 5.388888888888889,
+          "interval_coverage_10_90": 0.8055555555555556,
+          "interval_width_10_90_mean": 16.736058717512435
+        },
+        "Dutch Grand Prix": {
+          "n": 46,
+          "mae": 8.037751338834118,
+          "baseline_mae": 7.043478260869565,
+          "interval_coverage_10_90": 0.6956521739130435,
+          "interval_width_10_90_mean": 17.6226860152209
+        },
+        "Emilia Romagna Grand Prix": {
+          "n": 54,
+          "mae": 7.4750259864046775,
+          "baseline_mae": 9.796296296296296,
+          "interval_coverage_10_90": 0.3888888888888889,
+          "interval_width_10_90_mean": 16.631590335455535
+        },
+        "French Grand Prix": {
+          "n": 17,
+          "mae": 3.9307801668003557,
+          "baseline_mae": 4.705882352941177,
+          "interval_coverage_10_90": 0.8235294117647058,
+          "interval_width_10_90_mean": 17.697923733161105
+        },
+        "Hungarian Grand Prix": {
+          "n": 56,
+          "mae": 4.391579020215057,
+          "baseline_mae": 4.160714285714286,
+          "interval_coverage_10_90": 0.7678571428571429,
+          "interval_width_10_90_mean": 18.33059940525205
+        },
+        "Italian Grand Prix": {
+          "n": 56,
+          "mae": 5.916691442870145,
+          "baseline_mae": 5.732142857142857,
+          "interval_coverage_10_90": 0.8035714285714286,
+          "interval_width_10_90_mean": 16.324696468929034
+        },
+        "Japanese Grand Prix": {
+          "n": 70,
+          "mae": 5.680152373966157,
+          "baseline_mae": 6.628571428571429,
+          "interval_coverage_10_90": 0.5857142857142857,
+          "interval_width_10_90_mean": 15.148187397572629
+        },
+        "Las Vegas Grand Prix": {
+          "n": 34,
+          "mae": 5.251123932388523,
+          "baseline_mae": 6.147058823529412,
+          "interval_coverage_10_90": 0.7352941176470589,
+          "interval_width_10_90_mean": 17.354400387136142
+        },
+        "Mexico City Grand Prix": {
+          "n": 54,
+          "mae": 12.491235845664796,
+          "baseline_mae": 13.11111111111111,
+          "interval_coverage_10_90": 0.3148148148148148,
+          "interval_width_10_90_mean": 16.90644161195495
+        },
+        "Miami Grand Prix": {
+          "n": 60,
+          "mae": 6.328222619546813,
+          "baseline_mae": 5.55,
+          "interval_coverage_10_90": 0.7333333333333333,
+          "interval_width_10_90_mean": 17.31569379735432
+        },
+        "Monaco Grand Prix": {
+          "n": 57,
+          "mae": 12.927137342794731,
+          "baseline_mae": 15.175438596491228,
+          "interval_coverage_10_90": 0.49122807017543857,
+          "interval_width_10_90_mean": 21.55457411671304
+        },
+        "Qatar Grand Prix": {
+          "n": 32,
+          "mae": 11.315327386027004,
+          "baseline_mae": 10.8125,
+          "interval_coverage_10_90": 0.3125,
+          "interval_width_10_90_mean": 15.69666500088184
+        },
+        "Saudi Arabian Grand Prix": {
+          "n": 52,
+          "mae": 8.698498995512999,
+          "baseline_mae": 5.211538461538462,
+          "interval_coverage_10_90": 0.46153846153846156,
+          "interval_width_10_90_mean": 9.98568701339926
+        },
+        "Singapore Grand Prix": {
+          "n": 51,
+          "mae": 7.906077552182559,
+          "baseline_mae": 7.8431372549019605,
+          "interval_coverage_10_90": 0.5294117647058824,
+          "interval_width_10_90_mean": 15.335474216842412
+        },
+        "Spanish Grand Prix": {
+          "n": 76,
+          "mae": 3.7465262955658205,
+          "baseline_mae": 4.171052631578948,
+          "interval_coverage_10_90": 0.881578947368421,
+          "interval_width_10_90_mean": 14.257382500753758
+        },
+        "S\u00e3o Paulo Grand Prix": {
+          "n": 39,
+          "mae": 5.7827561474008515,
+          "baseline_mae": 6.666666666666667,
+          "interval_coverage_10_90": 0.7692307692307693,
+          "interval_width_10_90_mean": 15.466738354449493
+        },
+        "United States Grand Prix": {
+          "n": 54,
+          "mae": 5.486468310313108,
+          "baseline_mae": 5.981481481481482,
+          "interval_coverage_10_90": 0.7592592592592593,
+          "interval_width_10_90_mean": 17.11865885519606
+        }
+      }
+    },
+    "temporal_2024": {
+      "result": {
+        "n": 407,
+        "mae": 6.497472283650106,
+        "baseline_mae": 6.976658476658477,
+        "interval_coverage_10_90": 0.601965601965602,
+        "interval_width_10_90_mean": 14.805851204792797
+      }
+    }
+  },
+  "quantile_gbr_no_eventname_ablation": {
+    "loco": {
+      "micro_pooled": {
+        "n": 1304,
+        "mae": 7.005338997632019,
+        "baseline_mae": 6.904141104294479,
+        "interval_coverage_10_90": 0.6840490797546013,
+        "interval_width_10_90_mean": 17.091033226258798
+      },
+      "macro_mean": {
+        "mae": 7.0472971444675805,
+        "baseline_mae": 7.009812864470997,
+        "interval_coverage_10_90": 0.6835406667796655,
+        "interval_width_10_90_mean": 17.221435503022484
+      },
+      "circuits_evaluated": 25,
+      "circuits_candidate_le_baseline": 11,
+      "per_circuit": {
+        "Abu Dhabi Grand Prix": {
+          "n": 57,
+          "mae": 4.105081845742802,
+          "baseline_mae": 4.087719298245614,
+          "interval_coverage_10_90": 0.9298245614035088,
+          "interval_width_10_90_mean": 21.00148311836949
+        },
+        "Australian Grand Prix": {
+          "n": 52,
+          "mae": 8.3278196884072,
+          "baseline_mae": 8.0,
+          "interval_coverage_10_90": 0.6346153846153846,
+          "interval_width_10_90_mean": 16.448297673743376
+        },
+        "Austrian Grand Prix": {
+          "n": 62,
+          "mae": 9.0668413712625,
+          "baseline_mae": 5.758064516129032,
+          "interval_coverage_10_90": 0.7741935483870968,
+          "interval_width_10_90_mean": 22.742760498712318
+        },
+        "Azerbaijan Grand Prix": {
+          "n": 47,
+          "mae": 9.16245620608811,
+          "baseline_mae": 7.957446808510638,
+          "interval_coverage_10_90": 0.44680851063829785,
+          "interval_width_10_90_mean": 16.342099489198173
+        },
+        "Bahrain Grand Prix": {
+          "n": 76,
+          "mae": 2.859119923945473,
+          "baseline_mae": 2.4473684210526314,
+          "interval_coverage_10_90": 0.9736842105263158,
+          "interval_width_10_90_mean": 14.569622062970382
+        },
+        "Belgian Grand Prix": {
+          "n": 54,
+          "mae": 4.380712959212327,
+          "baseline_mae": 6.203703703703703,
+          "interval_coverage_10_90": 0.7407407407407407,
+          "interval_width_10_90_mean": 13.091938186498178
+        },
+        "British Grand Prix": {
+          "n": 51,
+          "mae": 11.069906839250654,
+          "baseline_mae": 9.156862745098039,
+          "interval_coverage_10_90": 0.23529411764705882,
+          "interval_width_10_90_mean": 14.047016520597207
+        },
+        "Canadian Grand Prix": {
+          "n": 61,
+          "mae": 8.48230908040811,
+          "baseline_mae": 7.508196721311475,
+          "interval_coverage_10_90": 0.7049180327868853,
+          "interval_width_10_90_mean": 18.11925575793759
+        },
+        "Chinese Grand Prix": {
+          "n": 36,
+          "mae": 5.2173960060096904,
+          "baseline_mae": 5.388888888888889,
+          "interval_coverage_10_90": 0.8333333333333334,
+          "interval_width_10_90_mean": 18.43869346416466
+        },
+        "Dutch Grand Prix": {
+          "n": 46,
+          "mae": 8.116153436977717,
+          "baseline_mae": 7.043478260869565,
+          "interval_coverage_10_90": 0.8043478260869565,
+          "interval_width_10_90_mean": 19.481810106742397
+        },
+        "Emilia Romagna Grand Prix": {
+          "n": 54,
+          "mae": 7.93025529962623,
+          "baseline_mae": 9.796296296296296,
+          "interval_coverage_10_90": 0.42592592592592593,
+          "interval_width_10_90_mean": 17.586901989269535
+        },
+        "French Grand Prix": {
+          "n": 17,
+          "mae": 3.5105239130687607,
+          "baseline_mae": 4.705882352941177,
+          "interval_coverage_10_90": 1.0,
+          "interval_width_10_90_mean": 19.720414702467437
+        },
+        "Hungarian Grand Prix": {
+          "n": 56,
+          "mae": 4.351198080769579,
+          "baseline_mae": 4.160714285714286,
+          "interval_coverage_10_90": 0.7678571428571429,
+          "interval_width_10_90_mean": 19.540547325005956
+        },
+        "Italian Grand Prix": {
+          "n": 56,
+          "mae": 5.974415474466919,
+          "baseline_mae": 5.732142857142857,
+          "interval_coverage_10_90": 0.7678571428571429,
+          "interval_width_10_90_mean": 17.36871261199591
+        },
+        "Japanese Grand Prix": {
+          "n": 70,
+          "mae": 6.240993222931815,
+          "baseline_mae": 6.628571428571429,
+          "interval_coverage_10_90": 0.7,
+          "interval_width_10_90_mean": 16.105222238657518
+        },
+        "Las Vegas Grand Prix": {
+          "n": 34,
+          "mae": 5.677977778737752,
+          "baseline_mae": 6.147058823529412,
+          "interval_coverage_10_90": 0.9117647058823529,
+          "interval_width_10_90_mean": 17.133541407420072
+        },
+        "Mexico City Grand Prix": {
+          "n": 54,
+          "mae": 10.990123909346865,
+          "baseline_mae": 13.11111111111111,
+          "interval_coverage_10_90": 0.4444444444444444,
+          "interval_width_10_90_mean": 18.40261256189297
+        },
+        "Miami Grand Prix": {
+          "n": 60,
+          "mae": 6.70622466785599,
+          "baseline_mae": 5.55,
+          "interval_coverage_10_90": 0.8666666666666667,
+          "interval_width_10_90_mean": 19.91831004838038
+        },
+        "Monaco Grand Prix": {
+          "n": 57,
+          "mae": 12.68056423735776,
+          "baseline_mae": 15.175438596491228,
+          "interval_coverage_10_90": 0.5263157894736842,
+          "interval_width_10_90_mean": 21.33733472369664
+        },
+        "Qatar Grand Prix": {
+          "n": 32,
+          "mae": 11.680237514298994,
+          "baseline_mae": 10.8125,
+          "interval_coverage_10_90": 0.25,
+          "interval_width_10_90_mean": 14.15391012037851
+        },
+        "Saudi Arabian Grand Prix": {
+          "n": 52,
+          "mae": 8.537820201584104,
+          "baseline_mae": 5.211538461538462,
+          "interval_coverage_10_90": 0.28846153846153844,
+          "interval_width_10_90_mean": 8.411914781653635
+        },
+        "Singapore Grand Prix": {
+          "n": 51,
+          "mae": 8.414944545003202,
+          "baseline_mae": 7.8431372549019605,
+          "interval_coverage_10_90": 0.5294117647058824,
+          "interval_width_10_90_mean": 17.407668451756873
+        },
+        "Spanish Grand Prix": {
+          "n": 76,
+          "mae": 3.831153134182134,
+          "baseline_mae": 4.171052631578948,
+          "interval_coverage_10_90": 0.75,
+          "interval_width_10_90_mean": 11.219759858240357
+        },
+        "S\u00e3o Paulo Grand Prix": {
+          "n": 39,
+          "mae": 3.5671900141619184,
+          "baseline_mae": 6.666666666666667,
+          "interval_coverage_10_90": 0.9487179487179487,
+          "interval_width_10_90_mean": 19.09732892404078
+        },
+        "United States Grand Prix": {
+          "n": 54,
+          "mae": 5.301009260992902,
+          "baseline_mae": 5.981481481481482,
+          "interval_coverage_10_90": 0.8333333333333334,
+          "interval_width_10_90_mean": 18.848730951771785
+        }
+      }
+    }
+  },
+  "hazard_hgb_reference": {
+    "loco_macro_mae": 6.926280960326221,
+    "loco_macro_coverage": 0.8466560260995044,
+    "loco_macro_width": 23.265251530036693,
+    "loco_circuits_candidate_le_baseline": 5,
+    "loco_circuits_evaluated": 25
+  }
+}
