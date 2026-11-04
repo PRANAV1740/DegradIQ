@@ -139,6 +139,15 @@ environmental/contention, non-regressive; test left unchanged. Merged to `main`:
 - Tests: `degradiq/tests/test_promotion.py` (served model is promoted + current; LR
   untouched + legacy; provenance recorded). Full suite: 108 passed.
 
+## Milestone: unified multipage dashboard (done)
+
+- Added `degradiq/app.py`: a single Streamlit entry (`streamlit run degradiq/app.py`)
+  using `st.navigation`/`st.Page` to present both pages — First-Stop Prediction
+  (default, offline) and Tyre Degradation — without modifying either page script
+  (each still runs standalone). Tolerates the pages' own `set_page_config`.
+- Test: `degradiq/tests/test_app.py` (AppTest renders the default page). README
+  updated. Committed directly to `main` per request (fewer PRs).
+
 ## Protected-artifact ledger (unchanged)
 
 `artifacts/` (production + superseded candidate), `cache/hazard_checkpoints/`

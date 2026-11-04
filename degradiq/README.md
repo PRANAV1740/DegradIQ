@@ -13,11 +13,12 @@ pip install -r degradiq/requirements.txt
 # Optional dashboard UI
 pip install -r degradiq/requirements-dashboard.txt
 
-# Existing tyre degradation dashboard
-streamlit run degradiq/dashboard.py
+# Unified dashboard (both pages: First-Stop Prediction + Tyre Degradation)
+streamlit run degradiq/app.py
 
-# First-stop prediction + evaluation dashboard (offline, engine-driven)
-streamlit run degradiq/dashboard_first_stop.py
+# Or run a single page standalone:
+streamlit run degradiq/dashboard_first_stop.py   # offline, engine-driven
+streamlit run degradiq/dashboard.py              # tyre degradation (needs FastF1)
 
 # API during local development
 uvicorn degradiq.api:app --reload
