@@ -199,6 +199,18 @@ environmental/contention, non-regressive; test left unchanged. Merged to `main`:
   (needs account access); documented but not performed.
 - Tests: multi-event replay fixture check added. Full suite: 114 passed.
 
+## Milestone: Phase V race-context page (done)
+
+- Added `dashboard_race_context.py` (new multipage tab "Race Context"): for a recorded
+  2024 race (tracked `replay_events_2024.csv`) it shows actual first-stop distribution,
+  starting-compound mix, grid-vs-stop, and an event-level **predicted-vs-actual** scored
+  with the shared `PredictionEngine`. Honestly flags that these 2024 races are in the
+  model's training window (in-sample fit, not generalisation) and that weather/SC/traffic
+  context is not in the dataset.
+- All three app pages verified: First-Stop and Race Context use the shared engine; Tyre
+  Degradation uses the separate degradation model by design.
+- Tests: `tests/test_dashboard_race_context.py`. Full suite: 116 passed.
+
 ## Protected-artifact ledger (unchanged)
 
 `artifacts/` (production + superseded candidate), `cache/hazard_checkpoints/`
