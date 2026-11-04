@@ -129,12 +129,14 @@ else:
                 pass
 
 # ---- Historical replay (point-in-time) -------------------------------------
-REPLAY_PATH = (Path(__file__).resolve().parent / "reports" / "experiments"
-               / "first_stop_v2" / "replay_sample_spanish_2024.csv")
+_EXP = Path(__file__).resolve().parent / "reports" / "experiments" / "first_stop_v2"
+MULTI_REPLAY = _EXP / "replay_events_2024.csv"          # several 2024 events
+SINGLE_REPLAY = _EXP / "replay_sample_spanish_2024.csv"  # fallback: one event
+REPLAY_PATH = MULTI_REPLAY if MULTI_REPLAY.exists() else SINGLE_REPLAY
 st.subheader("Historical replay (point-in-time)")
-st.caption("Spanish Grand Prix 2024. At each replay lap the model sees only the "
+st.caption("Pick a 2024 race and driver. At each replay lap the model sees only the "
            "feature rows available up to that lap; the actual first stop is revealed "
-           "for comparison. Scored with the loaded model via its per-lap hazard.")
+           "for comparison. Scored with the loaded model's per-lap hazard.")
 if engine is None:
     st.info("Load a model to run replay.")
 elif not REPLAY_PATH.exists():
@@ -143,7 +145,12 @@ else:
     import numpy as np
     import plotly.graph_objects as go
 
-    replay = pd.read_csv(REPLAY_PATH)
+    replay_all = pd.read_csv(REPLAY_PATH)
+    if "EventName" in replay_all.columns and replay_all["EventName"].nunique() > 1:
+        ev_sel = st.selectbox("Replay event", sorted(replay_all["EventName"].unique()))
+        replay = replay_all[replay_all["EventName"] == ev_sel]
+    else:
+        replay = replay_all
     drv = st.selectbox("Replay driver", sorted(replay["Driver"].unique()))
     d = replay[replay["Driver"] == drv].sort_values("LapNumber").reset_index(drop=True)
     # Actual first stop = the predicting lap with StopNextLap==1, plus one.
