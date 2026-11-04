@@ -1,0 +1,57 @@
+{
+  "run_id": "blind_2025_20261104_234326",
+  "generated_at_utc": "2026-11-04T18:44:22.963044+00:00",
+  "label_definition_version": "2.0-strategic-green-vsc-sc",
+  "frozen_training_seasons": [
+    2022,
+    2023,
+    2024
+  ],
+  "train_rows": 21153,
+  "events_loaded_2025": 11,
+  "events_scheduled_2025": 24,
+  "recovered_events": [],
+  "honesty_note": "blind_13_recovered = events unavailable during v2 development, so they never influenced training or model selection: a genuine out-of-sample test of the frozen 2022-2024 model. examined_11 = events seen during development. full_2025 pools both. Probabilistic metrics use in-race per-lap features; stop-lap MAE/interval metrics are a pre-race forecast.",
+  "results": {
+    "full_2025": {
+      "tag": "full_2025",
+      "events": 11,
+      "holdout_rows": 3488,
+      "holdout_positive_rows": 178,
+      "probabilistic": {
+        "brier_score": 0.04636146470187343,
+        "log_loss": 0.1810139480477449,
+        "roc_auc": 0.7544154587732101,
+        "n_rows": 3488,
+        "observed_stop_rate": 0.05103211009174312
+      },
+      "first_stop_lap_mae": 7.792134831460674,
+      "baseline_historical_median_mae": 8.665730337078651,
+      "interval_coverage_10_90": 0.8426966292134831,
+      "interval_width_10_90_mean": 22.8876404494382,
+      "drivers_with_observed_first_stop": 178
+    },
+    "blind_13_recovered": {
+      "tag": "blind_13_recovered",
+      "status": "no_rows"
+    },
+    "examined_11": {
+      "tag": "examined_11",
+      "events": 11,
+      "holdout_rows": 3488,
+      "holdout_positive_rows": 178,
+      "probabilistic": {
+        "brier_score": 0.04636146470187343,
+        "log_loss": 0.1810139480477449,
+        "roc_auc": 0.7544154587732101,
+        "n_rows": 3488,
+        "observed_stop_rate": 0.05103211009174312
+      },
+      "first_stop_lap_mae": 7.792134831460674,
+      "baseline_historical_median_mae": 8.665730337078651,
+      "interval_coverage_10_90": 0.8426966292134831,
+      "interval_width_10_90_mean": 22.8876404494382,
+      "drivers_with_observed_first_stop": 178
+    }
+  }
+}
