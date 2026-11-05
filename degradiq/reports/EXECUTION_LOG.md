@@ -211,6 +211,24 @@ environmental/contention, non-regressive; test left unchanged. Merged to `main`:
   Degradation uses the separate degradation model by design.
 - Tests: `tests/test_dashboard_race_context.py`. Full suite: 116 passed.
 
+## Milestone: release readiness + QA audit (done)
+
+- **Documentation drift fixed** (README): the unified dashboard is now described as
+  **three** pages (First-Stop, Race Context, Tyre Degradation) — was "both pages"; the
+  served model is now described as the **calibrated HGB** (`first_stop_model_v2_hgb.joblib`)
+  with the LR as untouched fallback — was "discrete logistic-regression"; the Vercel
+  step now ships both artifacts.
+- **ML/engine integrity verified with evidence:** served sha256 `724ab2eb…` matches its
+  metadata; feature schema == `FEATURE_COLUMNS`; label `current`; fallback LR loads as
+  `unversioned_legacy` (explicit, observable); an incompatible model raises
+  `IncompatibleModelError` (no silent load). API: all documented routes exist; unknown
+  driver → 422 with no path/traceback leak; predict 200 with probabilities in [0,1].
+  All three dashboard pages render; shared engine used by First-Stop + Race Context.
+- **Prospective validation protocol** documented (`PROSPECTIVE_VALIDATION.md`): frozen
+  model/schema/label, append-only pre-race + point-in-time checkpoints, outcome rules,
+  baselines, separated classification/timing metrics — a protocol, not a result.
+- Served model and research artifacts **unchanged**. Full suite: 116 passed.
+
 ## Protected-artifact ledger (unchanged)
 
 `artifacts/` (production + superseded candidate), `cache/hazard_checkpoints/`
