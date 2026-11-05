@@ -542,7 +542,7 @@ def predict_first_stops(model_bundle: dict[str, Any], event_name: str, race_laps
         "event": event_name,
         "mode": mode,
         "race_laps": race_laps,
-        "model_type": "discrete first-stop hazard (logistic regression)",
+        "model_type": "discrete first-stop hazard model",
         "interpretation": "Stop-lap probabilities are conditional-hazard forecasts. The reported window is conditional on stopping before race distance; it is not a guarantee or an optimal-strategy claim.",
         "driver_count_forecast": len(output),
         "predictions": output,
