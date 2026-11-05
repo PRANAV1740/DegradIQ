@@ -3,146 +3,187 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>DEGRADIQ · Pit Wall</title>
-  <meta name="description" content="DegradIQ Pit Wall — first-stop strategy operations (independent, not affiliated with Formula 1)." />
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%230b1220'/><path d='M8 22V10h4a4 4 0 010 8H8' stroke='%23ffb020' stroke-width='2.2' fill='none'/></svg>" />
+  <title>DEGRADIQ · Apex Control</title>
+  <meta name="description" content="DegradIQ Apex Control — first-stop strategy operations (independent; not affiliated with Formula 1)." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%230a0e16'/><path d='M9 23V9h4.5a5 5 0 010 10H9' stroke='%23e8c07d' stroke-width='2.4' fill='none'/></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" />
   <link rel="stylesheet" href="/assets/styles.css" />
 </head>
-<body data-connection="init">
-  <a class="skip" href="#main">Skip to content</a>
+<body data-intro="pending">
+  <a class="skip-link" href="#main">Skip to content</a>
 
-  <header class="topbar" role="banner">
-    <div class="brand">
-      <span class="brand-mark" aria-hidden="true">◧</span>
-      <div class="brand-text">
-        <span class="brand-name">DEGRADIQ</span>
-        <span class="brand-sub">PIT WALL · STRATEGY OPERATIONS</span>
-      </div>
+  <!-- Signature opening: short, skippable, no persistence beyond this session -->
+  <div id="intro" class="intro" aria-hidden="true">
+    <svg class="intro-circuit" viewBox="0 0 400 200" aria-hidden="true">
+      <path id="intro-track" d="M40 150 C 40 70, 120 40, 180 70 S 300 150, 360 90 C 390 62, 370 40, 340 48"
+            fill="none" stroke="var(--cyan)" stroke-width="1.5" />
+    </svg>
+    <div class="intro-mark">
+      <span class="intro-d">D</span>
+      <div class="intro-word"><b>DEGRADIQ</b><span>APEX CONTROL · STRATEGY OPERATIONS</span></div>
     </div>
-    <div class="statusbar" role="status" aria-live="polite">
-      <span class="pill" id="st-season">SEASON 2026</span>
-      <span class="pill" id="st-event">GP —</span>
-      <span class="pill state" id="st-api"><i class="dot"></i>API …</span>
-      <span class="pill state" id="st-model"><i class="dot"></i>MODEL …</span>
-      <span class="pill state warn" id="st-live"><i class="dot"></i>LIVE TIMING UNAVAILABLE</span>
-      <span class="pill mono" id="st-clock">--:--:--</span>
-    </div>
-  </header>
+    <div class="intro-line"></div>
+    <button class="intro-skip" id="intro-skip">SKIP ›</button>
+  </div>
 
-  <main id="main" class="grid">
-    <!-- Race overview -->
-    <section class="panel" aria-labelledby="h-race">
-      <div class="panel-h"><h2 id="h-race">Race overview</h2><span class="tag">INPUT</span></div>
-      <div class="panel-b">
-        <label class="field"><span>Grand Prix</span>
-          <select id="in-event"></select></label>
-        <div class="row3">
-          <div class="stat"><span class="k">Round</span><span class="v mono" id="m-round">—</span></div>
-          <div class="stat"><span class="k">Location</span><span class="v" id="m-loc">—</span></div>
-          <div class="stat"><span class="k">Date</span><span class="v mono" id="m-date">—</span></div>
-        </div>
-        <div class="row3">
-          <label class="field"><span>Race distance (laps) <i class="hint">user-entered</i></span>
-            <input id="in-laps" type="number" min="5" max="100" value="57" /></label>
-          <label class="field"><span>Forecast mode</span>
-            <select id="in-mode"><option value="pre-race">Pre-race forecast</option><option value="live">Manual race-state snapshot</option></select></label>
-          <div class="stat"><span class="k">Drivers selected</span><span class="v mono" id="m-count">0</span></div>
-        </div>
-        <div class="row3">
-          <div class="stat"><span class="k">Model</span><span class="v mono" id="m-arch">—</span></div>
-          <div class="stat"><span class="k">Label</span><span class="v mono" id="m-label">—</span></div>
-          <div class="stat"><span class="k">Status</span><span class="v mono" id="m-lstat">—</span></div>
-        </div>
-      </div>
-    </section>
+  <!-- Navigation rail -->
+  <nav class="rail" aria-label="Sections">
+    <div class="rail-mark" title="DegradIQ">D</div>
+    <a class="rail-item active" href="#sec-overview" data-sec="overview"><span class="ri">◳</span><span class="rl">Overview</span></a>
+    <a class="rail-item" href="#sec-strategy" data-sec="strategy"><span class="ri">⬒</span><span class="rl">Strategy</span></a>
+    <a class="rail-item" href="#sec-board" data-sec="board"><span class="ri">▭</span><span class="rl">Pit Board</span></a>
+    <a class="rail-item" href="#sec-prob" data-sec="prob"><span class="ri">◠</span><span class="rl">Probability</span></a>
+    <a class="rail-item" href="#sec-model" data-sec="model"><span class="ri">◎</span><span class="rl">Model</span></a>
+    <a class="rail-item" href="#sec-data" data-sec="data"><span class="ri">▤</span><span class="rl">Sources</span></a>
+  </nav>
 
-    <!-- Scenario setup -->
-    <section class="panel span2" aria-labelledby="h-grid">
-      <div class="panel-h"><h2 id="h-grid">Strategy scenario</h2>
-        <div class="h-actions">
-          <span class="note" id="grid-note">Grid positions are user-defined inputs — not official qualifying.</span>
-          <button class="btn ghost" id="b-all">Select all</button>
-          <button class="btn ghost" id="b-none">Clear</button>
-        </div>
+  <div class="stage">
+    <!-- Operational header -->
+    <header class="topbar" role="banner">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">D</span>
+        <div class="brand-text"><span class="brand-name">DEGRADIQ</span>
+          <span class="brand-sub">PIT WALL · STRATEGY OPERATIONS</span></div>
       </div>
-      <div class="panel-b">
-        <div class="livehint" id="live-hint" hidden>MANUAL INPUT — NOT LIVE TELEMETRY</div>
-        <div class="table-wrap">
-          <table class="data" id="t-grid">
-            <thead><tr>
-              <th class="c-sel"><input type="checkbox" id="h-sel" title="Toggle all"/></th>
-              <th>Driver</th><th>Team</th><th class="c-grid">Grid</th><th>Start compound</th><th class="c-age">Tyre age</th>
-              <th class="live-col" hidden>Lap</th><th class="live-col" hidden>Cur. comp</th><th class="live-col" hidden>Pos</th>
-            </tr></thead>
-            <tbody id="grid-body"></tbody>
-          </table>
-        </div>
-        <div class="run">
-          <button class="btn primary" id="b-run">Run first-stop forecast</button>
-          <span class="run-state" id="run-state"></span>
-        </div>
+      <label class="event-pick"><span>Event</span>
+        <select id="in-event"></select></label>
+      <div class="statusbar" role="status" aria-live="polite">
+        <span class="pill mono" id="st-clock">--:--:-- UTC</span>
+        <span class="pill state" id="st-api"><i class="dot"></i>API …</span>
+        <span class="pill state" id="st-model"><i class="dot"></i>MODEL …</span>
+        <span class="pill state warn" id="st-live"><i class="dot"></i>LIVE TIMING UNAVAILABLE</span>
       </div>
-    </section>
+      <span class="pill mono hide-sm" id="st-season">2026</span>
+      <span class="pill mono hide-sm" id="st-event">GP —</span>
+    </header>
 
-    <!-- Forecast results -->
-    <section class="panel span3" aria-labelledby="h-res">
-      <div class="panel-h"><h2 id="h-res">Strategy forecast</h2><span class="tag">MODEL OUTPUT · NOT A CONFIRMED PIT CALL</span></div>
-      <div class="panel-b">
-        <div class="empty" id="res-empty">Set a scenario and run a forecast to see model output.</div>
-        <div class="table-wrap" hidden id="res-wrap">
-          <table class="data" id="t-res">
-            <thead><tr>
-              <th>#</th><th>Driver</th><th>Team</th><th>P(stop)</th><th>Most likely lap</th>
-              <th>Median lap</th><th>Expected lap</th><th>10–90 window</th>
-            </tr></thead>
-            <tbody id="res-body"></tbody>
-          </table>
+    <main id="main">
+      <!-- OVERVIEW -->
+      <section id="sec-overview" class="block">
+        <div class="block-h"><span class="num">00</span>
+          <div><h1>Command Deck</h1><p>Pre-race situational picture. Forecasts are model outputs, not confirmed pit calls.</p></div>
+          <a class="cta" href="#sec-strategy">Open Strategy Desk →</a>
         </div>
-      </div>
-    </section>
+        <div class="deck">
+          <article class="panel wide">
+            <div class="p-h"><span class="p-k">Selected event</span><span class="tag" id="ov-round">ROUND —</span></div>
+            <h3 class="p-title" id="ov-event">—</h3>
+            <div class="p-meta mono" id="ov-loc">—</div>
+            <div class="metrics">
+              <div class="metric"><span class="mk">Race distance</span><span class="mv"><b id="ov-laps">—</b><small>laps</small></span></div>
+              <div class="metric"><span class="mk">Forecast mode</span><span class="mv"><b id="ov-mode">PRE</b></span></div>
+              <div class="metric"><span class="mk">Field</span><span class="mv"><b id="ov-field">—</b><small>selected</small></span></div>
+            </div>
+          </article>
+          <article class="panel">
+            <div class="p-h"><span class="p-k">API · model</span></div>
+            <h3 class="p-title sm">System status</h3>
+            <div class="sys" id="ov-sys"><div class="empty">Checking…</div></div>
+          </article>
+          <article class="panel">
+            <div class="p-h"><span class="p-k">Prediction engine</span></div>
+            <h3 class="p-title sm">Model</h3>
+            <div class="kv sm" id="ov-model"><div class="empty">Loading…</div></div>
+          </article>
+        </div>
+        <article class="panel strip-panel">
+          <div class="p-h"><span class="p-k">Grid order · selected drivers</span><span class="tag">USER-DEFINED GRID</span></div>
+          <div class="strip" id="strip"><div class="empty">Loading lineup…</div></div>
+        </article>
+      </section>
 
-    <!-- Pit window board -->
-    <section class="panel span2" aria-labelledby="h-board">
-      <div class="panel-h"><h2 id="h-board">Pit window board</h2>
-        <div class="h-actions">
+      <!-- STRATEGY DESK -->
+      <section id="sec-strategy" class="block">
+        <div class="block-h"><span class="num">01</span>
+          <div><h1>Strategy Desk</h1><p>Configure the race scenario. Grid positions are user inputs — not official qualifying.</p></div>
+        </div>
+        <div class="desk">
+          <article class="panel controls">
+            <label class="field"><span>Race distance (laps) <i class="hint">user-entered</i></span>
+              <input id="in-laps" type="number" min="5" max="100" value="57" /></label>
+            <label class="field"><span>Forecast mode</span>
+              <select id="in-mode"><option value="pre-race">Pre-race forecast</option><option value="live">Manual race-state snapshot</option></select></label>
+            <label class="field"><span>Driver search</span>
+              <input id="in-search" type="search" placeholder="code or team…" /></label>
+            <div class="ctl-row">
+              <button class="btn ghost" id="b-all">Select all</button>
+              <button class="btn ghost" id="b-none">Clear</button>
+              <span class="count mono"><b id="m-count">0</b> selected</span>
+            </div>
+            <div class="livehint" id="live-hint" hidden>MANUAL INPUT — NOT LIVE TELEMETRY</div>
+            <button class="btn primary" id="b-run">Run first-stop forecast</button>
+            <span class="run-state" id="run-state"></span>
+          </article>
+          <article class="panel matrix">
+            <div class="table-wrap">
+              <table class="data" id="t-grid">
+                <thead><tr>
+                  <th class="c-sel"><input type="checkbox" id="h-sel" title="Toggle all"/></th>
+                  <th>Driver</th><th>Team</th><th class="c-grid">Grid</th><th>Start compound</th><th class="c-age">Age</th>
+                  <th class="live-col" hidden>Lap</th><th class="live-col" hidden>Comp</th><th class="live-col" hidden>Pos</th>
+                </tr></thead>
+                <tbody id="grid-body"></tbody>
+              </table>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- FORECAST + PIT BOARD -->
+      <section id="sec-board" class="block">
+        <div class="block-h"><span class="num">02</span>
+          <div><h1>Pit Window Board</h1><p>Forecast windows, not optimal strategy. Each lane is a 10–90% stop window with a median marker.</p></div>
           <label class="mini">Sort
             <select id="board-sort"><option value="lap">by predicted lap</option><option value="prob">by stop probability</option></select></label>
         </div>
-      </div>
-      <div class="panel-b"><div id="board" class="board"><div class="empty">No forecast yet.</div></div></div>
-    </section>
+        <article class="panel"><div class="board" id="board"><div class="empty">Run a forecast to populate the board.</div></div></article>
+        <div class="block-h sub"><span class="num">02·b</span><div><h2>Strategy forecast</h2><p>Model output — not a confirmed pit call.</p></div></div>
+        <article class="panel">
+          <div class="empty" id="res-empty">Set a scenario in the Strategy Desk and run a forecast.</div>
+          <div class="table-wrap" hidden id="res-wrap">
+            <table class="data" id="t-res"><thead><tr>
+              <th>#</th><th>Driver</th><th>Team</th><th>P(stop)</th><th>Most likely</th><th>Median</th><th>Expected</th><th>10–90 window</th>
+            </tr></thead><tbody id="res-body"></tbody></table>
+          </div>
+        </article>
+      </section>
 
-    <!-- Model integrity -->
-    <section class="panel" aria-labelledby="h-int">
-      <div class="panel-h"><h2 id="h-int">Model integrity</h2><span class="tag">PROVENANCE</span></div>
-      <div class="panel-b kv" id="integrity">
-        <div class="empty">Loading model status…</div>
-      </div>
-    </section>
+      <!-- PROBABILITY -->
+      <section id="sec-prob" class="block">
+        <div class="block-h"><span class="num">03</span>
+          <div><h1>Probability Lab</h1><p>Cumulative first-stop probability by lap. Model forecast — not confirmed pit calls.</p></div>
+        </div>
+        <article class="panel">
+          <div id="prob-legend" class="legend"></div>
+          <div class="chart-wrap"><svg id="chart" viewBox="0 0 760 320" preserveAspectRatio="none" role="img" aria-label="Cumulative first-stop probability by lap"></svg>
+            <div class="tip" id="chart-tip" hidden></div></div>
+        </article>
+      </section>
 
-    <!-- Cumulative probability -->
-    <section class="panel span2" aria-labelledby="h-prob">
-      <div class="panel-h"><h2 id="h-prob">Cumulative first-stop probability</h2>
-        <div class="h-actions"><span class="note">Model forecast — not confirmed pit calls.</span></div>
-      </div>
-      <div class="panel-b">
-        <div id="prob-legend" class="legend"></div>
-        <div class="chart-wrap"><svg id="chart" viewBox="0 0 720 300" preserveAspectRatio="none" role="img" aria-label="Cumulative first-stop probability by lap"></svg>
-          <div class="tip" id="chart-tip" hidden></div></div>
-      </div>
-    </section>
+      <!-- MODEL ROOM -->
+      <section id="sec-model" class="block">
+        <div class="block-h"><span class="num">04</span>
+          <div><h1>Model Room</h1><p>Served model provenance. Generalises for classification; unseen-circuit timing is weaker (see model card).</p></div>
+        </div>
+        <article class="panel"><div class="kv" id="integrity"><div class="empty">Loading model status…</div></div></article>
+      </section>
 
-    <!-- Data sources -->
-    <section class="panel" aria-labelledby="h-src">
-      <div class="panel-h"><h2 id="h-src">Data sources</h2><span class="tag">HONEST STATUS</span></div>
-      <div class="panel-b"><ul class="sources" id="sources"></ul></div>
-    </section>
-  </main>
+      <!-- DATA SOURCES -->
+      <section id="sec-data" class="block">
+        <div class="block-h"><span class="num">05</span>
+          <div><h1>Data Sources</h1><p>Honest availability. No live timing, GPS, weather, radio or safety-car feed is connected.</p></div>
+        </div>
+        <article class="panel"><ul class="sources" id="sources"></ul></article>
+      </section>
 
-  <footer class="foot">
-    <span>DEGRADIQ · independent research tool. Not affiliated with, endorsed by, or using assets of Formula 1, the FIA or any team.</span>
-    <span class="mono" id="foot-build">—</span>
-  </footer>
+      <footer class="foot">
+        <span>DEGRADIQ · APEX CONTROL — independent research tool. Not affiliated with, endorsed by, or using assets of Formula 1, the FIA or any team.</span>
+        <span class="mono" id="foot-build">—</span>
+      </footer>
+    </main>
+  </div>
 
   <script src="/assets/app.js" defer></script>
 </body>
