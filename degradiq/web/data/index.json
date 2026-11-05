@@ -1,0 +1,272 @@
+{
+  "generated": "2026-11-05",
+  "source": "FastF1 cache (offline)",
+  "circuits": {
+    "available": [
+      {
+        "circuit_id": "bahrain",
+        "name": "Bahrain Grand Prix",
+        "available": true
+      },
+      {
+        "circuit_id": "spanish",
+        "name": "Spanish Grand Prix",
+        "available": true
+      },
+      {
+        "circuit_id": "italian",
+        "name": "Italian Grand Prix",
+        "available": true
+      }
+    ],
+    "note": "Verified geometry exists only for circuits with cached position telemetry; others show an unavailable state."
+  },
+  "tyre": {
+    "season": 2024,
+    "events": [
+      {
+        "event_id": "bahrain",
+        "event": "Bahrain Grand Prix",
+        "season": 2024,
+        "compounds": [
+          "HARD",
+          "SOFT"
+        ],
+        "clean_laps": 1024
+      },
+      {
+        "event_id": "saudi-arabian",
+        "event": "Saudi Arabian Grand Prix",
+        "season": 2024,
+        "compounds": [
+          "HARD",
+          "MEDIUM",
+          "SOFT"
+        ],
+        "clean_laps": 816
+      },
+      {
+        "event_id": "australian",
+        "event": "Australian Grand Prix",
+        "season": 2024,
+        "compounds": [
+          "HARD",
+          "MEDIUM",
+          "SOFT"
+        ],
+        "clean_laps": 857
+      },
+      {
+        "event_id": "japanese",
+        "event": "Japanese Grand Prix",
+        "season": 2024,
+        "compounds": [
+          "HARD",
+          "MEDIUM",
+          "SOFT"
+        ],
+        "clean_laps": 785
+      },
+      {
+        "event_id": "chinese",
+        "event": "Chinese Grand Prix",
+        "season": 2024,
+        "compounds": [
+          "HARD",
+          "MEDIUM",
+          "SOFT"
+        ],
+        "clean_laps": 762
+      },
+      {
+        "event_id": "miami",
+        "event": "Miami Grand Prix",
+        "season": 2024,
+        "compounds": [
+          "HARD",
+          "MEDIUM"
+        ],
+        "clean_laps": 934
+      },
+      {
+        "event_id": "emilia-romagna",
+        "event": "Emilia Romagna Grand Prix",
+        "season": 2024,
+        "compounds": [
+          "HARD",
+          "MEDIUM",
+          "SOFT"
+        ],
+        "clean_laps": 1164
+      },
+      {
+        "event_id": "monaco",
+        "event": "Monaco Grand Prix",
+        "season": 2024,
+        "compounds": [
+          "HARD",
+          "MEDIUM"
+        ],
+        "clean_laps": 1187
+      },
+      {
+        "event_id": "canadian",
+        "event": "Canadian Grand Prix",
+        "season": 2024,
+        "compounds": [
+          "HARD",
+          "INTERMEDIATE",
+          "MEDIUM"
+        ],
+        "clean_laps": 1022
+      },
+      {
+        "event_id": "spanish",
+        "event": "Spanish Grand Prix",
+        "season": 2024,
+        "compounds": [
+          "HARD",
+          "MEDIUM",
+          "SOFT"
+        ],
+        "clean_laps": 1206
+      },
+      {
+        "event_id": "austrian",
+        "event": "Austrian Grand Prix",
+        "season": 2024,
+        "compounds": [
+          "HARD",
+          "MEDIUM"
+        ],
+        "clean_laps": 1269
+      },
+      {
+        "event_id": "british",
+        "event": "British Grand Prix",
+        "season": 2024,
+        "compounds": [
+          "HARD",
+          "INTERMEDIATE",
+          "MEDIUM",
+          "SOFT"
+        ],
+        "clean_laps": 850
+      },
+      {
+        "event_id": "hungarian",
+        "event": "Hungarian Grand Prix",
+        "season": 2024,
+        "compounds": [
+          "HARD",
+          "MEDIUM",
+          "SOFT"
+        ],
+        "clean_laps": 1254
+      },
+      {
+        "event_id": "belgian",
+        "event": "Belgian Grand Prix",
+        "season": 2024,
+        "compounds": [
+          "HARD",
+          "MEDIUM",
+          "SOFT"
+        ],
+        "clean_laps": 751
+      },
+      {
+        "event_id": "dutch",
+        "event": "Dutch Grand Prix",
+        "season": 2024,
+        "compounds": [
+          "HARD",
+          "MEDIUM",
+          "SOFT"
+        ],
+        "clean_laps": 1354
+      },
+      {
+        "event_id": "italian",
+        "event": "Italian Grand Prix",
+        "season": 2024,
+        "compounds": [
+          "HARD",
+          "MEDIUM"
+        ],
+        "clean_laps": 927
+      },
+      {
+        "event_id": "singapore",
+        "event": "Singapore Grand Prix",
+        "season": 2024,
+        "compounds": [
+          "HARD",
+          "MEDIUM",
+          "SOFT"
+        ],
+        "clean_laps": 1109
+      },
+      {
+        "event_id": "united-states",
+        "event": "United States Grand Prix",
+        "season": 2024,
+        "compounds": [
+          "HARD",
+          "MEDIUM"
+        ],
+        "clean_laps": 937
+      },
+      {
+        "event_id": "mexico-city",
+        "event": "Mexico City Grand Prix",
+        "season": 2024,
+        "compounds": [
+          "HARD",
+          "MEDIUM"
+        ],
+        "clean_laps": 1061
+      },
+      {
+        "event_id": "sao-paulo",
+        "event": "S\u00e3o Paulo Grand Prix",
+        "season": 2024,
+        "compounds": [
+          "INTERMEDIATE"
+        ],
+        "clean_laps": 943
+      },
+      {
+        "event_id": "las-vegas",
+        "event": "Las Vegas Grand Prix",
+        "season": 2024,
+        "compounds": [
+          "HARD",
+          "MEDIUM"
+        ],
+        "clean_laps": 826
+      },
+      {
+        "event_id": "qatar",
+        "event": "Qatar Grand Prix",
+        "season": 2024,
+        "compounds": [
+          "HARD",
+          "MEDIUM",
+          "SOFT"
+        ],
+        "clean_laps": 717
+      },
+      {
+        "event_id": "abu-dhabi",
+        "event": "Abu Dhabi Grand Prix",
+        "season": 2024,
+        "compounds": [
+          "HARD",
+          "MEDIUM"
+        ],
+        "clean_laps": 921
+      }
+    ]
+  }
+}
