@@ -13,12 +13,13 @@ pip install -r degradiq/requirements.txt
 # Optional dashboard UI
 pip install -r degradiq/requirements-dashboard.txt
 
-# Unified dashboard (both pages: First-Stop Prediction + Tyre Degradation)
+# Unified dashboard — three pages: First-Stop Prediction, Race Context, Tyre Degradation
 streamlit run degradiq/app.py
 
 # Or run a single page standalone:
-streamlit run degradiq/dashboard_first_stop.py   # offline, engine-driven
-streamlit run degradiq/dashboard.py              # tyre degradation (needs FastF1)
+streamlit run degradiq/dashboard_first_stop.py     # first-stop prediction (offline, engine-driven)
+streamlit run degradiq/dashboard_race_context.py   # race context + predicted-vs-actual (offline)
+streamlit run degradiq/dashboard.py                # tyre degradation (needs FastF1)
 
 # API during local development
 uvicorn degradiq.api:app --reload
@@ -117,7 +118,7 @@ Outputs include per-lap stop probabilities, cumulative probability of having sto
 1. Push the project to GitHub after reviewing the generated model and reports.
 2. In Vercel, import the repository and set **Root Directory** to `degradiq`.
 3. Leave the framework/build settings on automatic detection. Vercel should discover `main.py` as the FastAPI entrypoint and install `requirements.txt`.
-4. Ensure the trained file `degradiq/artifacts/first_stop_model.joblib` and its metadata are included in the repository/deployment. Do not deploy before training and reviewing the chronological holdout.
+4. Ensure the served model `degradiq/artifacts/first_stop_model_v2_hgb.joblib` (+ metadata) and the fallback `first_stop_model.joblib` (+ metadata) are included in the repository/deployment. The API prefers the validated HGB and falls back to the LR only if the HGB is absent/incompatible.
 5. Deploy a **Preview** first. Test `/health`, `/calendar`, `/strategy/first-stop/status`, `/strategy/first-stop/lineup`, and `/docs`; send a small prediction request only once status says `ready`.
 6. If the preview behaves correctly and the bundle remains within Vercel's Python function size limit, promote/deploy to Production.
 
@@ -137,7 +138,7 @@ The current `/calendar` endpoint fetches the schedule at request time. The pit-s
 ## First-stop model limitations
 
 - First-stop behavior is learned from historical race timing. It is not the same as tyre degradation and is not a causal or optimal-strategy model.
-- The model is a discrete logistic-regression hazard with driver/team/circuit/compound and lap-state features. Unknown categorical values are handled, but predictions for unseen drivers/teams or changed regulations may be less reliable.
+- The served model is a **calibrated HistGradientBoosting discrete-hazard** model (`first_stop_model_v2_hgb.joblib`, label `2.0-strategic-green-vsc-sc`, trained 2022–2024) with driver/team/circuit/compound and lap-state features; the original logistic-regression model (`first_stop_model.joblib`) is the untouched fallback. Unknown categorical values are handled, but predictions for unseen drivers/teams/circuits or changed regulations may be less reliable, and stop-lap *timing* on unfamiliar circuits is weaker than classification (see `reports/experiments/first_stop_v2/PHASE3_TIMING.md`).
 - Historical first-stop labels rely on `PitInTime`; races/sessions with missing or incomplete pit-in timing may be skipped or weakly represented.
 - Pre-race mode uses starting grid and compound, plus historical patterns. Live mode can use current state. No future race information should be included in either mode.
 - The chronological holdout is recorded before final refitting. Review holdout metrics and sample coverage; no performance guarantee is made.
