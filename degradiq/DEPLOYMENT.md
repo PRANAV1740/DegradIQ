@@ -17,7 +17,7 @@ documents that the project is ready and how to deploy it.
 | Dependency spec present | ✅ `degradiq/requirements.txt` (API), `requirements-dashboard.txt` (UI), `requirements-train.txt` (offline training) |
 | Backend imports + starts | ✅ `from degradiq.api import app`; `/health` → 200 |
 | End-to-end smoke | ✅ `POST /strategy/first-stop/predict` → 200, served model `calibrated_hgb`, returns probabilities + `interval_width_if_stops` |
-| Dashboard starts | ✅ `AppTest` renders `degradiq/app.py` and both pages without exceptions |
+| Dashboard starts | ✅ `AppTest` renders `degradiq/app.py` and all three pages (First-Stop Prediction, Race Context, Tyre Degradation) without exceptions |
 | Shared engine | ✅ API and dashboard both use `PredictionEngine`/`load_default_engine` |
 | Secrets | ✅ none in the repo; **no API keys required**. FastF1 needs internet only for the *local* tyre-degradation page and offline data prep |
 | Artifact bundle size | ✅ ~4 MB total in `artifacts/` (production LR + validated HGB + metadata) — well within serverless limits |
@@ -27,7 +27,7 @@ documents that the project is ready and how to deploy it.
 ```bash
 pip install -r degradiq/requirements-dashboard.txt   # everything (API + UI + data)
 uvicorn degradiq.api:app --reload                     # backend → http://127.0.0.1:8000/docs
-streamlit run degradiq/app.py                         # dashboard (First-Stop + Tyre Degradation)
+streamlit run degradiq/app.py                         # dashboard: First-Stop Prediction · Race Context · Tyre Degradation
 ```
 API-only (lean): `pip install -r degradiq/requirements.txt`.
 
