@@ -32,9 +32,11 @@
   <nav class="rail" aria-label="Sections">
     <div class="rail-mark" title="DegradIQ">D</div>
     <a class="rail-item active" href="#sec-overview" data-sec="overview"><span class="ri">◳</span><span class="rl">Overview</span></a>
+    <a class="rail-item" href="#sec-circuit" data-sec="circuit"><span class="ri">◴</span><span class="rl">Circuit</span></a>
     <a class="rail-item" href="#sec-strategy" data-sec="strategy"><span class="ri">⬒</span><span class="rl">Strategy</span></a>
-    <a class="rail-item" href="#sec-board" data-sec="board"><span class="ri">▭</span><span class="rl">Pit Board</span></a>
+    <a class="rail-item" href="#sec-board" data-sec="board"><span class="ri">▭</span><span class="rl">Stint Canvas</span></a>
     <a class="rail-item" href="#sec-prob" data-sec="prob"><span class="ri">◠</span><span class="rl">Probability</span></a>
+    <a class="rail-item" href="#sec-tyre" data-sec="tyre"><span class="ri">◉</span><span class="rl">Tyre</span></a>
     <a class="rail-item" href="#sec-model" data-sec="model"><span class="ri">◎</span><span class="rl">Model</span></a>
     <a class="rail-item" href="#sec-data" data-sec="data"><span class="ri">▤</span><span class="rl">Sources</span></a>
   </nav>
@@ -94,9 +96,46 @@
         </article>
       </section>
 
+      <!-- CIRCUIT INTELLIGENCE -->
+      <section id="sec-circuit" class="block">
+        <div class="block-h"><span class="num">01</span>
+          <div><h1>Circuit Intelligence</h1><p>Verified track geometry from cached FastF1 telemetry. Circuits without cached data show an honest unavailable state — never a substitute.</p></div>
+          <span class="tag" id="circ-avail">—</span>
+        </div>
+        <div class="circuit-wrap">
+          <article class="panel circuit-map">
+            <div class="p-h">
+              <span class="p-k">Track map</span>
+              <div class="circ-ctl">
+                <button class="chip-btn active" id="circ-sectors" title="Toggle sector shading" aria-pressed="true">Sectors</button>
+                <button class="chip-btn active" id="circ-corners" title="Toggle corner numbers" aria-pressed="true">Corners</button>
+                <button class="chip-btn" id="circ-reset" title="Reset view">Reset ⟲</button>
+              </div>
+            </div>
+            <div class="map-stage" id="map-stage">
+              <svg id="circ-svg" viewBox="0 0 1000 1000" role="img" aria-label="Grand Prix circuit map" tabindex="0"></svg>
+              <div class="map-empty" id="circ-empty"><div class="empty">Loading circuit…</div></div>
+            </div>
+            <div class="circ-legend" id="circ-legend" hidden>
+              <span class="it"><i class="sw s1"></i>Sector 1</span><span class="it"><i class="sw s2"></i>Sector 2</span>
+              <span class="it"><i class="sw s3"></i>Sector 3</span><span class="it"><i class="sw sf"></i>Start / finish</span>
+              <span class="it"><i class="sw mk"></i>Marshal post</span>
+            </div>
+          </article>
+          <aside class="panel circuit-ctx">
+            <div class="p-h"><span class="p-k">Context</span><span class="tag" id="circ-ctx-tag">CIRCUIT</span></div>
+            <h3 class="p-title sm" id="circ-name">—</h3>
+            <div class="p-meta mono" id="circ-loc">—</div>
+            <div class="kv sm" id="circ-facts"><div class="empty">—</div></div>
+            <div class="corner-readout" id="circ-corner"><div class="empty">Hover or select a corner on the map.</div></div>
+            <div class="prov" id="circ-prov"></div>
+          </aside>
+        </div>
+      </section>
+
       <!-- STRATEGY DESK -->
       <section id="sec-strategy" class="block">
-        <div class="block-h"><span class="num">01</span>
+        <div class="block-h"><span class="num">02</span>
           <div><h1>Strategy Desk</h1><p>Configure the race scenario. Grid positions are user inputs — not official qualifying.</p></div>
         </div>
         <div class="desk">
@@ -131,20 +170,28 @@
         </div>
       </section>
 
-      <!-- FORECAST + PIT BOARD -->
+      <!-- STRATEGY STINT CANVAS -->
       <section id="sec-board" class="block">
-        <div class="block-h"><span class="num">02</span>
-          <div><h1>Pit Window Board</h1><p>Forecast windows, not optimal strategy. Each lane is a 10–90% stop window with a median marker.</p></div>
+        <div class="block-h"><span class="num">03</span>
+          <div><h1>Strategy Stint Canvas</h1><p>Race-lap timeline, one lane per selected driver, from the first-stop model. Bars are 10–90% stop windows <b>conditional on stopping</b>; markers are most-likely ●, median ◆ and expected ▲ laps. Not a confirmed pit call.</p></div>
           <label class="mini">Sort
-            <select id="board-sort"><option value="lap">by predicted lap</option><option value="prob">by stop probability</option></select></label>
+            <select id="board-sort"><option value="lap">by expected lap</option><option value="prob">by stop probability</option><option value="driver">by driver</option></select></label>
         </div>
-        <article class="panel"><div class="board" id="board"><div class="empty">Run a forecast to populate the board.</div></div></article>
-        <div class="block-h sub"><span class="num">02·b</span><div><h2>Strategy forecast</h2><p>Model output — not a confirmed pit call.</p></div></div>
+        <article class="panel">
+          <div class="canvas-ctl">
+            <span class="canvas-legend"><span class="it"><i class="mk-dot"></i>most likely</span><span class="it"><i class="mk-med"></i>median</span><span class="it"><i class="mk-exp"></i>expected</span><span class="it"><i class="mk-prob"></i>P(stop)</span></span>
+            <label class="toggle-inline"><input type="checkbox" id="canvas-manual"> <span>Manual scenario overlay</span></label>
+          </div>
+          <div class="manual-hint" id="manual-hint" hidden>MANUAL WHAT-IF — your hypothetical stop laps (✚ marker). Not a model output.</div>
+          <div class="board" id="board"><div class="empty">Run a forecast to populate the canvas.</div></div>
+        </article>
+        <div class="block-h sub"><span class="num">03·b</span><div><h2>Strategy forecast</h2><p>Model output — not a confirmed pit call. Window laps are conditional on the driver stopping.</p></div></div>
         <article class="panel">
           <div class="empty" id="res-empty">Set a scenario in the Strategy Desk and run a forecast.</div>
           <div class="table-wrap" hidden id="res-wrap">
             <table class="data" id="t-res"><thead><tr>
               <th>#</th><th>Driver</th><th>Team</th><th>P(stop)</th><th>Most likely</th><th>Median</th><th>Expected</th><th>10–90 window</th>
+              <th class="manual-col" hidden>Manual stop</th>
             </tr></thead><tbody id="res-body"></tbody></table>
           </div>
         </article>
@@ -152,7 +199,7 @@
 
       <!-- PROBABILITY -->
       <section id="sec-prob" class="block">
-        <div class="block-h"><span class="num">03</span>
+        <div class="block-h"><span class="num">04</span>
           <div><h1>Probability Lab</h1><p>Cumulative first-stop probability by lap. Model forecast — not confirmed pit calls.</p></div>
         </div>
         <article class="panel">
@@ -162,9 +209,35 @@
         </article>
       </section>
 
+      <!-- TYRE INTELLIGENCE -->
+      <section id="sec-tyre" class="block">
+        <div class="block-h"><span class="num">05</span>
+          <div><h1>Tyre Intelligence</h1><p>Real historical lap time vs tyre age from cached race data. Raw observations — affected by fuel, traffic and track evolution, not tyre age alone. No tyre temperature or wear is measured.</p></div>
+          <span class="tag" id="tyre-avail">—</span>
+        </div>
+        <div class="tyre-wrap">
+          <article class="panel tyre-chart-panel">
+            <div class="p-h">
+              <span class="p-k">Lap time vs tyre age</span>
+              <div class="tyre-ctl" id="tyre-compounds"></div>
+            </div>
+            <div class="chart-wrap tall"><svg id="tyre-svg" viewBox="0 0 760 360" role="img" aria-label="Lap time versus tyre age by compound"></svg>
+              <div class="tip" id="tyre-tip" hidden></div></div>
+            <div class="tyre-note mono">Band = p25–p75 of clean laps at each tyre age · line = median · excludes in/out laps and Safety-Car/VSC/red-flag laps.</div>
+          </article>
+          <aside class="panel tyre-quality">
+            <div class="p-h"><span class="p-k">Data quality</span><span class="tag">REAL DATA</span></div>
+            <h3 class="p-title sm" id="tyre-event">—</h3>
+            <div class="kv sm" id="tyre-stats"><div class="empty">—</div></div>
+            <div class="tyre-compare" id="tyre-compare"></div>
+            <div class="prov" id="tyre-prov"></div>
+          </aside>
+        </div>
+      </section>
+
       <!-- MODEL ROOM -->
       <section id="sec-model" class="block">
-        <div class="block-h"><span class="num">04</span>
+        <div class="block-h"><span class="num">06</span>
           <div><h1>Model Room</h1><p>Served model provenance. Generalises for classification; unseen-circuit timing is weaker (see model card).</p></div>
         </div>
         <article class="panel"><div class="kv" id="integrity"><div class="empty">Loading model status…</div></div></article>
@@ -172,7 +245,7 @@
 
       <!-- DATA SOURCES -->
       <section id="sec-data" class="block">
-        <div class="block-h"><span class="num">05</span>
+        <div class="block-h"><span class="num">07</span>
           <div><h1>Data Sources</h1><p>Honest availability. No live timing, GPS, weather, radio or safety-car feed is connected.</p></div>
         </div>
         <article class="panel"><ul class="sources" id="sources"></ul></article>

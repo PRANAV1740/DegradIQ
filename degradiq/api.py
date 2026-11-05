@@ -76,6 +76,9 @@ def _service_meta():
         "first_stop_status": "/strategy/first-stop/status",
         "first_stop_lineup": "/strategy/first-stop/lineup",
         "first_stop_predict": "POST /strategy/first-stop/predict",
+        "intel_index": "/api/intel/index",
+        "intel_circuit": "/api/intel/circuit/{circuit_id}",
+        "intel_tyre": "/api/intel/tyre/{event_id}",
     }
 
 
@@ -182,3 +185,92 @@ def first_stop_predict(request: FirstStopRequest):
         raise HTTPException(status_code=422, detail=str(exc))
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Prediction failed: {type(exc).__name__}: {exc}")
+
+
+# ---------------------------------------------------------------------------
+# Circuit & Tyre Intelligence — read-only, packaged offline data only.
+# Serves version-controlled JSON built by degradiq/scripts/build_intel_data.py from
+# the local FastF1 cache. No live fetch, no filesystem traversal, no secret exposure.
+# Circuits/events without cached data are reported as unavailable (never fabricated).
+# ---------------------------------------------------------------------------
+import re as _re
+
+_DATA_DIR = _WEB_DIR / "data"
+_ID_RE = _re.compile(r"^[a-z0-9-]{1,40}$")
+
+
+def _load_intel_index() -> dict:
+    path = _DATA_DIR / "index.json"
+    if not path.is_file():
+        raise HTTPException(status_code=503, detail="Intelligence data bundle is not deployed. Build it locally with python -m degradiq.scripts.build_intel_data.")
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Failed to load intel index: {type(exc).__name__}: {exc}")
+
+
+def _safe_data_file(kind: str, item_id: str) -> Path:
+    """Resolve a packaged data file by validated id; reject anything path-like."""
+    if not _ID_RE.match(item_id):
+        raise HTTPException(status_code=422, detail="Invalid id. Allowed: lowercase letters, digits and hyphens.")
+    path = (_DATA_DIR / kind / f"{item_id}.json").resolve()
+    root = (_DATA_DIR / kind).resolve()
+    if root not in path.parents:  # defence-in-depth against traversal
+        raise HTTPException(status_code=422, detail="Invalid id.")
+    return path
+
+
+@app.get("/api/intel/index")
+def intel_index():
+    """Availability map: which circuits have verified geometry and which events have tyre data."""
+    idx = _load_intel_index()
+    return {
+        "status": "ok",
+        "source": idx.get("source"),
+        "generated": idx.get("generated"),
+        "circuits": idx.get("circuits", {}),
+        "tyre": idx.get("tyre", {}),
+        "note": "Geometry and tyre observations are derived from the local FastF1 cache only; "
+                "circuits/events without cached data are reported as unavailable, never substituted.",
+    }
+
+
+@app.get("/api/intel/circuit/{circuit_id}")
+def intel_circuit(circuit_id: str):
+    """Verified Grand Prix circuit geometry, or an honest unavailable state."""
+    circuit_id = circuit_id.strip().lower()
+    path = _safe_data_file("circuits", circuit_id)
+    if not path.is_file():
+        idx = _load_intel_index()
+        return JSONResponse(status_code=404, content={
+            "status": "unavailable", "circuit_id": circuit_id, "available": False,
+            "reason": "No verified geometry for this circuit. Geometry requires cached FastF1 position telemetry, "
+                      "which exists only for a limited set of circuits in this deployment.",
+            "available_circuits": idx.get("circuits", {}).get("available", []),
+        })
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Failed to load circuit: {type(exc).__name__}: {exc}")
+    data["status"] = "ok"
+    return data
+
+
+@app.get("/api/intel/tyre/{event_id}")
+def intel_tyre(event_id: str):
+    """Real historical lap-time vs tyre-age observations for a cached event, or unavailable."""
+    event_id = event_id.strip().lower()
+    path = _safe_data_file("tyre", event_id)
+    if not path.is_file():
+        idx = _load_intel_index()
+        return JSONResponse(status_code=404, content={
+            "status": "unavailable", "event_id": event_id, "available": False,
+            "reason": "No cached tyre data for this event in this deployment.",
+            "available_events": idx.get("tyre", {}).get("events", []),
+        })
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Failed to load tyre data: {type(exc).__name__}: {exc}")
+    data["status"] = "ok"
+    return data

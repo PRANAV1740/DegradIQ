@@ -7,7 +7,13 @@ const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const COMPOUNDS = ["SOFT", "MEDIUM", "HARD", "INTERMEDIATE", "WET"];
 const COLORS = ["#4fd6dd", "#e8c07d", "#5aa8ff", "#4fd38a", "#ff6b6b", "#b79bff", "#f3d14e", "#7fd0ff"];
-const state = { calendar: [], lineup: [], event: null, mode: "pre-race", predictions: [], raceLaps: 57 };
+const state = {
+  calendar: [], lineup: [], event: null, mode: "pre-race", predictions: [], raceLaps: 57,
+  intel: { circuits: [], tyreEvents: [] }, circuit: null, tyre: null,
+  tyreHidden: {}, focusDriver: null, manual: {}, manualOn: false,
+};
+const COMPOUND_HEX = { SOFT: "#ff5a6a", MEDIUM: "#f3d14e", HARD: "#e9eef7", INTERMEDIATE: "#4fd38a", WET: "#5aa8ff" };
+const slugify = (n) => (n || "").toLowerCase().replace(/ grand prix/g, "").trim().replace(/\s+/g, "-").replace(/ã/g, "a").replace(/ç/g, "c");
 
 async function api(path, opts) {
   const r = await fetch(path, opts);
@@ -66,6 +72,7 @@ async function boot() {
   } catch { setPill("st-model", "bad", "MODEL ERROR"); renderModel(null); }
   setPill("st-live", "warn", "LIVE TIMING UNAVAILABLE");
   renderSys();
+  await loadIntel();
   await Promise.all([loadCalendar(), loadLineup()]);
   renderSources(); bindUI(); setupNav(); syncOverview();
 }
@@ -112,7 +119,20 @@ function selectEvent(i) {
   state.event = e;
   $("#st-event").textContent = "GP " + (e.EventName || "—");
   syncOverview();
+  loadCircuit(e);
+  loadTyre(e);
 }
+
+/* ---- shared intelligence (circuit + tyre availability) ---- */
+async function loadIntel() {
+  try {
+    const idx = await api("/api/intel/index");
+    state.intel.circuits = (idx.circuits && idx.circuits.available) || [];
+    state.intel.tyreEvents = (idx.tyre && idx.tyre.events) || [];
+  } catch (e) { state.intel = { circuits: [], tyreEvents: [] }; }
+}
+function findCircuit(name) { const s = slugify(name), n = (name || "").toLowerCase(); return state.intel.circuits.find(c => c.circuit_id === s || (c.name || "").toLowerCase() === n); }
+function findTyre(name) { const s = slugify(name), n = (name || "").toLowerCase(); return state.intel.tyreEvents.find(t => t.event_id === s || (t.event || "").toLowerCase() === n); }
 
 /* ---- lineup / grid ---- */
 async function loadLineup() {
@@ -185,6 +205,18 @@ function bindUI() {
   $("#b-none").addEventListener("click", () => { $$("#grid-body .sel").forEach(c => { c.checked = false; c.closest("tr").classList.remove("sel"); }); syncOverview(); });
   $("#b-run").addEventListener("click", runForecast);
   $("#board-sort").addEventListener("change", renderBoard);
+  // Circuit controls
+  const toggle = (btn, fn) => btn.addEventListener("click", () => { btn.classList.toggle("active"); btn.setAttribute("aria-pressed", btn.classList.contains("active")); fn(); });
+  toggle($("#circ-sectors"), () => state.circuit && renderCircuit());
+  toggle($("#circ-corners"), () => state.circuit && renderCircuit());
+  $("#circ-reset").addEventListener("click", resetCircuit);
+  // Stint Canvas manual scenario
+  $("#canvas-manual").addEventListener("change", e => {
+    state.manualOn = e.target.checked;
+    $("#manual-hint").hidden = !state.manualOn;
+    $$(".manual-col").forEach(c => c.hidden = !state.manualOn);
+    renderResults(); renderBoard();
+  });
 }
 
 /* ---- forecast ---- */
@@ -224,32 +256,60 @@ function renderResults() {
   const ps = state.predictions.filter(p => p.status === "forecast");
   if (!ps.length) { $("#res-wrap").hidden = true; $("#res-empty").hidden = false; $("#res-empty").textContent = "No forecasts returned."; return; }
   $("#res-empty").hidden = true; $("#res-wrap").hidden = false;
+  const man = state.manualOn;
   $("#res-body").innerHTML = ps.map(p => {
     const w = p.likely_window_if_stops || {}, prob = p.probability_stop_before_finish ?? 0;
-    return `<tr><td class="mono">${p.predicted_order_by_expected_lap ?? "—"}</td><td><span class="drv">${p.driver}</span></td>
+    const foc = state.focusDriver === p.driver ? " class=\"focus\"" : "";
+    const mv = state.manual[p.driver] != null ? state.manual[p.driver] : "";
+    return `<tr${foc} data-drv="${p.driver}"><td class="mono">${p.predicted_order_by_expected_lap ?? "—"}</td><td><span class="drv">${p.driver}</span></td>
       <td>${p.team || "—"}</td><td class="prob-cell">${(prob * 100).toFixed(1)}%<div class="bar"><i style="width:${Math.round(prob * 100)}%"></i></div></td>
       <td class="mono">${p.most_likely_stop_lap ?? "—"}</td><td class="mono">${p.median_stop_lap_if_stops ?? "—"}</td>
-      <td class="mono">${p.expected_stop_lap_if_stops ?? "—"}</td><td class="mono">${w.from_lap != null ? w.from_lap + "–" + w.to_lap : "—"}</td></tr>`;
+      <td class="mono">${p.expected_stop_lap_if_stops ?? "—"}</td><td class="mono">${w.from_lap != null ? w.from_lap + "–" + w.to_lap : "—"}</td>
+      <td class="manual-col" ${man ? "" : "hidden"}><input type="number" class="man-in" min="1" max="${state.raceLaps}" value="${mv}" placeholder="—" data-drv="${p.driver}"></td></tr>`;
   }).join("");
+  $$("#res-body .drv").forEach(el => el.addEventListener("click", () => setFocusDriver(el.closest("tr").dataset.drv)));
+  $$("#res-body .man-in").forEach(inp => inp.addEventListener("change", () => {
+    const v = parseInt(inp.value, 10);
+    if (Number.isFinite(v) && v >= 1 && v <= state.raceLaps) state.manual[inp.dataset.drv] = v; else delete state.manual[inp.dataset.drv];
+    renderBoard();
+  }));
 }
 
 function renderBoard() {
   const host = $("#board");
   let ps = state.predictions.filter(p => p.status === "forecast");
-  if (!ps.length) { host.innerHTML = '<div class="empty">Run a forecast to populate the board.</div>'; return; }
+  if (!ps.length) { host.innerHTML = '<div class="empty">Run a forecast to populate the canvas.</div>'; return; }
   const sort = $("#board-sort").value;
-  ps = ps.slice().sort((a, b) => sort === "prob" ? (b.probability_stop_before_finish || 0) - (a.probability_stop_before_finish || 0) : (a.expected_stop_lap_if_stops || 1e9) - (b.expected_stop_lap_if_stops || 1e9));
-  const L = state.raceLaps;
-  host.innerHTML = ps.map(p => {
+  ps = ps.slice().sort((a, b) =>
+    sort === "prob" ? (b.probability_stop_before_finish || 0) - (a.probability_stop_before_finish || 0)
+      : sort === "driver" ? a.driver.localeCompare(b.driver)
+        : (a.expected_stop_lap_if_stops || 1e9) - (b.expected_stop_lap_if_stops || 1e9));
+  const L = state.raceLaps, pos = v => Math.max(0, Math.min(100, (v / L) * 100));
+  // lap-axis gridlines behind the lanes
+  const gridMarks = []; for (let lx = 0; lx <= L; lx += Math.max(5, Math.round(L / 8))) gridMarks.push(lx);
+  const grid = `<div class="canvas-grid">${gridMarks.map(lx => `<i style="left:${pos(lx)}%"></i>`).join("")}</div>`;
+  host.innerHTML = grid + ps.map(p => {
     const w = p.likely_window_if_stops || {}, pct = Math.round((p.probability_stop_before_finish || 0) * 100);
-    if (w.from_lap == null) return `<div class="lane"><span class="who"><b>${p.driver}</b></span><div class="track"></div><span class="pw">no window</span></div>`;
-    const left = (w.from_lap / L) * 100, width = Math.max(1.5, ((w.to_lap - w.from_lap) / L) * 100);
-    const med = p.median_stop_lap_if_stops != null ? (p.median_stop_lap_if_stops / L) * 100 : null;
-    return `<div class="lane"><span class="who"><b>${p.driver}</b><span>${pct}%</span></span>
-      <div class="track" title="${p.driver}: window L${w.from_lap}–${w.to_lap}, median L${p.median_stop_lap_if_stops ?? "—"}">
-        <div class="win" style="left:${left}%;width:${width}%"></div>${med != null ? `<div class="med" style="left:${med}%"></div>` : ""}</div>
+    const focus = state.focusDriver === p.driver ? " focus" : "";
+    const man = state.manualOn && state.manual[p.driver] != null ? `<div class="man-mark" style="left:${pos(state.manual[p.driver])}%" title="Manual what-if: L${state.manual[p.driver]}">✚</div>` : "";
+    if (w.from_lap == null) return `<div class="lane${focus}" data-drv="${p.driver}"><span class="who"><b>${p.driver}</b><span>${pct}%</span></span><div class="track">${man}</div><span class="pw">no window · stops ${pct}%</span></div>`;
+    const left = pos(w.from_lap), width = Math.max(1.2, pos(w.to_lap) - pos(w.from_lap));
+    const marks = [];
+    if (p.most_likely_stop_lap != null) marks.push(`<div class="mk dot" style="left:${pos(p.most_likely_stop_lap)}%" title="most likely L${p.most_likely_stop_lap}"></div>`);
+    if (p.median_stop_lap_if_stops != null) marks.push(`<div class="mk med" style="left:${pos(p.median_stop_lap_if_stops)}%" title="median L${p.median_stop_lap_if_stops}"></div>`);
+    if (p.expected_stop_lap_if_stops != null) marks.push(`<div class="mk exp" style="left:${pos(p.expected_stop_lap_if_stops)}%" title="expected L${p.expected_stop_lap_if_stops}"></div>`);
+    return `<div class="lane${focus}" data-drv="${p.driver}">
+      <span class="who"><b>${p.driver}</b><span>${pct}%</span></span>
+      <div class="track" title="${p.driver}: 10–90% window L${w.from_lap}–${w.to_lap} (conditional on stopping)">
+        <div class="win" style="left:${left}%;width:${width}%;opacity:${0.25 + 0.6 * (p.probability_stop_before_finish || 0)}"></div>
+        ${marks.join("")}${man}</div>
       <span class="pw">L${w.from_lap}–${w.to_lap} · <b>${p.expected_stop_lap_if_stops ?? "—"}</b></span></div>`;
-  }).join("") + `<div class="scale"><span>driver</span><div class="ticks"><span>1</span><span>${Math.round(L / 2)}</span><span>${L}</span></div><span>exp. lap</span></div>`;
+  }).join("") + `<div class="scale"><span>driver · P(stop)</span><div class="ticks">${gridMarks.map(lx => `<span>${lx}</span>`).join("")}</div><span>exp. lap</span></div>`;
+  $$("#board .lane").forEach(l => l.addEventListener("click", () => setFocusDriver(l.dataset.drv)));
+}
+function setFocusDriver(drv) {
+  state.focusDriver = state.focusDriver === drv ? null : drv;
+  renderBoard(); renderResults(); renderChart(); syncOverview();
 }
 
 function renderChart() {
@@ -273,6 +333,202 @@ function renderChart() {
     if (lap < 0 || lap > L) { tip.hidden = true; return; }
     const parts = ps.map(p => { const c = p.cumulative_probabilities.reduce((a, b) => Math.abs(b.lap - lap) < Math.abs(a.lap - lap) ? b : a); return `${p.driver} ${Math.round(c.probability_stopped_by_lap * 100)}%`; });
     tip.hidden = false; tip.style.left = (ev.clientX - r.left) + "px"; tip.style.top = (ev.clientY - r.top) + "px"; tip.innerHTML = `L${lap} · ` + parts.join(" · ");
+  };
+  svg.onmouseleave = () => { tip.hidden = true; };
+}
+
+/* ============================ CIRCUIT INTELLIGENCE ============================ */
+const circView = { x: 0, y: 0, w: 1000, h: 1000 };
+let circCornerIdx = -1;
+
+async function loadCircuit(e) {
+  const tag = $("#circ-avail"), svg = $("#circ-svg"), empty = $("#circ-empty");
+  const hit = findCircuit(e.EventName);
+  $("#circ-name").textContent = e.EventName || "—";
+  if (!hit) { renderCircuitUnavailable(e); return; }
+  tag.className = "tag"; tag.textContent = "LOADING…";
+  try {
+    const data = await api("/api/intel/circuit/" + encodeURIComponent(hit.circuit_id));
+    if (data.status !== "ok" || !data.outline) { renderCircuitUnavailable(e); return; }
+    state.circuit = data; renderCircuit();
+  } catch (err) { renderCircuitUnavailable(e, err); }
+}
+function renderCircuitUnavailable(e, err) {
+  state.circuit = null; circCornerIdx = -1;
+  const tag = $("#circ-avail"), svg = $("#circ-svg"), empty = $("#circ-empty");
+  tag.className = "tag warn"; tag.textContent = "GEOMETRY UNAVAILABLE";
+  svg.innerHTML = ""; empty.hidden = false;
+  const avail = state.intel.circuits.map(c => c.name).join(", ") || "none in this deployment";
+  empty.innerHTML = `<div class="empty unavail"><b>No verified geometry for ${e.EventName || "this circuit"}.</b>
+    <span>Track maps require cached FastF1 position telemetry. This deployment has verified geometry for: ${avail}.
+    We never substitute a different circuit's shape.</span></div>`;
+  $("#circ-loc").textContent = "—"; $("#circ-facts").innerHTML = '<div class="empty">—</div>';
+  $("#circ-corner").innerHTML = '<div class="empty">Select a circuit with verified geometry.</div>';
+  $("#circ-prov").innerHTML = ""; $("#circ-legend").hidden = true; $("#circ-ctx-tag").textContent = "UNAVAILABLE";
+}
+function renderCircuit() {
+  const d = state.circuit, svg = $("#circ-svg"), empty = $("#circ-empty");
+  empty.hidden = true; $("#circ-avail").className = "tag ok"; $("#circ-avail").textContent = "VERIFIED GEOMETRY";
+  $("#circ-ctx-tag").textContent = "CIRCUIT"; $("#circ-legend").hidden = false;
+  Object.assign(circView, { x: 0, y: 0, w: 1000, h: 1000 }); svg.setAttribute("viewBox", "0 0 1000 1000");
+  const ol = d.outline, n = ol.length, third = Math.floor(n / 3);
+  const seg = (a, b) => ol.slice(a, b + 1).map((p, i) => (i ? "L" : "M") + p[0] + " " + p[1]).join(" ");
+  const showSec = $("#circ-sectors").classList.contains("active");
+  const showCor = $("#circ-corners").classList.contains("active");
+  let h = `<path class="track-base" d="${ol.map((p, i) => (i ? "L" : "M") + p[0] + " " + p[1]).join(" ")} Z"/>`;
+  if (showSec) {
+    h += `<path class="track-sec s1" d="${seg(0, third)}"/>`;
+    h += `<path class="track-sec s2" d="${seg(third, 2 * third)}"/>`;
+    h += `<path class="track-sec s3" d="${seg(2 * third, n - 1)}"/>`;
+  } else {
+    h += `<path class="track-sec s1" d="${ol.map((p, i) => (i ? "L" : "M") + p[0] + " " + p[1]).join(" ")}" style="stroke:var(--cyan)"/>`;
+  }
+  (d.marshal_sectors || []).forEach(m => { h += `<circle class="marshal" cx="${m.xy[0]}" cy="${m.xy[1]}" r="4"/>`; });
+  if (d.start_finish) h += `<g class="startfin"><circle cx="${d.start_finish[0]}" cy="${d.start_finish[1]}" r="11"/><circle cx="${d.start_finish[0]}" cy="${d.start_finish[1]}" r="5"/></g>`;
+  if (showCor) (d.corners || []).forEach((c, i) => {
+    h += `<g class="corner" data-idx="${i}" tabindex="0" role="button" aria-label="Turn ${c.number}">
+      <circle class="hit" cx="${c.xy[0]}" cy="${c.xy[1]}" r="18"/>
+      <circle class="dot" cx="${c.xy[0]}" cy="${c.xy[1]}" r="6"/>
+      <text x="${c.xy[0]}" y="${c.xy[1]}" dy="-11" text-anchor="middle">${c.number}</text></g>`;
+  });
+  svg.innerHTML = h;
+  $("#circ-loc").textContent = [d.location, d.country].filter(Boolean).join(", ") + "  ·  " + (d.source_event || "");
+  $("#circ-facts").innerHTML = [
+    ["Corners", (d.corners || []).length], ["Marshal posts", (d.marshal_sectors || []).length],
+    ["Coordinate system", "normalised"], ["Pit lane", d.available && d.available.pit_lane ? "yes" : "not derived"],
+  ].map(([k, v]) => `<div class="line"><span class="k">${k}</span><span class="val">${v}</span></div>`).join("");
+  $("#circ-prov").innerHTML = `<div class="prov-h">Provenance</div>
+    <div class="prov-row"><span>Source</span><b>${esc(d.source)}</b></div>
+    <div class="prov-row"><span>Event</span><b>${esc(d.source_event)}</b></div>
+    <div class="prov-row"><span>Retrieved</span><b>${esc(d.retrieved)}</b></div>
+    <div class="prov-row"><span>Licence</span><b>${esc(d.licence)}</b></div>
+    <div class="prov-note">${esc(d.notes)} Sector 1/2/3 shading shows approximate even thirds of the lap (a visual guide, not official timing-sector boundaries); marshal posts are the real FastF1 markers.</div>`;
+  circCornerIdx = -1; $("#circ-corner").innerHTML = '<div class="empty">Hover, click or arrow-key through the corners.</div>';
+  bindCircuitInteractions();
+}
+function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+function showCorner(i, lock) {
+  const d = state.circuit; if (!d || !d.corners[i]) return;
+  const c = d.corners[i];
+  $$("#circ-svg .corner").forEach(g => g.classList.toggle("on", +g.dataset.idx === i));
+  $("#circ-corner").innerHTML = `<div class="corner-card"><span class="ct">TURN</span><b class="cn">${c.number}</b>
+    <div class="cmeta mono">corner ${i + 1} of ${d.corners.length}<br>map x${c.xy[0]} y${c.xy[1]} (normalised)</div>
+    ${lock ? '<span class="clk mono">selected</span>' : ""}</div>`;
+}
+function bindCircuitInteractions() {
+  const svg = $("#circ-svg");
+  $$("#circ-svg .corner").forEach(g => {
+    const i = +g.dataset.idx;
+    g.addEventListener("mouseenter", () => showCorner(i, false));
+    g.addEventListener("click", () => { circCornerIdx = i; showCorner(i, true); });
+    g.addEventListener("focus", () => { circCornerIdx = i; showCorner(i, true); });
+  });
+  svg.onwheel = ev => { ev.preventDefault(); zoomCircuit(ev.deltaY < 0 ? 0.85 : 1.18, ev); };
+  let drag = null;
+  svg.onpointerdown = ev => { if (ev.target.closest(".corner")) return; drag = { x: ev.clientX, y: ev.clientY }; svg.setPointerCapture(ev.pointerId); };
+  svg.onpointermove = ev => { if (!drag) return; const r = svg.getBoundingClientRect(); circView.x -= (ev.clientX - drag.x) / r.width * circView.w; circView.y -= (ev.clientY - drag.y) / r.height * circView.h; drag = { x: ev.clientX, y: ev.clientY }; applyCircView(); };
+  svg.onpointerup = () => { drag = null; };
+  svg.onkeydown = ev => {
+    const d = state.circuit; if (!d) return;
+    if (ev.key === "ArrowRight" || ev.key === "ArrowDown") { circCornerIdx = (circCornerIdx + 1) % d.corners.length; showCorner(circCornerIdx, true); ev.preventDefault(); }
+    else if (ev.key === "ArrowLeft" || ev.key === "ArrowUp") { circCornerIdx = (circCornerIdx - 1 + d.corners.length) % d.corners.length; showCorner(circCornerIdx, true); ev.preventDefault(); }
+    else if (ev.key === "+" || ev.key === "=") zoomCircuit(0.85);
+    else if (ev.key === "-") zoomCircuit(1.18);
+    else if (ev.key === "0") resetCircuit();
+  };
+}
+function applyCircView() { $("#circ-svg").setAttribute("viewBox", `${circView.x} ${circView.y} ${circView.w} ${circView.h}`); }
+function zoomCircuit(f, ev) {
+  const svg = $("#circ-svg"), r = svg.getBoundingClientRect();
+  let cx = circView.x + circView.w / 2, cy = circView.y + circView.h / 2;
+  if (ev) { cx = circView.x + (ev.clientX - r.left) / r.width * circView.w; cy = circView.y + (ev.clientY - r.top) / r.height * circView.h; }
+  const nw = Math.max(120, Math.min(1000, circView.w * f)), nh = Math.max(120, Math.min(1000, circView.h * f));
+  circView.x = cx - (cx - circView.x) * (nw / circView.w); circView.y = cy - (cy - circView.y) * (nh / circView.h);
+  circView.w = nw; circView.h = nh;
+  circView.x = Math.max(-200, Math.min(1200 - nw, circView.x)); circView.y = Math.max(-200, Math.min(1200 - nh, circView.y));
+  applyCircView();
+}
+function resetCircuit() { Object.assign(circView, { x: 0, y: 0, w: 1000, h: 1000 }); applyCircView(); }
+
+/* ============================== TYRE INTELLIGENCE ============================= */
+async function loadTyre(e) {
+  const hit = findTyre(e.EventName);
+  $("#tyre-event").textContent = e.EventName || "—";
+  if (!hit) { renderTyreUnavailable(e); return; }
+  $("#tyre-avail").className = "tag"; $("#tyre-avail").textContent = "LOADING…";
+  try {
+    const data = await api("/api/intel/tyre/" + encodeURIComponent(hit.event_id));
+    if (data.status !== "ok" || !data.compounds) { renderTyreUnavailable(e); return; }
+    state.tyre = data; state.tyreHidden = {}; renderTyre();
+  } catch (err) { renderTyreUnavailable(e, err); }
+}
+function renderTyreUnavailable(e) {
+  state.tyre = null;
+  $("#tyre-avail").className = "tag warn"; $("#tyre-avail").textContent = "NO CACHED DATA";
+  $("#tyre-svg").innerHTML = ""; $("#tyre-compounds").innerHTML = "";
+  const avail = state.intel.tyreEvents.length;
+  $("#tyre-stats").innerHTML = `<div class="empty unavail"><b>No cached tyre data for ${e.EventName || "this event"}.</b>
+    <span>Tyre intelligence is drawn only from cached race laps (${avail} events available in this deployment). No values are fabricated.</span></div>`;
+  $("#tyre-compare").innerHTML = ""; $("#tyre-prov").innerHTML = "";
+}
+function renderTyre() {
+  const d = state.tyre, comps = Object.keys(d.compounds);
+  $("#tyre-avail").className = "tag ok"; $("#tyre-avail").textContent = d.clean_laps + " CLEAN LAPS";
+  $("#tyre-compounds").innerHTML = comps.map(c =>
+    `<button class="chip-btn comp-chip ${state.tyreHidden[c] ? "" : "active"}" data-c="${c}"><i style="background:${COMPOUND_HEX[c] || "#888"}"></i>${c}</button>`).join("");
+  $$("#tyre-compounds .comp-chip").forEach(b => b.addEventListener("click", () => { const c = b.dataset.c; state.tyreHidden[c] = !state.tyreHidden[c]; renderTyre(); }));
+  drawTyreChart();
+  $("#tyre-stats").innerHTML = [
+    ["Event", esc(d.event) + " " + d.season], ["Session", esc(d.session)],
+    ["Clean laps", d.clean_laps + " / " + d.total_laps + " total"],
+    ["Compounds", comps.join(", ")],
+  ].map(([k, v]) => `<div class="line"><span class="k">${k}</span><span class="val">${v}</span></div>`).join("");
+  // Compound comparison: median pace loss across each compound's observed age range.
+  $("#tyre-compare").innerHTML = '<div class="prov-h">Degradation (median, clean laps)</div>' + comps.map(c => {
+    const cc = d.compounds[c], obs = cc.observations, last = obs[obs.length - 1];
+    const dd = last.pace_loss_s, perLap = obs.length > 1 ? (dd / (last.age - obs[0].age)) : 0;
+    return `<div class="cmp-row ${state.tyreHidden[c] ? "off" : ""}"><span class="cmp-n"><i style="background:${COMPOUND_HEX[c] || "#888"}"></i>${c}</span>
+      <span class="mono">${cc.n} laps · age ${cc.age_range[0]}–${cc.age_range[1]}</span>
+      <span class="mono cmp-d">${dd >= 0 ? "+" : ""}${dd.toFixed(2)}s · ${(perLap * 1000).toFixed(0)} ms/lap</span></div>`;
+  }).join("");
+  $("#tyre-prov").innerHTML = `<div class="prov-h">Provenance &amp; limitations</div>
+    <div class="prov-row"><span>Source</span><b>${esc(d.source)}</b></div>
+    <div class="prov-row"><span>Metric</span><b>${esc(d.metric)}</b></div>
+    <div class="prov-row"><span>Retrieved</span><b>${esc(d.retrieved)}</b></div>
+    <div class="prov-note"><b>Cleaning:</b> ${esc(d.cleaning)}</div>
+    <div class="prov-note"><b>Limitations:</b> ${esc(d.limitations)}</div>`;
+}
+function drawTyreChart() {
+  const d = state.tyre, svg = $("#tyre-svg"), W = 760, H = 360, pad = { l: 52, r: 16, t: 16, b: 34 };
+  const comps = Object.keys(d.compounds).filter(c => !state.tyreHidden[c]);
+  svg.innerHTML = "";
+  const all = comps.flatMap(c => d.compounds[c].observations);
+  if (!all.length) { svg.innerHTML = `<text x="${W / 2}" y="${H / 2}" text-anchor="middle" class="axl">No compound selected</text>`; return; }
+  const ages = all.map(o => o.age), times = all.flatMap(o => [o.p25_s, o.p75_s]);
+  const aMin = Math.min(...ages), aMax = Math.max(...ages), tMin = Math.min(...times), tMax = Math.max(...times);
+  const tPad = (tMax - tMin) * 0.08 || 0.5;
+  const x = a => pad.l + (aMax === aMin ? 0.5 : (a - aMin) / (aMax - aMin)) * (W - pad.l - pad.r);
+  const y = t => pad.t + (t - (tMin - tPad)) / ((tMax + tPad) - (tMin - tPad)) * (H - pad.t - pad.b);
+  // gridlines + y labels (lap time seconds)
+  for (let k = 0; k <= 4; k++) { const tv = (tMin - tPad) + k / 4 * ((tMax + tPad) - (tMin - tPad)); const yy = y((tMin - tPad) + (1 - k / 4) * ((tMax + tPad) - (tMin - tPad))); svg.insertAdjacentHTML("beforeend", `<line class="grid" x1="${pad.l}" y1="${yy}" x2="${W - pad.r}" y2="${yy}"/><text class="axl" x="8" y="${yy + 3}">${tv.toFixed(1)}s</text>`); }
+  // x labels (tyre age)
+  const step = Math.max(1, Math.round((aMax - aMin) / 7));
+  for (let a = aMin; a <= aMax; a += step) svg.insertAdjacentHTML("beforeend", `<text class="axl" x="${x(a)}" y="${H - 12}" text-anchor="middle">${a}</text>`);
+  svg.insertAdjacentHTML("beforeend", `<text class="axt" x="${(pad.l + W - pad.r) / 2}" y="${H - 1}" text-anchor="middle">tyre age (laps)</text>`);
+  comps.forEach(c => {
+    const col = COMPOUND_HEX[c] || "#8aa0bd", obs = d.compounds[c].observations;
+    const band = obs.map(o => `${x(o.age)},${y(o.p25_s)}`).concat(obs.slice().reverse().map(o => `${x(o.age)},${y(o.p75_s)}`)).join(" ");
+    svg.insertAdjacentHTML("beforeend", `<polygon class="tband" points="${band}" style="fill:${col}"/>`);
+    const line = obs.map((o, i) => (i ? "L" : "M") + x(o.age) + " " + y(o.median_s)).join(" ");
+    svg.insertAdjacentHTML("beforeend", `<path class="tline" d="${line}" style="stroke:${col}"/>`);
+    obs.forEach(o => svg.insertAdjacentHTML("beforeend", `<circle class="tpt" cx="${x(o.age)}" cy="${y(o.median_s)}" r="2.6" style="fill:${col}" data-c="${c}" data-a="${o.age}" data-m="${o.median_s}" data-n="${o.n}"/>`));
+  });
+  const tip = $("#tyre-tip");
+  svg.onmousemove = ev => {
+    const el = ev.target.closest(".tpt"); if (!el) { tip.hidden = true; return; }
+    const r = svg.getBoundingClientRect();
+    tip.hidden = false; tip.style.left = (ev.clientX - r.left) + "px"; tip.style.top = (ev.clientY - r.top) + "px";
+    tip.innerHTML = `${el.dataset.c} · age ${el.dataset.a}<br>median ${(+el.dataset.m).toFixed(3)}s · n=${el.dataset.n}`;
   };
   svg.onmouseleave = () => { tip.hidden = true; };
 }
