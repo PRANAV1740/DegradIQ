@@ -2,7 +2,11 @@
 from __future__ import annotations
 from typing import Literal
 
+from pathlib import Path
+
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import FileResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 try:  # Package import for local development.
@@ -32,6 +36,12 @@ app = FastAPI(
     version="2026.2",
 )
 
+# Browser frontend (PIT WALL) served from the same FastAPI origin. Assets are mounted
+# only when present so the API still runs headless if the web bundle is absent.
+_WEB_DIR = Path(__file__).resolve().parent / "web"
+if (_WEB_DIR / "assets").is_dir():
+    app.mount("/assets", StaticFiles(directory=str(_WEB_DIR / "assets")), name="assets")
+
 
 class DriverForecastInput(BaseModel):
     driver: str = Field(..., min_length=3, max_length=3, description="2026 full-season driver code")
@@ -53,19 +63,35 @@ class FirstStopRequest(BaseModel):
     drivers: list[DriverForecastInput] = Field(..., min_length=1, max_length=22)
 
 
-@app.get("/")
-def root():
+def _service_meta():
     return {
         "service": "DegradIQ API",
         "season": YEAR,
         "status": "ok",
+        "app": "/",
         "docs": "/docs",
+        "meta": "/api/meta",
         "health": "/health",
         "calendar": "/calendar",
         "first_stop_status": "/strategy/first-stop/status",
         "first_stop_lineup": "/strategy/first-stop/lineup",
         "first_stop_predict": "POST /strategy/first-stop/predict",
     }
+
+
+@app.get("/", include_in_schema=False)
+@app.get("/app", include_in_schema=False)
+def web_app():
+    """Serve the PIT WALL browser interface; fall back to service metadata JSON."""
+    index = _WEB_DIR / "index.html"
+    if index.is_file():
+        return FileResponse(str(index))
+    return JSONResponse(_service_meta())
+
+
+@app.get("/api/meta")
+def service_meta():
+    return _service_meta()
 
 
 @app.get("/health")
