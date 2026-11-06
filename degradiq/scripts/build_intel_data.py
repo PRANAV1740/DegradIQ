@@ -39,10 +39,24 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-import fastf1  # noqa: E402
 from degradiq.pit_strategy import PACKAGE_DIR  # noqa: E402
 
-fastf1.Cache.enable_cache(str(PACKAGE_DIR / "cache" / "fastf1"))
+# FastF1 is only needed when actually building geometry/tyre data. Import it (and enable its
+# cache) lazily so the module's pure helpers (projection, validation, OSM parsing) can be
+# imported and unit-tested without FastF1 or its cache directory present (e.g. in CI).
+_FF1 = None
+
+
+def _fastf1():
+    global _FF1
+    if _FF1 is None:
+        import fastf1 as _f
+        (PACKAGE_DIR / "cache" / "fastf1").mkdir(parents=True, exist_ok=True)
+        _f.Cache.enable_cache(str(PACKAGE_DIR / "cache" / "fastf1"))
+        _FF1 = _f
+    return _FF1
+
+
 OUT = PACKAGE_DIR / "web" / "data"
 NOW = datetime.now(timezone.utc).date().isoformat()
 
@@ -215,6 +229,7 @@ def _project_markers(outline, markers, threshold=MARSHAL_SNAP_THRESHOLD):
 
 
 def build_circuit_fastf1(cfg) -> dict | None:
+    fastf1 = _fastf1()
     year, event = cfg["fastf1"]
     s = fastf1.get_session(year, event, "R")
     s.load(laps=True, telemetry=True, weather=False, messages=False)
@@ -587,6 +602,7 @@ def _clean_laps(laps: pd.DataFrame) -> pd.DataFrame:
 
 
 def build_tyre(year: int, name: str) -> dict | None:
+    fastf1 = _fastf1()
     s = fastf1.get_session(year, name, "R")
     s.load(laps=True, telemetry=False, weather=False, messages=False)
     total = len(s.laps)
