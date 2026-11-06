@@ -226,12 +226,14 @@ def intel_index():
     idx = _load_intel_index()
     return {
         "status": "ok",
-        "source": idx.get("source"),
+        "sources": idx.get("sources", {"fastf1": idx.get("source")}),
         "generated": idx.get("generated"),
         "circuits": idx.get("circuits", {}),
+        "coverage": idx.get("coverage", {}),
         "tyre": idx.get("tyre", {}),
-        "note": "Geometry and tyre observations are derived from the local FastF1 cache only; "
-                "circuits/events without cached data are reported as unavailable, never substituted.",
+        "note": "Circuit geometry is a FastF1 racing-line trace (with corners) or an OpenStreetMap "
+                "centreline outline (© OpenStreetMap contributors, ODbL); circuits with neither are "
+                "reported as unavailable and never substituted. Tyre data is from the local FastF1 cache.",
     }
 
 
