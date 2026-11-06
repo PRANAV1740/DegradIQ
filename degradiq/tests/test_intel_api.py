@@ -117,6 +117,195 @@ class IntelFrontendIntegrityTests(unittest.TestCase):
         self.assertIn("never substitute", src.lower())
         self.assertNotIn("Math.random", src)
 
+    def test_app_js_handles_osm_and_attribution(self):
+        src = (Path(__file__).resolve().parents[1] / "web" / "assets" / "app.js").read_text(encoding="utf-8")
+        self.assertIn("osm_centreline", src)
+        self.assertIn("OpenStreetMap", src)
+        # Mapping is explicit (event -> circuit), not a blind name guess.
+        self.assertIn("event_to_circuit", src)
+
+    def test_app_js_no_official_sector_claim(self):
+        src = (Path(__file__).resolve().parents[1] / "web" / "assets" / "app.js").read_text(encoding="utf-8")
+        # Must state official timing sectors are unavailable, and consume validated boundaries.
+        self.assertIn("Official S1/S2/S3 timing sectors: not available", src)
+        self.assertIn("marshal_boundaries", src)
+        # The old equal-thirds visualization must be gone.
+        self.assertNotIn("Math.floor(n / 3)", src)
+
+
+@unittest.skipUnless((DATA / "index.json").is_file(), "intel data bundle not built")
+class IntelMappingTests(unittest.TestCase):
+    """Event->circuit mapping must be explicit and configuration-aware."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.idx = json.loads((DATA / "index.json").read_text(encoding="utf-8"))
+        cls.c = _client()
+
+    def test_index_exposes_mapping_and_coverage(self):
+        m = self.c.get("/api/intel/index").json()
+        self.assertIn("event_to_circuit", m["circuits"])
+        self.assertIn("coverage", m)
+        self.assertIn("events", m["coverage"])
+
+    def test_barcelona_and_madrid_are_distinct_configurations(self):
+        mapping = self.idx["circuits"]["event_to_circuit"]
+        # Both exist in the 2026 calendar and must NOT resolve to the same circuit.
+        if "Barcelona Grand Prix" in mapping and "Spanish Grand Prix" in mapping:
+            self.assertNotEqual(mapping["Barcelona Grand Prix"], mapping["Spanish Grand Prix"],
+                                "Barcelona GP and the Madrid 'Spanish GP' must be different circuits")
+
+    def test_available_circuit_events_match_mapping(self):
+        mapping = self.idx["circuits"]["event_to_circuit"]
+        for c in self.idx["circuits"]["available"]:
+            self.assertIn("geometry_type", c)
+            for ev in c.get("events", []):
+                self.assertEqual(mapping.get(ev), c["circuit_id"])
+
+    def test_no_duplicate_circuit_ids(self):
+        ids = [c["circuit_id"] for c in self.idx["circuits"]["available"]]
+        self.assertEqual(len(ids), len(set(ids)))
+
+    def test_osm_circuits_carry_attribution(self):
+        for c in self.idx["circuits"]["available"]:
+            if c.get("geometry_type") == "osm_centreline":
+                d = self.c.get(f"/api/intel/circuit/{c['circuit_id']}").json()
+                self.assertIn("openstreetmap", (d.get("licence") or "").lower())
+                self.assertTrue(d.get("attribution"))
+                self.assertEqual(d["corners"], [])          # OSM has no corner numbers
+
+    def test_coverage_counts_consistent(self):
+        cov = self.idx["coverage"]
+        self.assertEqual(cov["verified"] + cov["partial"] + cov["unavailable"] + cov["failed"],
+                         len(cov["circuits"]))
+        # every circuit carries one of the four classifications
+        valid = {"VERIFIED", "PARTIAL", "UNAVAILABLE", "FAILED"}
+        for c in cov["circuits"]:
+            self.assertIn(c["status"], valid)
+
+    def test_verified_circuits_declare_official_sectors_unavailable(self):
+        for c in self.idx["circuits"]["available"]:
+            if c.get("geometry_type") == "fastlap_trace":
+                d = self.c.get(f"/api/intel/circuit/{c['circuit_id']}").json()
+                self.assertFalse(d["available"].get("official_timing_sectors", False))
+                self.assertIn("official_timing_sectors", d)
+                mp = d.get("marshal_projection") or {}
+                self.assertTrue(mp.get("frame_compatible"))          # same coordinate frame
+                self.assertIn("FastF1", mp.get("coordinate_reference", ""))
+
+    def test_osm_circuits_have_no_cross_frame_marshal_markers(self):
+        # OSM geometry must never carry FastF1 marshal markers projected across frames.
+        for c in self.idx["circuits"]["available"]:
+            if c.get("geometry_type") == "osm_centreline":
+                d = self.c.get(f"/api/intel/circuit/{c['circuit_id']}").json()
+                self.assertEqual(d.get("marshal_sectors", []), [])
+                self.assertEqual(d.get("coordinate_system", "").count("FastF1"), 0)
+
+    def test_build_manifest_present(self):
+        cov = self.idx["coverage"]
+        self.assertIn("build", cov)
+        self.assertIn("build_id", cov["build"])
+
+
+class GeometryValidationUnitTests(unittest.TestCase):
+    """The builder's validation rejects malformed/invalid geometry."""
+
+    def _validate(self):
+        import importlib
+        mod = importlib.import_module("degradiq.scripts.build_intel_data")
+        return mod.validate_geometry
+
+    def test_valid_geometry_passes(self):
+        v = self._validate()
+        good = {"outline": [[i, i] for i in range(0, 900, 20)], "corners": [{"number": 1, "xy": [50, 50]}]}
+        self.assertEqual(v(good), [])
+
+    def test_out_of_range_and_sparse_rejected(self):
+        v = self._validate()
+        self.assertTrue(v({"outline": [[0, 0], [1, 1]]}))                     # too few
+        self.assertTrue(v({"outline": [[0, 0], [99999, 1]] * 30}))            # out of range
+        self.assertTrue(v({"outline": [[float("nan"), 1]] * 30}))            # non-finite
+
+
+def _square_outline(step=20):
+    """A dense closed square loop in the 0-1000 normalised frame."""
+    pts = []
+    for x in range(100, 900, step): pts.append([x, 100])
+    for y in range(100, 900, step): pts.append([900, y])
+    for x in range(900, 100, -step): pts.append([x, 900])
+    for y in range(900, 100, -step): pts.append([100, y])
+    pts.append([100, 100])
+    return pts
+
+
+class MarshalProjectionUnitTests(unittest.TestCase):
+    """Nearest-segment marshal projection with coordinate-frame + snap validation."""
+
+    def _proj(self):
+        import importlib
+        return importlib.import_module("degradiq.scripts.build_intel_data")._project_markers
+
+    def test_missing_markers(self):
+        r = self._proj()(_square_outline(), [])
+        self.assertEqual(r["accepted"], []); self.assertEqual(r["boundaries"], [])
+
+    def test_compatible_markers_accepted_small_snap(self):
+        # markers sitting on the edges (same frame) -> accepted with tiny snap distance
+        markers = [{"number": 1, "xy": [300, 100]}, {"number": 2, "xy": [900, 500]}, {"number": 3, "xy": [500, 900]}]
+        r = self._proj()(_square_outline(), markers)
+        self.assertEqual(r["summary"]["n_accepted"], 3)
+        self.assertTrue(r["summary"]["max_snap_units"] < 5)
+        self.assertTrue(r["summary"]["frame_compatible"])
+
+    def test_excessive_snap_rejected(self):
+        # a marker far inside the square (wrong frame / off-track) -> rejected, never forced on
+        r = self._proj()(_square_outline(), [{"number": 9, "xy": [500, 500]}])
+        self.assertEqual(r["summary"]["n_accepted"], 0)
+        self.assertEqual(r["rejected"][0]["status"], "rejected")
+        self.assertIn("snap distance", r["rejected"][0]["rejection_reason"])
+
+    def test_markers_ordered_by_lap_distance(self):
+        # given out of order, accepted markers come back sorted by cumulative distance
+        markers = [{"number": 3, "xy": [500, 900]}, {"number": 1, "xy": [300, 100]}, {"number": 2, "xy": [900, 500]}]
+        r = self._proj()(_square_outline(), markers)
+        d = [m["cumulative_distance_units"] for m in r["accepted"]]
+        self.assertEqual(d, sorted(d))
+
+    def test_boundaries_are_outline_indices(self):
+        markers = [{"number": 1, "xy": [300, 100]}, {"number": 2, "xy": [900, 500]}]
+        r = self._proj()(_square_outline(), markers)
+        n = len(_square_outline())
+        self.assertTrue(all(0 <= b < n for b in r["boundaries"]))
+
+
+class OSMRelationMemberTests(unittest.TestCase):
+    """Relation member roles: pit-lane excluded, start node gives a point, start way does not."""
+
+    def _candidates(self):
+        import importlib
+        return importlib.import_module("degradiq.scripts.build_intel_data")._candidate_sources
+
+    def _rel_data(self, with_start_node, with_start_way):
+        members = [{"type": "way", "ref": 10, "role": "", "geometry": [{"lat": 0.0, "lon": 0.0}, {"lat": 0.001, "lon": 0.0}]},
+                   {"type": "way", "ref": 11, "role": "pit", "geometry": [{"lat": 0.0, "lon": 0.001}, {"lat": 0.0005, "lon": 0.001}]}]
+        if with_start_way:
+            members.append({"type": "way", "ref": 12, "role": "start", "geometry": [{"lat": 0.0005, "lon": -0.0001}, {"lat": 0.0005, "lon": 0.0001}]})
+        if with_start_node:
+            members.append({"type": "node", "ref": 13, "role": "start", "lat": 0.0005, "lon": 0.0})
+        return {"elements": [{"type": "relation", "id": 1, "tags": {"name": "Test Circuit", "sport": "motor"}, "members": members}]}
+
+    def test_start_node_sets_point_and_pit_excluded(self):
+        src = self._candidates()(self._rel_data(True, False), 2000)[0]
+        self.assertTrue(src["has_pit"])
+        self.assertEqual(src["start"], (0.0005, 0.0))          # node -> defensible point
+        self.assertEqual([w["id"] for w in src["ways"]], [10])  # pit + start excluded from the loop
+
+    def test_start_way_recorded_but_no_point(self):
+        src = self._candidates()(self._rel_data(False, True), 2000)[0]
+        self.assertTrue(src["start_way_present"])
+        self.assertIsNone(src["start"])                        # never a point from an arbitrary way
+        self.assertEqual([w["id"] for w in src["ways"]], [10])  # start way not stitched into loop
+
 
 if __name__ == "__main__":
     unittest.main()
