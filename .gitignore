@@ -39,3 +39,7 @@ Thumbs.db
 .idea/
 .vscode/
 *.log
+
+# Circuit build staging/rollback (local only)
+degradiq/web/data/_staging/
+degradiq/web/data/_backup/
