@@ -128,10 +128,20 @@ async function loadIntel() {
   try {
     const idx = await api("/api/intel/index");
     state.intel.circuits = (idx.circuits && idx.circuits.available) || [];
+    state.intel.eventMap = (idx.circuits && idx.circuits.event_to_circuit) || {};
+    state.intel.events = (idx.coverage && idx.coverage.events) || [];
     state.intel.tyreEvents = (idx.tyre && idx.tyre.events) || [];
-  } catch (e) { state.intel = { circuits: [], tyreEvents: [] }; }
+  } catch (e) { state.intel = { circuits: [], eventMap: {}, events: [], tyreEvents: [] }; }
 }
-function findCircuit(name) { const s = slugify(name), n = (name || "").toLowerCase(); return state.intel.circuits.find(c => c.circuit_id === s || (c.name || "").toLowerCase() === n); }
+// Explicit, configuration-aware mapping: an available circuit lists the exact EventNames
+// it serves, so the 2026 Barcelona GP and the new Madrid "Spanish GP" never share geometry.
+function findCircuit(name) {
+  const n = (name || "").toLowerCase();
+  return state.intel.circuits.find(c => (c.events || []).includes(name))
+    || state.intel.circuits.find(c => c.circuit_id === state.intel.eventMap[name])
+    || state.intel.circuits.find(c => (c.name || "").toLowerCase() === n);
+}
+function eventCoverage(name) { return (state.intel.events || []).find(e => e.event === name) || null; }
 function findTyre(name) { const s = slugify(name), n = (name || "").toLowerCase(); return state.intel.tyreEvents.find(t => t.event_id === s || (t.event || "").toLowerCase() === n); }
 
 /* ---- lineup / grid ---- */
@@ -342,7 +352,7 @@ const circView = { x: 0, y: 0, w: 1000, h: 1000 };
 let circCornerIdx = -1;
 
 async function loadCircuit(e) {
-  const tag = $("#circ-avail"), svg = $("#circ-svg"), empty = $("#circ-empty");
+  const tag = $("#circ-avail");
   const hit = findCircuit(e.EventName);
   $("#circ-name").textContent = e.EventName || "—";
   if (!hit) { renderCircuitUnavailable(e); return; }
@@ -356,55 +366,135 @@ async function loadCircuit(e) {
 function renderCircuitUnavailable(e, err) {
   state.circuit = null; circCornerIdx = -1;
   const tag = $("#circ-avail"), svg = $("#circ-svg"), empty = $("#circ-empty");
-  tag.className = "tag warn"; tag.textContent = "GEOMETRY UNAVAILABLE";
+  setCircuitAttribution("");
+  const cov = eventCoverage(e.EventName) || {};
+  // Distinct unavailable states: data-acquisition failure vs genuinely no geometry.
+  const failed = !!err || cov.status === "FAILED";
+  tag.className = "tag warn"; tag.textContent = failed ? "DATA ACQUISITION FAILED" : "GEOMETRY UNAVAILABLE";
   svg.innerHTML = ""; empty.hidden = false;
-  const avail = state.intel.circuits.map(c => c.name).join(", ") || "none in this deployment";
-  empty.innerHTML = `<div class="empty unavail"><b>No verified geometry for ${e.EventName || "this circuit"}.</b>
-    <span>Track maps require cached FastF1 position telemetry. This deployment has verified geometry for: ${avail}.
-    We never substitute a different circuit's shape.</span></div>`;
+  const verified = state.intel.circuits.filter(c => c.geometry_type === "fastlap_trace").map(c => c.name);
+  const approx = state.intel.circuits.filter(c => c.geometry_type === "osm_centreline").map(c => c.name);
+  const reason = failed
+    ? `We could not acquire or validate geometry for this circuit (${esc((err && (err.status || "network")) || cov.reason || "error")}). Nothing is shown rather than a guessed shape.`
+    : `No verified racing-line telemetry and no usable OpenStreetMap trace for this circuit${cov.reason ? " — " + esc(cov.reason) : ""}. We never substitute a different circuit's shape.`;
+  empty.innerHTML = `<div class="empty unavail"><b>${failed ? "Geometry could not be loaded" : "Geometry unavailable"} for ${esc(e.EventName || "this circuit")}.</b>
+    <span>${reason}</span>
+    <span class="mono avail-note">Verified (racing-line + corners): ${verified.join(", ") || "none"}.<br>Approximate (OpenStreetMap outline): ${approx.length} circuit${approx.length === 1 ? "" : "s"}.</span></div>`;
   $("#circ-loc").textContent = "—"; $("#circ-facts").innerHTML = '<div class="empty">—</div>';
-  $("#circ-corner").innerHTML = '<div class="empty">Select a circuit with verified geometry.</div>';
+  $("#circ-corner").innerHTML = '<div class="empty">Pick an event with available geometry.</div>';
   $("#circ-prov").innerHTML = ""; $("#circ-legend").hidden = true; $("#circ-ctx-tag").textContent = "UNAVAILABLE";
+}
+// Project each marshal post onto its nearest outline point (distance-based) and return the
+// sorted unique boundary indices. These delimit marshal sectors — a traceable FastF1 source —
+// not the 3 official timing sectors.
+function marshalBoundaries(d) {
+  const ol = d.outline || [], ms = d.marshal_sectors || [];
+  if (!ms.length || !ol.length) return [];
+  const idx = ms.map(m => {
+    let best = 0, bd = Infinity;
+    for (let i = 0; i < ol.length; i++) { const dx = ol[i][0] - m.xy[0], dy = ol[i][1] - m.xy[1], dd = dx * dx + dy * dy; if (dd < bd) { bd = dd; best = i; } }
+    return best;
+  });
+  return [...new Set(idx)].sort((a, b) => a - b);
+}
+function setCircuitAttribution(text) {
+  const stage = $("#map-stage"); let el = $("#circ-attrib");
+  if (!text) { if (el) el.remove(); return; }
+  if (!el) { el = document.createElement("div"); el.id = "circ-attrib"; el.className = "map-attrib"; stage.appendChild(el); }
+  el.textContent = text;
 }
 function renderCircuit() {
   const d = state.circuit, svg = $("#circ-svg"), empty = $("#circ-empty");
-  empty.hidden = true; $("#circ-avail").className = "tag ok"; $("#circ-avail").textContent = "VERIFIED GEOMETRY";
-  $("#circ-ctx-tag").textContent = "CIRCUIT"; $("#circ-legend").hidden = false;
+  const osm = d.geometry_type === "osm_centreline";
+  empty.hidden = true; $("#circ-ctx-tag").textContent = osm ? "OSM OUTLINE" : "CIRCUIT";
+  $("#circ-avail").className = "tag " + (osm ? "approx" : "ok");
+  $("#circ-avail").textContent = osm ? "APPROX · OPENSTREETMAP" : "VERIFIED GEOMETRY";
+  $("#circ-legend").hidden = false;
+  $("#circ-sectors").style.display = osm ? "none" : "";   // no verified sectors for OSM outlines
+  $("#circ-corners").style.display = osm ? "none" : "";
   Object.assign(circView, { x: 0, y: 0, w: 1000, h: 1000 }); svg.setAttribute("viewBox", "0 0 1000 1000");
-  const ol = d.outline, n = ol.length, third = Math.floor(n / 3);
-  const seg = (a, b) => ol.slice(a, b + 1).map((p, i) => (i ? "L" : "M") + p[0] + " " + p[1]).join(" ");
-  const showSec = $("#circ-sectors").classList.contains("active");
-  const showCor = $("#circ-corners").classList.contains("active");
-  let h = `<path class="track-base" d="${ol.map((p, i) => (i ? "L" : "M") + p[0] + " " + p[1]).join(" ")} Z"/>`;
-  if (showSec) {
-    h += `<path class="track-sec s1" d="${seg(0, third)}"/>`;
-    h += `<path class="track-sec s2" d="${seg(third, 2 * third)}"/>`;
-    h += `<path class="track-sec s3" d="${seg(2 * third, n - 1)}"/>`;
+  const ol = d.outline, n = ol.length;
+  const line = pts => pts.map((p, i) => (i ? "L" : "M") + p[0] + " " + p[1]).join(" ");
+  // FastF1 laps naturally return to the start (close with Z); OSM outlines are never
+  // force-closed — the validated near-zero gap is left as-is rather than drawing a segment.
+  let h = `<path class="track-base" d="${line(ol)}${osm ? "" : " Z"}"/>`;
+  if (osm) {
+    // Single-colour outline only — never invent sector shading on an OSM centreline.
+    h += `<path class="track-sec s1" d="${line(ol)}" style="stroke:var(--cyan)"/>`;
+    if (d.start_finish) h += `<g class="startfin"><circle cx="${d.start_finish[0]}" cy="${d.start_finish[1]}" r="11"/><circle cx="${d.start_finish[0]}" cy="${d.start_finish[1]}" r="5"/></g>`;
+    $("#circ-legend").innerHTML = `<span class="it"><i class="sw s1"></i>Circuit outline</span>
+      ${d.start_finish ? '<span class="it"><i class="sw sf"></i>Start / finish (OSM)</span>' : ""}
+      <span class="it osm-attr">© OpenStreetMap contributors</span>`;
   } else {
-    h += `<path class="track-sec s1" d="${ol.map((p, i) => (i ? "L" : "M") + p[0] + " " + p[1]).join(" ")}" style="stroke:var(--cyan)"/>`;
+    const showSec = $("#circ-sectors").classList.contains("active");
+    const showCor = $("#circ-corners").classList.contains("active");
+    // Marshal sectors are the ONLY traceable sector-boundary source here. The build projects
+    // each marshal post onto the nearest outline SEGMENT (same FastF1 coordinate frame) with
+    // snap-distance validation; we shade the segments between accepted boundaries in alternating
+    // tones. These are marshal sectors, NOT the 3 official timing sectors — see the legend.
+    const bounds = (d.marshal_boundaries && d.marshal_boundaries.length) ? d.marshal_boundaries : marshalBoundaries(d);
+    if (showSec && bounds.length >= 2) {
+      for (let k = 0; k < bounds.length; k++) {
+        const a = bounds[k], b = bounds[(k + 1) % bounds.length];
+        const part = a < b ? ol.slice(a, b + 1) : ol.slice(a).concat(ol.slice(0, b + 1));
+        h += `<path class="track-sec" d="${line(part)}" style="stroke:${k % 2 ? "#b79bff" : "var(--cyan)"}"/>`;
+      }
+    } else {
+      h += `<path class="track-sec s1" d="${line(ol)}" style="stroke:var(--cyan)"/>`;
+    }
+    (d.marshal_sectors || []).forEach(m => { const xy = m.projected_xy || m.xy; h += `<circle class="marshal" cx="${xy[0]}" cy="${xy[1]}" r="4"/>`; });
+    if (d.start_finish) h += `<g class="startfin"><circle cx="${d.start_finish[0]}" cy="${d.start_finish[1]}" r="11"/><circle cx="${d.start_finish[0]}" cy="${d.start_finish[1]}" r="5"/></g>`;
+    if (showCor) (d.corners || []).forEach((c, i) => {
+      h += `<g class="corner" data-idx="${i}" tabindex="0" role="button" aria-label="Turn ${c.number}">
+        <circle class="hit" cx="${c.xy[0]}" cy="${c.xy[1]}" r="18"/>
+        <circle class="dot" cx="${c.xy[0]}" cy="${c.xy[1]}" r="6"/>
+        <text x="${c.xy[0]}" y="${c.xy[1]}" dy="-11" text-anchor="middle">${c.number}</text></g>`;
+    });
+    const marsh = (d.marshal_sectors || []).length;
+    $("#circ-legend").innerHTML = (marsh
+      ? `<span class="it"><i class="sw s1"></i><i class="sw s3"></i>Marshal sectors (${marsh})</span>`
+      : "") +
+      `<span class="it"><i class="sw sf"></i>Start / finish</span>
+       <span class="it"><i class="sw mk"></i>Marshal post</span>
+       <span class="it osm-attr">Official S1/S2/S3 timing sectors: not available</span>`;
   }
-  (d.marshal_sectors || []).forEach(m => { h += `<circle class="marshal" cx="${m.xy[0]}" cy="${m.xy[1]}" r="4"/>`; });
-  if (d.start_finish) h += `<g class="startfin"><circle cx="${d.start_finish[0]}" cy="${d.start_finish[1]}" r="11"/><circle cx="${d.start_finish[0]}" cy="${d.start_finish[1]}" r="5"/></g>`;
-  if (showCor) (d.corners || []).forEach((c, i) => {
-    h += `<g class="corner" data-idx="${i}" tabindex="0" role="button" aria-label="Turn ${c.number}">
-      <circle class="hit" cx="${c.xy[0]}" cy="${c.xy[1]}" r="18"/>
-      <circle class="dot" cx="${c.xy[0]}" cy="${c.xy[1]}" r="6"/>
-      <text x="${c.xy[0]}" y="${c.xy[1]}" dy="-11" text-anchor="middle">${c.number}</text></g>`;
-  });
   svg.innerHTML = h;
-  $("#circ-loc").textContent = [d.location, d.country].filter(Boolean).join(", ") + "  ·  " + (d.source_event || "");
-  $("#circ-facts").innerHTML = [
-    ["Corners", (d.corners || []).length], ["Marshal posts", (d.marshal_sectors || []).length],
-    ["Coordinate system", "normalised"], ["Pit lane", d.available && d.available.pit_lane ? "yes" : "not derived"],
-  ].map(([k, v]) => `<div class="line"><span class="k">${k}</span><span class="val">${v}</span></div>`).join("");
-  $("#circ-prov").innerHTML = `<div class="prov-h">Provenance</div>
-    <div class="prov-row"><span>Source</span><b>${esc(d.source)}</b></div>
-    <div class="prov-row"><span>Event</span><b>${esc(d.source_event)}</b></div>
-    <div class="prov-row"><span>Retrieved</span><b>${esc(d.retrieved)}</b></div>
-    <div class="prov-row"><span>Licence</span><b>${esc(d.licence)}</b></div>
-    <div class="prov-note">${esc(d.notes)} Sector 1/2/3 shading shows approximate even thirds of the lap (a visual guide, not official timing-sector boundaries); marshal posts are the real FastF1 markers.</div>`;
-  circCornerIdx = -1; $("#circ-corner").innerHTML = '<div class="empty">Hover, click or arrow-key through the corners.</div>';
-  bindCircuitInteractions();
+  // Visible OpenStreetMap attribution on the map itself (ODbL requirement).
+  setCircuitAttribution(osm ? (d.attribution || "© OpenStreetMap contributors") : "");
+  $("#circ-loc").textContent = [d.location, d.country].filter(Boolean).join(", ") + (d.source_event ? "  ·  " + d.source_event : "");
+  const val = d.validation || {}, mp = d.marshal_projection || {};
+  const facts = osm
+    ? [["Geometry", "centreline outline"], ["Corners", "not in OSM data"],
+       ["Track length", d.track_length_m ? d.track_length_m + " m (OSM)" : "—"],
+       ["Loop", d.loop_closed ? "closed" : "open / partial"],
+       ["Source", val.from_relation ? "OSM relation" : "raceway ways"]]
+    : [["Corners", (d.corners || []).length],
+       ["Marshal sectors", mp.n_accepted != null ? `${mp.n_accepted} accepted${mp.n_rejected ? ` · ${mp.n_rejected} rejected` : ""}` : (d.marshal_sectors || []).length],
+       ["Official S1/S2/S3", "unavailable"],
+       ["Start / finish", d.start_finish ? "telemetry S/F" : "—"],
+       ["Pit lane", d.available && d.available.pit_lane ? "yes" : "not derived"]];
+  if (osm && (d.missing || []).length) facts.push(["Not available", d.missing.join(", ")]);
+  $("#circ-facts").innerHTML = facts.map(([k, v]) => `<div class="line"><span class="k">${k}</span><span class="val">${v}</span></div>`).join("");
+  const prov = [["Source", d.source], ["Provider", d.data_provider]];
+  if (d.source_event) prov.push(["Event", d.source_event]);
+  prov.push(["Retrieved", d.retrieved], ["Licence", d.licence]);
+  if (d.attribution) prov.push(["Attribution", d.attribution]);
+  if (d.osm && d.osm.relation_id) prov.push(["OSM relation", String(d.osm.relation_id)]);
+  if (d.osm && (d.osm.way_ids || []).length) prov.push(["OSM way ids", d.osm.way_ids.slice(0, 6).join(", ") + (d.osm.way_ids.length > 6 ? "…" : "")]);
+  $("#circ-prov").innerHTML = `<div class="prov-h">Provenance &amp; geometry type</div>
+    <div class="prov-row"><span>Geometry</span><b>${esc(d.geometry_label || d.geometry_type)}</b></div>
+    ${prov.map(([k, v]) => `<div class="prov-row"><span>${k}</span><b>${esc(v)}</b></div>`).join("")}
+    ${d.identity_basis ? `<div class="prov-note"><b>Identity:</b> ${esc(d.identity_basis)}</div>` : ""}
+    ${mp.n_accepted != null ? `<div class="prov-note"><b>Marshal projection:</b> ${mp.n_accepted} accepted, ${mp.n_rejected} rejected · ${esc(mp.coordinate_reference || "")} · nearest-segment, max snap ${mp.max_snap_units ?? "—"} units. Official S1/S2/S3 timing sectors remain unavailable.</div>` : ""}
+    ${val.accepted_reason ? `<div class="prov-note"><b>Validation:</b> accepted — ${esc(val.accepted_reason)}${val.within_expected_window === false ? " (outside the heuristic length window; accepted on circuit-relation identity)" : ""}.</div>` : ""}
+    ${d.licence_compliance ? `<div class="prov-note"><b>Licensing:</b> ${esc(d.licence_compliance)}</div>` : ""}
+    ${d.config_note ? `<div class="prov-note"><b>Configuration:</b> ${esc(d.config_note)}</div>` : ""}
+    <div class="prov-note">${esc(d.notes)}</div>`;
+  circCornerIdx = -1;
+  $("#circ-corner").innerHTML = osm
+    ? '<div class="empty">OpenStreetMap provides the outline only — corner numbers and sectors are not available for this circuit.</div>'
+    : '<div class="empty">Hover, click or arrow-key through the corners.</div>';
+  if (!osm) bindCircuitInteractions(); else bindCircuitPanZoom();
 }
 function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
 function showCorner(i, lock) {
@@ -415,14 +505,8 @@ function showCorner(i, lock) {
     <div class="cmeta mono">corner ${i + 1} of ${d.corners.length}<br>map x${c.xy[0]} y${c.xy[1]} (normalised)</div>
     ${lock ? '<span class="clk mono">selected</span>' : ""}</div>`;
 }
-function bindCircuitInteractions() {
+function bindCircuitPanZoom() {
   const svg = $("#circ-svg");
-  $$("#circ-svg .corner").forEach(g => {
-    const i = +g.dataset.idx;
-    g.addEventListener("mouseenter", () => showCorner(i, false));
-    g.addEventListener("click", () => { circCornerIdx = i; showCorner(i, true); });
-    g.addEventListener("focus", () => { circCornerIdx = i; showCorner(i, true); });
-  });
   svg.onwheel = ev => { ev.preventDefault(); zoomCircuit(ev.deltaY < 0 ? 0.85 : 1.18, ev); };
   let drag = null;
   svg.onpointerdown = ev => { if (ev.target.closest(".corner")) return; drag = { x: ev.clientX, y: ev.clientY }; svg.setPointerCapture(ev.pointerId); };
@@ -430,12 +514,22 @@ function bindCircuitInteractions() {
   svg.onpointerup = () => { drag = null; };
   svg.onkeydown = ev => {
     const d = state.circuit; if (!d) return;
-    if (ev.key === "ArrowRight" || ev.key === "ArrowDown") { circCornerIdx = (circCornerIdx + 1) % d.corners.length; showCorner(circCornerIdx, true); ev.preventDefault(); }
-    else if (ev.key === "ArrowLeft" || ev.key === "ArrowUp") { circCornerIdx = (circCornerIdx - 1 + d.corners.length) % d.corners.length; showCorner(circCornerIdx, true); ev.preventDefault(); }
+    const corners = d.corners || [];
+    if (corners.length && (ev.key === "ArrowRight" || ev.key === "ArrowDown")) { circCornerIdx = (circCornerIdx + 1) % corners.length; showCorner(circCornerIdx, true); ev.preventDefault(); }
+    else if (corners.length && (ev.key === "ArrowLeft" || ev.key === "ArrowUp")) { circCornerIdx = (circCornerIdx - 1 + corners.length) % corners.length; showCorner(circCornerIdx, true); ev.preventDefault(); }
     else if (ev.key === "+" || ev.key === "=") zoomCircuit(0.85);
     else if (ev.key === "-") zoomCircuit(1.18);
     else if (ev.key === "0") resetCircuit();
   };
+}
+function bindCircuitInteractions() {
+  $$("#circ-svg .corner").forEach(g => {
+    const i = +g.dataset.idx;
+    g.addEventListener("mouseenter", () => showCorner(i, false));
+    g.addEventListener("click", () => { circCornerIdx = i; showCorner(i, true); });
+    g.addEventListener("focus", () => { circCornerIdx = i; showCorner(i, true); });
+  });
+  bindCircuitPanZoom();
 }
 function applyCircView() { $("#circ-svg").setAttribute("viewBox", `${circView.x} ${circView.y} ${circView.w} ${circView.h}`); }
 function zoomCircuit(f, ev) {
