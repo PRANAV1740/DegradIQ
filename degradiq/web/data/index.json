@@ -1,7 +1,7 @@
 {
   "generated": "2026-11-07",
-  "build_id": "20261107T114355Z-60fd47",
-  "build_utc": "2026-11-07T11:43:55.499279+00:00",
+  "build_id": "20261107T124529Z-01ef08",
+  "build_utc": "2026-11-07T12:45:29.415180+00:00",
   "sources": {
     "fastf1": "FastF1 session telemetry (cached)",
     "osm": "OpenStreetMap via Overpass API (ODbL)"
@@ -157,69 +157,6 @@
           "pit_lane_known_in_osm": false
         },
         "config_note": null
-      },
-      {
-        "circuit_id": "interlagos",
-        "name": "Aut\u00f3dromo Jos\u00e9 Carlos Pace (Interlagos)",
-        "events": [
-          "S\u00e3o Paulo Grand Prix"
-        ],
-        "available": true,
-        "geometry_type": "osm_centreline",
-        "source_dataset": "openstreetmap",
-        "geometry_source": "openstreetmap_overpass",
-        "has_corners": false,
-        "availability": {
-          "outline": true,
-          "corners": false,
-          "marshal_sectors": false,
-          "pit_lane": false,
-          "start_finish": false,
-          "pit_lane_known_in_osm": false
-        },
-        "config_note": null
-      },
-      {
-        "circuit_id": "lusail",
-        "name": "Lusail International Circuit",
-        "events": [
-          "Qatar Grand Prix"
-        ],
-        "available": true,
-        "geometry_type": "osm_centreline",
-        "source_dataset": "openstreetmap",
-        "geometry_source": "openstreetmap_overpass",
-        "has_corners": false,
-        "availability": {
-          "outline": true,
-          "corners": false,
-          "marshal_sectors": false,
-          "pit_lane": false,
-          "start_finish": false,
-          "pit_lane_known_in_osm": false
-        },
-        "config_note": null
-      },
-      {
-        "circuit_id": "yas-marina",
-        "name": "Yas Marina Circuit",
-        "events": [
-          "Abu Dhabi Grand Prix"
-        ],
-        "available": true,
-        "geometry_type": "osm_centreline",
-        "source_dataset": "openstreetmap",
-        "geometry_source": "openstreetmap_overpass",
-        "has_corners": false,
-        "availability": {
-          "outline": true,
-          "corners": false,
-          "marshal_sectors": false,
-          "pit_lane": false,
-          "start_finish": false,
-          "pit_lane_known_in_osm": false
-        },
-        "config_note": null
       }
     ],
     "event_to_circuit": {
@@ -255,8 +192,8 @@
     "supported_events": 23,
     "circuits_total": 25,
     "verified": 3,
-    "partial": 7,
-    "unavailable": 15,
+    "partial": 4,
+    "unavailable": 18,
     "failed": 0,
     "classifications": [
       "VERIFIED",
@@ -265,8 +202,8 @@
       "FAILED"
     ],
     "build": {
-      "build_id": "20261107T114355Z-60fd47",
-      "build_utc": "2026-11-07T11:43:55.499279+00:00",
+      "build_id": "20261107T124529Z-01ef08",
+      "build_utc": "2026-11-07T12:45:29.415180+00:00",
       "source_failures": [],
       "served_from_previous": []
     },
@@ -290,7 +227,7 @@
           "Saudi Arabian Grand Prix"
         ],
         "status": "UNAVAILABLE",
-        "reason": "no validated closed circuit loop in OpenStreetMap (raceway_ways loop (284m, gap 0m): length 283m outside expected window; raceway_ways loop (5521m, gap 173m): closure gap 173m exceeds tolerance 76m; raceway_ways loop (1693m, gap 1037m): closure gap 1037m exceeds tolerance 40m)",
+        "reason": "no validated closed circuit loop in OpenStreetMap (raceway_ways loop (284m, gap 0m): length 283m outside expected window; raceway_ways loop (5521m, gap 173m): not node-topology closed (node joins 11, coord joins 0); raceway_ways loop (1693m, gap 1037m): not node-topology closed (node joins 1, coord joins 0))",
         "attempted": "osm"
       },
       {
@@ -300,7 +237,7 @@
           "Australian Grand Prix"
         ],
         "status": "UNAVAILABLE",
-        "reason": "no validated closed circuit loop in OpenStreetMap (relation loop (5314m, gap 0m): loop closed only via 29 coordinate joins, not OSM node topology)",
+        "reason": "no highway=raceway ways or motorsport circuit relation in OpenStreetMap here (e.g. an un-mapped street circuit)",
         "attempted": "osm"
       },
       {
@@ -310,7 +247,7 @@
           "Japanese Grand Prix"
         ],
         "status": "UNAVAILABLE",
-        "reason": "no validated closed circuit loop in OpenStreetMap (raceway_ways loop (6702m, gap 863m): closure gap 863m exceeds tolerance 59m; raceway_ways loop (1267m, gap 0m): length 1266m outside expected window; raceway_ways loop (480m, gap 0m): length 479m outside expected window; raceway_ways loop (165m, gap 0m): length 165m outside expected window)",
+        "reason": "no validated closed circuit loop in OpenStreetMap (raceway_ways loop (6702m, gap 863m): not node-topology closed (node joins 40, coord joins 0); raceway_ways loop (1267m, gap 0m): length 1266m outside expected window; raceway_ways loop (480m, gap 0m): length 479m outside expected window; raceway_ways loop (165m, gap 0m): length 165m outside expected window)",
         "attempted": "osm"
       },
       {
@@ -343,7 +280,7 @@
           "Miami Grand Prix"
         ],
         "status": "UNAVAILABLE",
-        "reason": "no validated closed circuit loop in OpenStreetMap (raceway_ways loop (5691m, gap 718m): closure gap 718m exceeds tolerance 45m; raceway_ways loop (742m, gap 627m): closure gap 627m exceeds tolerance 40m)",
+        "reason": "no validated closed circuit loop in OpenStreetMap (raceway_ways loop (5691m, gap 718m): not node-topology closed (node joins 6, coord joins 0); raceway_ways loop (742m, gap 627m): not node-topology closed (node joins 0, coord joins 0))",
         "attempted": "osm"
       },
       {
@@ -383,7 +320,7 @@
           "Monaco Grand Prix"
         ],
         "status": "UNAVAILABLE",
-        "reason": "no validated closed circuit loop in OpenStreetMap (relation loop (3305m, gap 24m): loop closed only via 38 coordinate joins, not OSM node topology; raceway_ways loop (251m, gap 0m): length 251m outside expected window; raceway_ways loop (408m, gap 324m): closure gap 324m exceeds tolerance 40m; raceway_ways loop (234m, gap 200m): closure gap 200m exceeds tolerance 40m)",
+        "reason": "no validated closed circuit loop in OpenStreetMap (raceway_ways loop (251m, gap 0m): length 251m outside expected window; raceway_ways loop (408m, gap 324m): not node-topology closed (node joins 1, coord joins 0); raceway_ways loop (234m, gap 200m): not node-topology closed (node joins 0, coord joins 0))",
         "attempted": "osm"
       },
       {
@@ -428,7 +365,7 @@
           "Spanish Grand Prix"
         ],
         "status": "UNAVAILABLE",
-        "reason": "FastF1 not accessible (DataNotLoadedError; e.g. 403/not cached); no validated closed circuit loop in OpenStreetMap (raceway_ways loop (2187m, gap 579m): closure gap 579m exceeds tolerance 40m)",
+        "reason": "FastF1 not accessible (DataNotLoadedError; e.g. 403/not cached); no validated closed circuit loop in OpenStreetMap (raceway_ways loop (2187m, gap 579m): not node-topology closed (node joins 0, coord joins 0))",
         "attempted": "fastf1+osm"
       },
       {
@@ -438,7 +375,7 @@
           "Austrian Grand Prix"
         ],
         "status": "UNAVAILABLE",
-        "reason": "no validated closed circuit loop in OpenStreetMap (relation loop (881m, gap 0m): length 880m outside expected window; relation loop (370m, gap 0m): length 370m outside expected window; relation loop (150m, gap 0m): length 149m outside expected window; relation loop (113m, gap 0m): length 112m outside expected window)",
+        "reason": "no validated closed circuit loop in OpenStreetMap (raceway_ways loop (305m, gap 44m): not node-topology closed (node joins 2, coord joins 0); raceway_ways loop (229m, gap 116m): not node-topology closed (node joins 2, coord joins 0); raceway_ways loop (4587m, gap 230m): not node-topology closed (node joins 12, coord joins 0); raceway_ways loop (1018m, gap 23m): not node-topology closed (node joins 2, coord joins 0))",
         "attempted": "osm"
       },
       {
@@ -448,7 +385,7 @@
           "British Grand Prix"
         ],
         "status": "UNAVAILABLE",
-        "reason": "no validated closed circuit loop in OpenStreetMap (relation loop (9634m, gap 330m): loop closed only via 44 coordinate joins, not OSM node topology; relation loop (480m, gap 0m): loop closed only via 1 coordinate joins, not OSM node topology; relation loop (311m, gap 0m): loop closed only via 1 coordinate joins, not OSM node topology; raceway_ways loop (7016m, gap 786m): closure gap 786m exceeds tolerance 52m)",
+        "reason": "no validated closed circuit loop in OpenStreetMap (relation loop (9634m, gap 330m): closure gap 330m exceeds absolute tolerance 40m; relation loop (480m, gap 0m): length 480m outside expected window; relation loop (311m, gap 0m): length 311m outside expected window; raceway_ways loop (7016m, gap 786m): not node-topology closed (node joins 27, coord joins 0))",
         "attempted": "osm"
       },
       {
@@ -458,7 +395,7 @@
           "Belgian Grand Prix"
         ],
         "status": "UNAVAILABLE",
-        "reason": "no validated closed circuit loop in OpenStreetMap (raceway_ways loop (7239m, gap 232m): closure gap 232m exceeds tolerance 62m; raceway_ways loop (1089m, gap 0m): length 1088m outside expected window; raceway_ways loop (1203m, gap 1163m): closure gap 1163m exceeds tolerance 40m; raceway_ways loop (720m, gap 470m): closure gap 470m exceeds tolerance 40m)",
+        "reason": "no validated closed circuit loop in OpenStreetMap (raceway_ways loop (7239m, gap 232m): not node-topology closed (node joins 30, coord joins 0); raceway_ways loop (1089m, gap 0m): length 1088m outside expected window; raceway_ways loop (1203m, gap 1163m): not node-topology closed (node joins 0, coord joins 0); raceway_ways loop (720m, gap 470m): not node-topology closed (node joins 0, coord joins 0))",
         "attempted": "osm"
       },
       {
@@ -468,7 +405,7 @@
           "Hungarian Grand Prix"
         ],
         "status": "UNAVAILABLE",
-        "reason": "no validated closed circuit loop in OpenStreetMap (relation loop (5534m, gap 0m): loop closed only via 11 coordinate joins, not OSM node topology; raceway_ways loop (5440m, gap 669m): closure gap 669m exceeds tolerance 40m; raceway_ways loop (276m, gap 0m): length 276m outside expected window; raceway_ways loop (421m, gap 0m): length 421m outside expected window)",
+        "reason": "no validated closed circuit loop in OpenStreetMap (raceway_ways loop (5440m, gap 669m): not node-topology closed (node joins 2, coord joins 0); raceway_ways loop (276m, gap 0m): length 276m outside expected window; raceway_ways loop (421m, gap 0m): length 421m outside expected window; raceway_ways loop (167m, gap 6m): not node-topology closed (node joins 1, coord joins 0))",
         "attempted": "osm"
       },
       {
@@ -478,7 +415,7 @@
           "Dutch Grand Prix"
         ],
         "status": "UNAVAILABLE",
-        "reason": "no validated closed circuit loop in OpenStreetMap (raceway_ways loop (156m, gap 119m): closure gap 119m exceeds tolerance 40m; raceway_ways loop (5016m, gap 459m): closure gap 459m exceeds tolerance 40m)",
+        "reason": "no validated closed circuit loop in OpenStreetMap (raceway_ways loop (156m, gap 119m): not node-topology closed (node joins 0, coord joins 0); raceway_ways loop (5016m, gap 459m): not node-topology closed (node joins 24, coord joins 0))",
         "attempted": "osm"
       },
       {
@@ -500,7 +437,7 @@
           "Azerbaijan Grand Prix"
         ],
         "status": "UNAVAILABLE",
-        "reason": "no validated closed circuit loop in OpenStreetMap (relation loop (5975m, gap 0m): loop closed only via 49 coordinate joins, not OSM node topology)",
+        "reason": "no validated closed circuit loop in OpenStreetMap (no candidate loops)",
         "attempted": "osm"
       },
       {
@@ -510,7 +447,7 @@
           "Singapore Grand Prix"
         ],
         "status": "UNAVAILABLE",
-        "reason": "no validated closed circuit loop in OpenStreetMap (raceway_ways loop (1223m, gap 575m): closure gap 575m exceeds tolerance 40m)",
+        "reason": "no validated closed circuit loop in OpenStreetMap (raceway_ways loop (1223m, gap 575m): not node-topology closed (node joins 3, coord joins 0))",
         "attempted": "osm"
       },
       {
@@ -520,7 +457,7 @@
           "United States Grand Prix"
         ],
         "status": "UNAVAILABLE",
-        "reason": "no validated closed circuit loop in OpenStreetMap (raceway_ways loop (5785m, gap 271m): closure gap 271m exceeds tolerance 55m; raceway_ways loop (247m, gap 202m): closure gap 202m exceeds tolerance 40m; raceway_ways loop (950m, gap 718m): closure gap 718m exceeds tolerance 40m; raceway_ways loop (981m, gap 0m): length 981m outside expected window)",
+        "reason": "no validated closed circuit loop in OpenStreetMap (raceway_ways loop (5785m, gap 271m): not node-topology closed (node joins 32, coord joins 0); raceway_ways loop (247m, gap 202m): not node-topology closed (node joins 0, coord joins 0); raceway_ways loop (950m, gap 718m): not node-topology closed (node joins 0, coord joins 0); raceway_ways loop (981m, gap 0m): length 981m outside expected window)",
         "attempted": "osm"
       },
       {
@@ -556,22 +493,9 @@
         "events": [
           "S\u00e3o Paulo Grand Prix"
         ],
-        "status": "PARTIAL",
-        "geometry_type": "osm_centreline",
-        "has_corners": false,
-        "source_dataset": "openstreetmap",
-        "track_length_m": 4356,
-        "osm_way_ids": [
-          1309159237
-        ],
-        "osm_relation_id": 17956608,
-        "missing": [
-          "corner numbers",
-          "sector boundaries",
-          "pit lane",
-          "racing direction",
-          "start/finish line"
-        ]
+        "status": "UNAVAILABLE",
+        "reason": "no validated closed circuit loop in OpenStreetMap (raceway_ways loop (5692m, gap 657m): not node-topology closed (node joins 25, coord joins 0); raceway_ways loop (736m, gap 80m): not node-topology closed (node joins 4, coord joins 0); raceway_ways loop (443m, gap 283m): not node-topology closed (node joins 2, coord joins 0); raceway_ways loop (155m, gap 133m): not node-topology closed (node joins 0, coord joins 0))",
+        "attempted": "osm"
       },
       {
         "circuit_id": "las-vegas",
@@ -580,7 +504,7 @@
           "Las Vegas Grand Prix"
         ],
         "status": "UNAVAILABLE",
-        "reason": "no validated closed circuit loop in OpenStreetMap (raceway_ways loop (863m, gap 355m): closure gap 355m exceeds tolerance 40m)",
+        "reason": "no validated closed circuit loop in OpenStreetMap (raceway_ways loop (863m, gap 355m): not node-topology closed (node joins 5, coord joins 0))",
         "attempted": "osm"
       },
       {
@@ -589,22 +513,9 @@
         "events": [
           "Qatar Grand Prix"
         ],
-        "status": "PARTIAL",
-        "geometry_type": "osm_centreline",
-        "has_corners": false,
-        "source_dataset": "openstreetmap",
-        "track_length_m": 5472,
-        "osm_way_ids": [
-          1316027541
-        ],
-        "osm_relation_id": 18052714,
-        "missing": [
-          "corner numbers",
-          "sector boundaries",
-          "pit lane",
-          "racing direction",
-          "start/finish line"
-        ]
+        "status": "UNAVAILABLE",
+        "reason": "no validated closed circuit loop in OpenStreetMap (relation loop (6668m, gap 993m): closure gap 993m exceeds absolute tolerance 40m; raceway_ways loop (5434m, gap 26m): not node-topology closed (node joins 3, coord joins 0); raceway_ways loop (529m, gap 433m): not node-topology closed (node joins 0, coord joins 0); raceway_ways loop (746m, gap 712m): not node-topology closed (node joins 0, coord joins 0))",
+        "attempted": "osm"
       },
       {
         "circuit_id": "yas-marina",
@@ -612,22 +523,9 @@
         "events": [
           "Abu Dhabi Grand Prix"
         ],
-        "status": "PARTIAL",
-        "geometry_type": "osm_centreline",
-        "has_corners": false,
-        "source_dataset": "openstreetmap",
-        "track_length_m": 5383,
-        "osm_way_ids": [
-          1322747130
-        ],
-        "osm_relation_id": 18145580,
-        "missing": [
-          "corner numbers",
-          "sector boundaries",
-          "pit lane",
-          "racing direction",
-          "start/finish line"
-        ]
+        "status": "UNAVAILABLE",
+        "reason": "no validated closed circuit loop in OpenStreetMap (raceway_ways loop (5597m, gap 224m): not node-topology closed (node joins 6, coord joins 0); raceway_ways loop (1130m, gap 620m): not node-topology closed (node joins 2, coord joins 0); raceway_ways loop (1023m, gap 749m): not node-topology closed (node joins 1, coord joins 0); raceway_ways loop (237m, gap 218m): not node-topology closed (node joins 0, coord joins 0))",
+        "attempted": "osm"
       }
     ],
     "events": [
@@ -768,8 +666,8 @@
         "round": 20,
         "event": "S\u00e3o Paulo Grand Prix",
         "circuit_id": "interlagos",
-        "status": "PARTIAL",
-        "geometry_type": "osm_centreline"
+        "status": "UNAVAILABLE",
+        "geometry_type": null
       },
       {
         "round": 21,
@@ -782,15 +680,15 @@
         "round": 22,
         "event": "Qatar Grand Prix",
         "circuit_id": "lusail",
-        "status": "PARTIAL",
-        "geometry_type": "osm_centreline"
+        "status": "UNAVAILABLE",
+        "geometry_type": null
       },
       {
         "round": 23,
         "event": "Abu Dhabi Grand Prix",
         "circuit_id": "yas-marina",
-        "status": "PARTIAL",
-        "geometry_type": "osm_centreline"
+        "status": "UNAVAILABLE",
+        "geometry_type": null
       }
     ]
   },

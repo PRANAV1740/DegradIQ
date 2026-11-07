@@ -23,6 +23,3 @@ FastF1-derived outlines are a separate source and are **not** OSM data.
 - **Autodromo Enzo e Dino Ferrari** (`imola`) — see the file's `osm.way_ids` / `osm.source_urls`.
 - **Circuit Gilles-Villeneuve** (`montreal`) — see the file's `osm.way_ids` / `osm.source_urls`.
 - **Autódromo Hermanos Rodríguez** (`mexico`) — see the file's `osm.way_ids` / `osm.source_urls`.
-- **Autódromo José Carlos Pace (Interlagos)** (`interlagos`) — see the file's `osm.way_ids` / `osm.source_urls`.
-- **Lusail International Circuit** (`lusail`) — see the file's `osm.way_ids` / `osm.source_urls`.
-- **Yas Marina Circuit** (`yas-marina`) — see the file's `osm.way_ids` / `osm.source_urls`.

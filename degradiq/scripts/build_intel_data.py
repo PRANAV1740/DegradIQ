@@ -352,12 +352,16 @@ def _components_with_ids(ways):
         n = w.get("nodes")
         return (n[0], n[-1]) if n and len(n) >= 2 else (None, None)
 
+    def has_nodes(w):
+        return bool(w.get("nodes") and len(w["nodes"]) >= 2)
+
     for i, seed in enumerate(items):
         if i in used:
             continue
         used.add(i)
         path = list(seed["pts"]); ids = [seed["id"]]; names = set(filter(None, [seed["tags"].get("name")]))
         hn, tn = ep_nodes(seed)
+        node_ids_available = has_nodes(seed)
         joins = {"node": 0, "coord": 0}
         changed = True
         while changed:
@@ -398,25 +402,24 @@ def _components_with_ids(ways):
                 else:
                     path = seg[:-1] + path; hn = sn0
                 ids.append(w["id"]); names |= set(filter(None, [w["tags"].get("name")]))
+                node_ids_available = node_ids_available and has_nodes(w)
                 joins[method] += 1; used.add(j); changed = True
-        closed_topology = hn is not None and tn is not None and hn == tn
-        comps.append({"pts": path, "ids": ids, "names": sorted(names),
-                      "joins": joins, "closed_topology": bool(closed_topology)})
+        # Topology closure is only meaningful (and only claimed) when node ids are present AND
+        # no join used coordinate proximity.
+        closed_topology = node_ids_available and joins["coord"] == 0 and hn is not None and tn is not None and hn == tn
+        comps.append({"pts": path, "ids": ids, "names": sorted(names), "joins": joins,
+                      "node_ids_available": bool(node_ids_available), "closed_topology": bool(closed_topology)})
     return comps
 
 
 EXPECTED_MIN_M, EXPECTED_MAX_M = 2800, 8000  # heuristic F1 circuit-length window
 # Closure: a real circuit's chained raceway ways must meet end-to-end within a tight
 # tolerance. We reject anything looser rather than let the SVG draw an artificial closing
-# segment. Documented tolerance: the smaller-bounding closure of an absolute 40 m OR 3% of
-# the circuit's bounding span (whichever is larger), e.g. ~210 m on a 7 km circuit.
-CLOSURE_ABS_M, CLOSURE_FRAC = 40.0, 0.03
+# segment. Closure is established by node-id identity where OSM node refs exist; CLOSURE_ABS_M
+# is the small ABSOLUTE coordinate tolerance used ONLY where node ids are genuinely unavailable
+# (never 3% of the bounding span — proximity is not topology).
+CLOSURE_ABS_M = 40.0
 START_SNAP_M = 60.0  # a relation start node must lie within this of the racing-loop polyline
-
-
-def _is_closed(gap, span):
-    """Tight closure test: a real circuit's chained ways meet within the documented tolerance."""
-    return gap <= max(CLOSURE_ABS_M, span * CLOSURE_FRAC)
 
 
 def _project_point_metric(pts, px, py):
@@ -435,15 +438,32 @@ def _project_point_metric(pts, px, py):
     return best[0], best[1], (second[0] if second else None)
 
 
-def _candidate_sources(data, radius):
-    """Build candidate way-sets: standalone raceway ways, plus each relation's member ways.
+def _relation_racing_evidence(tags, member_way_ids, raceway_ids):
+    """Positive racing-route test for a relation. Returns (ok, evidence_dict).
 
-    Returns list of dicts {kind, ways:[{id,tags,pts}], rel_id, rel_name}. Only ways that
-    belong together are grouped — standalone raceway ways in one set, each relation's own
-    members in their own set — so unrelated roads are never stitched across sets.
+    A relation is a candidate racing route ONLY on positive evidence — not merely because it is
+    'not a multipolygon'. We require a route-type relation with motorsport tags whose member ways
+    are predominantly the fetched highway=raceway ways, OR a relation whose members are almost
+    entirely raceway ways (strong geometry evidence). Area/boundary relations are excluded first.
     """
-    standalone = []
-    rels = []
+    rel_type = tags.get("type")
+    n = len(member_way_ids)
+    raceway_members = sum(1 for wid in member_way_ids if wid in raceway_ids)
+    frac = raceway_members / n if n else 0.0
+    is_route = rel_type in ("route", "route_master")
+    motorsport_tag = tags.get("sport") == "motor" or tags.get("route") in ("motorsport", "race", "racing", "motor")
+    ok = (is_route and motorsport_tag and frac >= 0.6) or frac >= 0.8
+    evidence = {"relation_type": rel_type, "is_route_type": is_route, "motorsport_tag": bool(motorsport_tag),
+                "member_ways": n, "raceway_member_ways": raceway_members, "raceway_member_fraction": round(frac, 2),
+                "tags": {k: tags.get(k) for k in ("type", "sport", "route", "name", "highway", "leisure") if tags.get(k)}}
+    return ok, evidence
+
+
+def _candidate_sources(data, radius):
+    """Build candidate way-sets: standalone highway=raceway ways, plus each relation's member ways
+    that passes POSITIVE racing-route validation. Area/boundary relations and relations without
+    racing evidence are rejected; unrelated roads are never stitched across sets."""
+    standalone, relations_raw = [], []
     for el in data.get("elements", []):
         t = el.get("type"); tags = el.get("tags", {})
         if t == "way" and el.get("geometry"):
@@ -452,25 +472,39 @@ def _candidate_sources(data, radius):
             standalone.append({"id": el["id"], "tags": tags, "nodes": el.get("nodes"),
                                "pts": [(p["lat"], p["lon"]) for p in el["geometry"]]})
         elif t == "relation":
-            mem, roles, start, has_pit, start_way = [], set(), None, False, False
-            for m in el.get("members", []):
-                role = m.get("role", "") or "(none)"
-                roles.add(role)
-                if m.get("type") == "way" and m.get("geometry"):
-                    if m.get("role") in ("pit", "pitlane", "pit_lane"):
-                        has_pit = True  # preserve awareness of the pit-lane member; keep it out of the racing loop
-                        continue
-                    if m.get("role") in ("start", "finish", "start_finish"):
-                        start_way = True  # a start WAY is recorded but NOT stitched into the loop
-                        continue           # and NOT turned into a point (no arbitrary endpoint/centroid)
-                    mem.append({"id": m.get("ref"), "tags": {"name": tags.get("name")},
-                                "pts": [(p["lat"], p["lon"]) for p in m["geometry"]], "role": m.get("role")})
-                elif m.get("type") == "node" and m.get("lat") is not None and "start" in (m.get("role") or ""):
-                    start = (m["lat"], m["lon"])  # a start/finish NODE gives a defensible point
-            if mem:
-                rels.append({"kind": "relation", "ways": mem, "rel_id": el["id"], "rel_name": tags.get("name"),
-                             "roles": sorted(roles), "has_pit": has_pit, "start": start, "start_way_present": start_way,
-                             "n_members": len(el.get("members", []))})
+            relations_raw.append(el)
+    raceway_ids = {w["id"] for w in standalone}
+
+    rels = []
+    for el in relations_raw:
+        tags = el.get("tags", {}); rel_type = tags.get("type")
+        member_roles = {(m.get("role") or "(none)") for m in el.get("members", [])}
+        # 1) Hard reject AREA/boundary relations (multipolygon outer/inner rings are perimeters).
+        if rel_type in ("multipolygon", "boundary") or ({"inner", "outer"} & member_roles):
+            continue
+        member_way_ids = [m.get("ref") for m in el.get("members", []) if m.get("type") == "way"]
+        # 2) POSITIVE racing-route evidence required.
+        ok, evidence = _relation_racing_evidence(tags, member_way_ids, raceway_ids)
+        if not ok:
+            continue
+        mem, roles, start, has_pit, start_way = [], set(), None, False, False
+        for m in el.get("members", []):
+            role = m.get("role", "") or "(none)"
+            roles.add(role)
+            if m.get("type") == "way" and m.get("geometry"):
+                if m.get("role") in ("pit", "pitlane", "pit_lane"):
+                    has_pit = True; continue
+                if m.get("role") in ("start", "finish", "start_finish"):
+                    start_way = True; continue
+                mem.append({"id": m.get("ref"), "tags": {"name": tags.get("name")}, "nodes": m.get("nodes"),
+                            "pts": [(p["lat"], p["lon"]) for p in m["geometry"]], "role": m.get("role")})
+            elif m.get("type") == "node" and m.get("lat") is not None and "start" in (m.get("role") or ""):
+                start = (m["lat"], m["lon"])
+        if mem:
+            rels.append({"kind": "relation", "ways": mem, "rel_id": el["id"], "rel_name": tags.get("name"),
+                         "rel_type": rel_type, "rel_tags": evidence["tags"], "racing_evidence": evidence,
+                         "roles": sorted(roles), "has_pit": has_pit, "start": start,
+                         "start_way_present": start_way, "n_members": len(el.get("members", []))})
     sources = list(rels)
     if standalone:
         sources.append({"kind": "raceway_ways", "ways": standalone, "rel_id": None, "rel_name": None})
@@ -498,40 +532,42 @@ def build_circuit_osm(cfg) -> tuple[dict | None, str | None]:
             if len(path) < 25:
                 continue
             span, length, gap = _path_metrics(path, lat)
-            closure_tol = max(CLOSURE_ABS_M, span * CLOSURE_FRAC)
-            # Closed if the chain's first and last node ids match (exact OSM topology) OR, as a
-            # fallback for coord-chained segments, the metric endpoint gap is within tolerance.
-            topo_closed = comp.get("closed_topology")
+            topo_closed = comp.get("closed_topology")      # node-id closed AND zero coord joins
             nj, cj = comp["joins"]["node"], comp["joins"]["coord"]
-            single_way_closed = nj == 0 and cj == 0 and _is_closed(gap, span)
-            # A racing loop must be established by OSM topology (shared node ids) or be a single
-            # mapped closed way — NEVER by bridging distinct ways on coordinate proximity, which
-            # is how ordinary roads get stitched into a false circuit.
-            geom_ok = topo_closed or single_way_closed
+            nia = comp.get("node_ids_available")
+            # Closure basis: where node ids exist, require exact first/last node-id identity (and
+            # no coordinate joins). Only where node ids are genuinely unavailable do we fall back
+            # to a small ABSOLUTE coordinate tolerance — never 3% of the bounding span.
+            if nia:
+                geom_ok = topo_closed
+                closure_basis = "node-topology: first/last node ids match, zero coordinate joins" if geom_ok else None
+            else:
+                geom_ok = gap <= CLOSURE_ABS_M
+                closure_basis = f"absolute coordinate tolerance {round(CLOSURE_ABS_M)}m (OSM node ids unavailable)" if geom_ok else None
             in_range = EXPECTED_MIN_M <= length <= EXPECTED_MAX_M
             named = bool(comp["names"]) or bool(src.get("rel_name"))
             rel = src["kind"] == "relation"
             accept = geom_ok and (in_range or (rel and named and 2000 <= length <= 9000))
             if not accept:
                 if not geom_ok:
-                    why = (f"loop closed only via {cj} coordinate joins, not OSM node topology"
-                           if cj > 0 else f"closure gap {round(gap)}m exceeds tolerance {round(closure_tol)}m")
+                    why = (f"not node-topology closed (node joins {nj}, coord joins {cj})" if nia
+                           else f"closure gap {round(gap)}m exceeds absolute tolerance {round(CLOSURE_ABS_M)}m")
                 else:
                     why = "length %dm outside expected window" % length
                 rejects.append(f"{src['kind']} loop ({round(length)}m, gap {round(gap)}m): {why}")
                 continue
-            # Prefer topologically-closed, node-chained loops.
+            # Prefer node-topology closed loops and node joins; penalise any coordinate joins.
             score = length - gap * 4 + (1500 if topo_closed else 0) + (800 if rel else 0) \
-                + (400 if named else 0) + 20 * comp["joins"]["node"] - 60 * comp["joins"]["coord"]
+                + (400 if named else 0) + 20 * nj - 80 * cj
             if score > best_score:
-                reason = ("node-topology closed loop" if topo_closed else "metric-closed loop within tolerance") + \
-                    ("" if in_range else f" (length {round(length)}m, accepted on relation identity)")
-                best = (comp, src, span, length, gap, named, in_range, reason); best_score = score
+                best = (comp, src, span, length, gap, named, in_range, closure_basis); best_score = score
     if best is None:
         detail = "; ".join(rejects[:4]) if rejects else "no candidate loops"
         return None, f"no validated closed circuit loop in OpenStreetMap ({detail})"
 
-    comp, src, span, length, gap, named, in_range, accepted_reason = best
+    comp, src, span, length, gap, named, in_range, closure_basis = best
+    accepted_reason = (closure_basis or "") + ("" if in_range else
+                      f" · length {round(length)}m accepted on validated circuit-route identity")
     mperlon = 111320 * math.cos(math.radians(lat))
     pts = [(p[1] * mperlon, p[0] * 111320) for p in comp["pts"]]
     stepn = max(1, len(pts) // 360)
@@ -566,6 +602,8 @@ def build_circuit_osm(cfg) -> tuple[dict | None, str | None]:
                                     "reason": "ambiguous placement" if ambiguous else "start node too far from racing loop"}
         pit_lane_present = bool(src.get("has_pit"))
         rel_validation = {"relation_id": src.get("rel_id"), "relation_name": src.get("rel_name"),
+                          "relation_type": src.get("rel_type"), "relation_tags": src.get("rel_tags"),
+                          "racing_route_evidence": src.get("racing_evidence"),
                           "member_ways_used": len(comp["ids"]), "member_roles": src.get("roles"),
                           "pit_lane_member_present": pit_lane_present,
                           "start_node_member_present": bool(start), "start_way_member_present": bool(src.get("start_way_present")),
@@ -574,8 +612,9 @@ def build_circuit_osm(cfg) -> tuple[dict | None, str | None]:
                                                   ("relation start node rejected" if start else
                                                    ("start way present but not point-mapped" if src.get("start_way_present") else "none"))),
                           "connected_closed_loop": True,
-                          "identity_basis": "member ways chain into a validated closed loop at the known circuit centre; "
-                                            "relation tag alone is not treated as proof"}
+                          "identity_basis": "accepted on POSITIVE racing-route evidence (route-type + motorsport tags "
+                                            "and/or members predominantly highway=raceway) AND a node-topology closed "
+                                            "loop at the known circuit centre; a non-multipolygon tag alone is not proof"}
     geom = {
         "geometry_type": "osm_centreline", "geometry_label": "OpenStreetMap circuit centreline (approximate outline)",
         "source_dataset": "openstreetmap", "geometry_source": "openstreetmap_overpass",
@@ -595,12 +634,13 @@ def build_circuit_osm(cfg) -> tuple[dict | None, str | None]:
         "validation": {"length_m": round(length), "span_m": round(span), "loop_gap_m": round(gap),
                        "loop_gap_ratio": round(gap / max(span, 1), 4),
                        "loop_closed": True, "closed_by_node_topology": bool(comp.get("closed_topology")),
-                       "closure_tolerance_m": round(max(CLOSURE_ABS_M, span * CLOSURE_FRAC)),
+                       "node_ids_available": bool(comp.get("node_ids_available")),
+                       "closure_basis": closure_basis, "closure_abs_tolerance_m": round(CLOSURE_ABS_M),
                        "chain_joins": comp.get("joins"),
                        "expected_window_m": [EXPECTED_MIN_M, EXPECTED_MAX_M],
                        "within_expected_window": bool(in_range), "named": bool(named),
-                       "from_relation": src["kind"] == "relation", "accepted_reason": accepted_reason,
-                       "start_node": start_validation},
+                       "from_relation": src["kind"] == "relation", "relation_type": src.get("rel_type"),
+                       "accepted_reason": accepted_reason, "start_node": start_validation},
         "coordinate_system": "normalised 0-1000 viewBox (equirectangular projection), Y flipped for SVG",
         "available": {"outline": True, "corners": False, "marshal_sectors": False, "pit_lane": False,
                       "start_finish": start_finish is not None, "pit_lane_known_in_osm": pit_lane_present},

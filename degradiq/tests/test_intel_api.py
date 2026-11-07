@@ -298,25 +298,35 @@ class OSMRelationMemberTests(unittest.TestCase):
         return importlib.import_module("degradiq.scripts.build_intel_data")._candidate_sources
 
     def _rel_data(self, with_start_node, with_start_way):
-        members = [{"type": "way", "ref": 10, "role": "", "geometry": [{"lat": 0.0, "lon": 0.0}, {"lat": 0.001, "lon": 0.0}]},
-                   {"type": "way", "ref": 11, "role": "pit", "geometry": [{"lat": 0.0, "lon": 0.001}, {"lat": 0.0005, "lon": 0.001}]}]
+        # a route-type motorsport relation whose racing members (10,15,16) are highway=raceway
+        # ways, so it passes positive validation; plus a pit way and optional start members.
+        racing = [10, 15, 16]
+        members = [{"type": "way", "ref": r, "role": "", "geometry": [{"lat": 0.0, "lon": float(i)}, {"lat": 0.001, "lon": float(i)}]}
+                   for i, r in enumerate(racing)]
+        members.append({"type": "way", "ref": 11, "role": "pit", "geometry": [{"lat": 0.0, "lon": 0.01}, {"lat": 0.0005, "lon": 0.01}]})
         if with_start_way:
             members.append({"type": "way", "ref": 12, "role": "start", "geometry": [{"lat": 0.0005, "lon": -0.0001}, {"lat": 0.0005, "lon": 0.0001}]})
         if with_start_node:
             members.append({"type": "node", "ref": 13, "role": "start", "lat": 0.0005, "lon": 0.0})
-        return {"elements": [{"type": "relation", "id": 1, "tags": {"name": "Test Circuit", "sport": "motor"}, "members": members}]}
+        els = [{"type": "relation", "id": 1, "tags": {"type": "route", "sport": "motor", "name": "Test Circuit"}, "members": members}]
+        for wid in racing:  # standalone highway=raceway ways (positive racing evidence)
+            els.append({"type": "way", "id": wid, "tags": {"highway": "raceway"}, "nodes": [wid, wid + 1],
+                        "geometry": [{"lat": 0.0, "lon": 0.0}, {"lat": 0.001, "lon": 0.0}]})
+        return {"elements": els}
 
     def test_start_node_sets_point_and_pit_excluded(self):
-        src = self._candidates()(self._rel_data(True, False), 2000)[0]
+        rels = [s for s in self._candidates()(self._rel_data(True, False), 2000) if s["kind"] == "relation"]
+        src = rels[0]
         self.assertTrue(src["has_pit"])
-        self.assertEqual(src["start"], (0.0005, 0.0))          # node -> defensible point
-        self.assertEqual([w["id"] for w in src["ways"]], [10])  # pit + start excluded from the loop
+        self.assertEqual(src["start"], (0.0005, 0.0))               # node -> defensible point
+        self.assertEqual([w["id"] for w in src["ways"]], [10, 15, 16])  # pit + start excluded from the loop
 
     def test_start_way_recorded_but_no_point(self):
-        src = self._candidates()(self._rel_data(False, True), 2000)[0]
+        rels = [s for s in self._candidates()(self._rel_data(False, True), 2000) if s["kind"] == "relation"]
+        src = rels[0]
         self.assertTrue(src["start_way_present"])
-        self.assertIsNone(src["start"])                        # never a point from an arbitrary way
-        self.assertEqual([w["id"] for w in src["ways"]], [10])  # start way not stitched into loop
+        self.assertIsNone(src["start"])                             # never a point from an arbitrary way
+        self.assertEqual([w["id"] for w in src["ways"]], [10, 15, 16])  # start way not stitched into loop
 
 
 class NodeTopologyChainingTests(unittest.TestCase):
@@ -358,6 +368,74 @@ class NodeTopologyChainingTests(unittest.TestCase):
         self.assertEqual(len(comps), 1)
         self.assertTrue(comps[0]["closed_topology"])
 
+    def test_single_closed_way_matching_nodes_is_topology_closed(self):
+        way = [{"id": 1, "tags": {}, "nodes": [1, 2, 3, 1], "pts": [(0, 0), (1, 0), (1, 1), (0, 0)]}]
+        c = self._chain()(way)[0]
+        self.assertTrue(c["closed_topology"]); self.assertTrue(c["node_ids_available"])
+
+    def test_single_way_distinct_end_nodes_nearby_coords_not_closed(self):
+        # first/last node ids differ though the coordinates coincide -> NOT topology closed
+        way = [{"id": 1, "tags": {}, "nodes": [1, 2, 3, 9], "pts": [(0, 0), (1, 0), (1, 1), (0, 0)]}]
+        c = self._chain()(way)[0]
+        self.assertFalse(c["closed_topology"]); self.assertTrue(c["node_ids_available"])
+
+    def test_single_way_without_node_ids_flags_unavailable(self):
+        way = [{"id": 1, "tags": {}, "nodes": None, "pts": [(0, 0), (1, 0), (1, 1), (0, 0)]}]
+        c = self._chain()(way)[0]
+        self.assertFalse(c["node_ids_available"]); self.assertFalse(c["closed_topology"])
+
+    def test_coord_joined_multiway_is_not_topology_closed(self):
+        # two coordinate-joined ways (no node ids) forming a loop must NOT claim topology closure
+        ways = [{"id": 1, "tags": {}, "nodes": None, "pts": [(0, 0), (1, 0), (1, 1)]},
+                {"id": 2, "tags": {}, "nodes": None, "pts": [(1, 1), (0, 1), (0, 0)]}]
+        c = self._chain()(ways)[0]
+        self.assertEqual(c["joins"]["coord"], 1)
+        self.assertFalse(c["closed_topology"])           # coord joins can't be topology-closed
+        self.assertFalse(c["node_ids_available"])
+
+
+class RelationTypeFilterTests(unittest.TestCase):
+    """Area/boundary relations must be rejected as racing-loop sources."""
+
+    def _candidates(self):
+        import importlib
+        return importlib.import_module("degradiq.scripts.build_intel_data")._candidate_sources
+
+    def _data(self, rtype, roles, raceway_member_ids=(), rel_tags=None):
+        # relation members (ways 10..) + optional standalone highway=raceway ways with those ids
+        members = [{"type": "way", "ref": 10 + i, "role": r,
+                    "geometry": [{"lat": 0.0, "lon": float(i)}, {"lat": 0.001, "lon": float(i)}]}
+                   for i, r in enumerate(roles)]
+        tags = {"type": rtype, "sport": "motor", "name": "X"}
+        if rel_tags:
+            tags.update(rel_tags)
+        els = [{"type": "relation", "id": 1, "tags": tags, "members": members}]
+        for wid in raceway_member_ids:
+            els.append({"type": "way", "id": wid, "tags": {"highway": "raceway"}, "nodes": [wid * 10, wid * 10 + 1],
+                        "geometry": [{"lat": 0.0, "lon": 0.0}, {"lat": 0.001, "lon": 0.0}]})
+        return {"elements": els}
+
+    def test_multipolygon_inner_outer_rejected(self):
+        srcs = self._candidates()(self._data("multipolygon", ["outer", "inner"]), 2000)
+        self.assertFalse(any(s["kind"] == "relation" for s in srcs))
+
+    def test_sport_motor_with_inner_outer_rejected_even_without_type(self):
+        srcs = self._candidates()(self._data(None, ["outer", "inner"]), 2000)
+        self.assertFalse(any(s["kind"] == "relation" for s in srcs))
+
+    def test_non_multipolygon_without_racing_evidence_rejected(self):
+        # a route relation whose members are NOT raceway ways -> no positive evidence -> rejected
+        srcs = self._candidates()(self._data("route", ["", "forward"], raceway_member_ids=()), 2000)
+        self.assertFalse(any(s["kind"] == "relation" for s in srcs))
+
+    def test_route_relation_with_raceway_members_accepted(self):
+        # route + motorsport tag + members are highway=raceway ways (ids 10,11) -> accepted
+        srcs = self._candidates()(self._data("route", ["", "forward"], raceway_member_ids=(10, 11)), 2000)
+        rels = [s for s in srcs if s["kind"] == "relation"]
+        self.assertEqual(len(rels), 1)
+        self.assertEqual(rels[0]["rel_type"], "route")
+        self.assertGreaterEqual(rels[0]["racing_evidence"]["raceway_member_fraction"], 0.6)
+
 
 class ClosureAndStartValidationTests(unittest.TestCase):
     """Tight OSM closure + metric start-node validation."""
@@ -365,14 +443,6 @@ class ClosureAndStartValidationTests(unittest.TestCase):
     def _mod(self):
         import importlib
         return importlib.import_module("degradiq.scripts.build_intel_data")
-
-    def test_large_closure_gap_rejected(self):
-        m = self._mod()
-        self.assertTrue(m._is_closed(0, 2000))          # perfectly closed
-        self.assertTrue(m._is_closed(26, 1464))         # lusail (1.8%) — accepted
-        self.assertFalse(m._is_closed(230, 1253))       # red-bull-ring (18.4%) — rejected
-        self.assertFalse(m._is_closed(232, 2069))       # spa (11.2%) — rejected
-        self.assertFalse(m._is_closed(224, 1724))       # yas-marina (13%) — rejected
 
     def test_start_node_distance_projection(self):
         m = self._mod()
