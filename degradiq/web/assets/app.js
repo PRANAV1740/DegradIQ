@@ -415,7 +415,9 @@ function renderCircuit() {
   Object.assign(circView, { x: 0, y: 0, w: 1000, h: 1000 }); svg.setAttribute("viewBox", "0 0 1000 1000");
   const ol = d.outline, n = ol.length;
   const line = pts => pts.map((p, i) => (i ? "L" : "M") + p[0] + " " + p[1]).join(" ");
-  let h = `<path class="track-base" d="${line(ol)}${osm && !d.loop_closed ? "" : " Z"}"/>`;
+  // FastF1 laps naturally return to the start (close with Z); OSM outlines are never
+  // force-closed — the validated near-zero gap is left as-is rather than drawing a segment.
+  let h = `<path class="track-base" d="${line(ol)}${osm ? "" : " Z"}"/>`;
   if (osm) {
     // Single-colour outline only — never invent sector shading on an OSM centreline.
     h += `<path class="track-sec s1" d="${line(ol)}" style="stroke:var(--cyan)"/>`;

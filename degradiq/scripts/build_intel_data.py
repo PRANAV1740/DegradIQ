@@ -301,11 +301,13 @@ def _overpass(lat, lon, radius):
     chain ways that belong together (standalone raceway ways, or one relation's members) —
     never unrelated ordinary roads.
     """
+    # `out geom;` returns full way bodies — tags, the ordered node-id list AND the geometry —
+    # so ways can be chained by exact shared node ids, not merely by coordinate proximity.
     q = (f'[out:json][timeout:50];('
          f'way["highway"="raceway"](around:{radius},{lat},{lon});'
          f'relation["highway"="raceway"](around:{radius},{lat},{lon});'
          f'relation["sport"="motor"](around:{radius},{lat},{lon});'
-         f');out tags geom;')
+         f');out geom;')
     last = None
     for base in OVERPASS_MIRRORS:
         for attempt in range(2):
@@ -328,30 +330,109 @@ def _path_metrics(path, lat0):
     return span, length, gap
 
 
-def _components_with_ids(ways, tol=1.6e-4):
-    """Chain raceway ways into connected polylines, tracking contributing way ids + names."""
+COORD_FALLBACK_TOL = 4.5e-5  # ~5 m — documented fallback ONLY where node topology is absent
+
+
+def _near(a, b, tol=COORD_FALLBACK_TOL):
+    return abs(a[0] - b[0]) < tol and abs(a[1] - b[1]) < tol
+
+
+def _components_with_ids(ways):
+    """Chain ways into polylines by EXACT shared node ids (OSM topology).
+
+    Two ways connect only when they share an endpoint node id. A small coordinate tolerance
+    (~5 m) is used only when node ids are unavailable for a way (e.g. relation members from
+    Overpass), and never to bridge two ways that both HAVE node ids but do not share one — so
+    coordinate proximity can never silently connect unrelated ways. Tracks join provenance.
+    """
     items = [w for w in ways if len(w["pts"]) >= 2]
     comps, used = [], set()
+
+    def ep_nodes(w):
+        n = w.get("nodes")
+        return (n[0], n[-1]) if n and len(n) >= 2 else (None, None)
+
     for i, seed in enumerate(items):
         if i in used:
             continue
+        used.add(i)
         path = list(seed["pts"]); ids = [seed["id"]]; names = set(filter(None, [seed["tags"].get("name")]))
-        used.add(i); changed = True
+        hn, tn = ep_nodes(seed)
+        joins = {"node": 0, "coord": 0}
+        changed = True
         while changed:
             changed = False
             for j, w in enumerate(items):
                 if j in used:
                     continue
-                for seg in (w["pts"], w["pts"][::-1]):
-                    if abs(path[-1][0] - seg[0][0]) < tol and abs(path[-1][1] - seg[0][1]) < tol:
-                        path += seg[1:]; ids.append(w["id"]); names |= set(filter(None, [w["tags"].get("name")])); used.add(j); changed = True; break
-                    if abs(path[0][0] - seg[-1][0]) < tol and abs(path[0][1] - seg[-1][1]) < tol:
-                        path = seg[:-1] + path; ids.append(w["id"]); names |= set(filter(None, [w["tags"].get("name")])); used.add(j); changed = True; break
-        comps.append({"pts": path, "ids": ids, "names": sorted(names)})
+                wn0, wn1 = ep_nodes(w); wp = w["pts"]
+                attached = None  # ("tail"/"head", reversed, method)
+                # 1) exact node-id connectivity
+                if tn is not None:
+                    if wn0 == tn:
+                        attached = ("tail", False, "node")
+                    elif wn1 == tn:
+                        attached = ("tail", True, "node")
+                if attached is None and hn is not None:
+                    if wn1 == hn:
+                        attached = ("head", False, "node")
+                    elif wn0 == hn:
+                        attached = ("head", True, "node")
+                # 2) coordinate fallback ONLY when node topology is unavailable on a side
+                if attached is None and (tn is None or wn0 is None or wn1 is None):
+                    if _near(path[-1], wp[0]):
+                        attached = ("tail", False, "coord")
+                    elif _near(path[-1], wp[-1]):
+                        attached = ("tail", True, "coord")
+                    elif _near(path[0], wp[-1]):
+                        attached = ("head", False, "coord")
+                    elif _near(path[0], wp[0]):
+                        attached = ("head", True, "coord")
+                if attached is None:
+                    continue
+                side, rev, method = attached
+                seg = wp[::-1] if rev else wp
+                sn0, sn1 = (wn1, wn0) if rev else (wn0, wn1)
+                if side == "tail":
+                    path += seg[1:]; tn = sn1
+                else:
+                    path = seg[:-1] + path; hn = sn0
+                ids.append(w["id"]); names |= set(filter(None, [w["tags"].get("name")]))
+                joins[method] += 1; used.add(j); changed = True
+        closed_topology = hn is not None and tn is not None and hn == tn
+        comps.append({"pts": path, "ids": ids, "names": sorted(names),
+                      "joins": joins, "closed_topology": bool(closed_topology)})
     return comps
 
 
 EXPECTED_MIN_M, EXPECTED_MAX_M = 2800, 8000  # heuristic F1 circuit-length window
+# Closure: a real circuit's chained raceway ways must meet end-to-end within a tight
+# tolerance. We reject anything looser rather than let the SVG draw an artificial closing
+# segment. Documented tolerance: the smaller-bounding closure of an absolute 40 m OR 3% of
+# the circuit's bounding span (whichever is larger), e.g. ~210 m on a 7 km circuit.
+CLOSURE_ABS_M, CLOSURE_FRAC = 40.0, 0.03
+START_SNAP_M = 60.0  # a relation start node must lie within this of the racing-loop polyline
+
+
+def _is_closed(gap, span):
+    """Tight closure test: a real circuit's chained ways meet within the documented tolerance."""
+    return gap <= max(CLOSURE_ABS_M, span * CLOSURE_FRAC)
+
+
+def _project_point_metric(pts, px, py):
+    """Nearest point on a metric polyline to (px, py). Returns (distance_m, foot_xy, 2nd_dist)."""
+    best = second = None
+    for i in range(len(pts) - 1):
+        ax, ay = pts[i]; bx, by = pts[i + 1]
+        dx, dy = bx - ax, by - ay; L2 = dx * dx + dy * dy
+        t = 0.0 if L2 == 0 else max(0.0, min(1.0, ((px - ax) * dx + (py - ay) * dy) / L2))
+        fx, fy = ax + t * dx, ay + t * dy
+        d = math.hypot(px - fx, py - fy)
+        if best is None or d < best[0]:
+            second = best; best = (d, (fx, fy), i)
+        elif second is None or d < second[0]:
+            second = (d, (fx, fy), i)
+    return best[0], best[1], (second[0] if second else None)
 
 
 def _candidate_sources(data, radius):
@@ -368,7 +449,8 @@ def _candidate_sources(data, radius):
         if t == "way" and el.get("geometry"):
             if tags.get("area") == "yes" or tags.get("raceway") in ("pitlane", "paddock"):
                 continue
-            standalone.append({"id": el["id"], "tags": tags, "pts": [(p["lat"], p["lon"]) for p in el["geometry"]]})
+            standalone.append({"id": el["id"], "tags": tags, "nodes": el.get("nodes"),
+                               "pts": [(p["lat"], p["lon"]) for p in el["geometry"]]})
         elif t == "relation":
             mem, roles, start, has_pit, start_way = [], set(), None, False, False
             for m in el.get("members", []):
@@ -416,21 +498,34 @@ def build_circuit_osm(cfg) -> tuple[dict | None, str | None]:
             if len(path) < 25:
                 continue
             span, length, gap = _path_metrics(path, lat)
-            closed = gap < max(250, span * 0.12)
+            closure_tol = max(CLOSURE_ABS_M, span * CLOSURE_FRAC)
+            # Closed if the chain's first and last node ids match (exact OSM topology) OR, as a
+            # fallback for coord-chained segments, the metric endpoint gap is within tolerance.
+            topo_closed = comp.get("closed_topology")
+            nj, cj = comp["joins"]["node"], comp["joins"]["coord"]
+            single_way_closed = nj == 0 and cj == 0 and _is_closed(gap, span)
+            # A racing loop must be established by OSM topology (shared node ids) or be a single
+            # mapped closed way — NEVER by bridging distinct ways on coordinate proximity, which
+            # is how ordinary roads get stitched into a false circuit.
+            geom_ok = topo_closed or single_way_closed
             in_range = EXPECTED_MIN_M <= length <= EXPECTED_MAX_M
             named = bool(comp["names"]) or bool(src.get("rel_name"))
             rel = src["kind"] == "relation"
-            # Acceptance: a closed loop in range, OR a named circuit relation forming a clean
-            # closed loop just outside range (2.0-9.0 km). Record the decision either way.
-            accept = closed and (in_range or (rel and named and 2000 <= length <= 9000))
+            accept = geom_ok and (in_range or (rel and named and 2000 <= length <= 9000))
             if not accept:
-                why = ("not closed" if not closed else "length %dm outside expected window" % length)
+                if not geom_ok:
+                    why = (f"loop closed only via {cj} coordinate joins, not OSM node topology"
+                           if cj > 0 else f"closure gap {round(gap)}m exceeds tolerance {round(closure_tol)}m")
+                else:
+                    why = "length %dm outside expected window" % length
                 rejects.append(f"{src['kind']} loop ({round(length)}m, gap {round(gap)}m): {why}")
                 continue
-            score = length - gap * 4 + (800 if rel else 0) + (400 if named else 0)
+            # Prefer topologically-closed, node-chained loops.
+            score = length - gap * 4 + (1500 if topo_closed else 0) + (800 if rel else 0) \
+                + (400 if named else 0) + 20 * comp["joins"]["node"] - 60 * comp["joins"]["coord"]
             if score > best_score:
-                reason = ("closed loop within %d-%dm circuit window" % (EXPECTED_MIN_M, EXPECTED_MAX_M)) if in_range \
-                    else "named circuit relation forming a clean closed loop (length %dm, just outside heuristic window)" % length
+                reason = ("node-topology closed loop" if topo_closed else "metric-closed loop within tolerance") + \
+                    ("" if in_range else f" (length {round(length)}m, accepted on relation identity)")
                 best = (comp, src, span, length, gap, named, in_range, reason); best_score = score
     if best is None:
         detail = "; ".join(rejects[:4]) if rejects else "no candidate loops"
@@ -450,17 +545,34 @@ def build_circuit_osm(cfg) -> tuple[dict | None, str | None]:
     # because its member ways chain into a validated closed loop near the known circuit centre.
     rel_validation = None
     start_finish = None
+    start_validation = None
     pit_lane_present = False
     if src["kind"] == "relation":
         start = src.get("start")
         if start:
-            start_finish = nm(start[1] * mperlon, start[0] * 111320)
+            # Validate the start NODE against the selected racing-loop polyline: project it in
+            # metric coordinates, require it within START_SNAP_M and not ambiguous; otherwise
+            # reject it rather than render an unvalidated node as the start/finish.
+            sx, sy = start[1] * mperlon, start[0] * 111320
+            sdist, foot, second = _project_point_metric(pts, sx, sy)
+            ambiguous = second is not None and second < sdist * 1.4 and second < START_SNAP_M
+            if sdist <= START_SNAP_M and not ambiguous:
+                start_finish = nm(foot[0], foot[1])
+                start_validation = {"status": "accepted", "snap_distance_m": round(sdist, 1),
+                                    "threshold_m": START_SNAP_M, "projected_onto_loop": True}
+            else:
+                start_validation = {"status": "rejected", "snap_distance_m": round(sdist, 1),
+                                    "threshold_m": START_SNAP_M,
+                                    "reason": "ambiguous placement" if ambiguous else "start node too far from racing loop"}
         pit_lane_present = bool(src.get("has_pit"))
         rel_validation = {"relation_id": src.get("rel_id"), "relation_name": src.get("rel_name"),
                           "member_ways_used": len(comp["ids"]), "member_roles": src.get("roles"),
                           "pit_lane_member_present": pit_lane_present,
                           "start_node_member_present": bool(start), "start_way_member_present": bool(src.get("start_way_present")),
-                          "start_finish_source": "relation start node" if start else ("start way present but not point-mapped" if src.get("start_way_present") else "none"),
+                          "start_node_validation": start_validation,
+                          "start_finish_source": ("relation start node (validated)" if start_finish else
+                                                  ("relation start node rejected" if start else
+                                                   ("start way present but not point-mapped" if src.get("start_way_present") else "none"))),
                           "connected_closed_loop": True,
                           "identity_basis": "member ways chain into a validated closed loop at the known circuit centre; "
                                             "relation tag alone is not treated as proof"}
@@ -481,9 +593,14 @@ def build_circuit_osm(cfg) -> tuple[dict | None, str | None]:
                 "pit_lane_in_osm": pit_lane_present, "relation_validation": rel_validation,
                 "retrieved_utc": datetime.now(timezone.utc).isoformat()},
         "validation": {"length_m": round(length), "span_m": round(span), "loop_gap_m": round(gap),
-                       "loop_closed": True, "expected_window_m": [EXPECTED_MIN_M, EXPECTED_MAX_M],
+                       "loop_gap_ratio": round(gap / max(span, 1), 4),
+                       "loop_closed": True, "closed_by_node_topology": bool(comp.get("closed_topology")),
+                       "closure_tolerance_m": round(max(CLOSURE_ABS_M, span * CLOSURE_FRAC)),
+                       "chain_joins": comp.get("joins"),
+                       "expected_window_m": [EXPECTED_MIN_M, EXPECTED_MAX_M],
                        "within_expected_window": bool(in_range), "named": bool(named),
-                       "from_relation": src["kind"] == "relation", "accepted_reason": accepted_reason},
+                       "from_relation": src["kind"] == "relation", "accepted_reason": accepted_reason,
+                       "start_node": start_validation},
         "coordinate_system": "normalised 0-1000 viewBox (equirectangular projection), Y flipped for SVG",
         "available": {"outline": True, "corners": False, "marshal_sectors": False, "pit_lane": False,
                       "start_finish": start_finish is not None, "pit_lane_known_in_osm": pit_lane_present},
@@ -751,8 +868,29 @@ def main(circuits_only=False):
     print(f"\nBuild {build_id}: {counts['VERIFIED']} VERIFIED, {counts['PARTIAL']} PARTIAL, "
           f"{counts['UNAVAILABLE']} UNAVAILABLE, {counts['FAILED']} FAILED (of {len(CIRCUITS)}); "
           f"available={len(circuits_index)}; served_from_previous={len(served_prev)}; events={len(calendar)}", flush=True)
-    print("PROMOTED. Post-promotion validation: " + ("OK" if not post else "PROBLEMS: " + "; ".join(post)), flush=True)
+    if post:
+        print("POST-PROMOTION VALIDATION FAILED — automatically rolling back to last known-good dataset.", flush=True)
+        for p in post:
+            print("  -", p, flush=True)
+        restored = _rollback(OUT)
+        print("ROLLED BACK." if restored else "ROLLBACK: no backup available (dataset left as-is for inspection).", flush=True)
+        return
+    print("PROMOTED. Post-promotion validation: OK", flush=True)
     print(f"Rollback copy at {OUT/'_backup'}.", flush=True)
+
+
+def _rollback(root) -> bool:
+    """Restore the last known-good dataset from <root>/_backup. Returns True if restored."""
+    import shutil
+    backup = root / "_backup"
+    if not (backup / "index.json").is_file() or not (backup / "circuits").exists():
+        return False
+    for f in (root / "circuits").glob("*.json"):
+        f.unlink()
+    for f in (backup / "circuits").glob("*.json"):
+        shutil.copy2(f, root / "circuits" / f.name)
+    shutil.copy2(backup / "index.json", root / "index.json")
+    return True
 
 
 def _promote(STAGE, circuits_index, coverage, source_failures, os, shutil):
