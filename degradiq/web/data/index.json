@@ -1,7 +1,7 @@
 {
   "generated": "2026-11-07",
-  "build_id": "20261107T124529Z-01ef08",
-  "build_utc": "2026-11-07T12:45:29.415180+00:00",
+  "build_id": "20261107T130757Z-53b27c",
+  "build_utc": "2026-11-07T13:07:57.311250+00:00",
   "sources": {
     "fastf1": "FastF1 session telemetry (cached)",
     "osm": "OpenStreetMap via Overpass API (ODbL)"
@@ -202,8 +202,8 @@
       "FAILED"
     ],
     "build": {
-      "build_id": "20261107T124529Z-01ef08",
-      "build_utc": "2026-11-07T12:45:29.415180+00:00",
+      "build_id": "20261107T130757Z-53b27c",
+      "build_utc": "2026-11-07T13:07:57.311250+00:00",
       "source_failures": [],
       "served_from_previous": []
     },
@@ -385,7 +385,7 @@
           "British Grand Prix"
         ],
         "status": "UNAVAILABLE",
-        "reason": "no validated closed circuit loop in OpenStreetMap (relation loop (9634m, gap 330m): closure gap 330m exceeds absolute tolerance 40m; relation loop (480m, gap 0m): length 480m outside expected window; relation loop (311m, gap 0m): length 311m outside expected window; raceway_ways loop (7016m, gap 786m): not node-topology closed (node joins 27, coord joins 0))",
+        "reason": "no highway=raceway ways or motorsport circuit relation in OpenStreetMap here (e.g. an un-mapped street circuit)",
         "attempted": "osm"
       },
       {
@@ -514,7 +514,7 @@
           "Qatar Grand Prix"
         ],
         "status": "UNAVAILABLE",
-        "reason": "no validated closed circuit loop in OpenStreetMap (relation loop (6668m, gap 993m): closure gap 993m exceeds absolute tolerance 40m; raceway_ways loop (5434m, gap 26m): not node-topology closed (node joins 3, coord joins 0); raceway_ways loop (529m, gap 433m): not node-topology closed (node joins 0, coord joins 0); raceway_ways loop (746m, gap 712m): not node-topology closed (node joins 0, coord joins 0))",
+        "reason": "no validated closed circuit loop in OpenStreetMap (raceway_ways loop (5434m, gap 26m): not node-topology closed (node joins 3, coord joins 0); raceway_ways loop (529m, gap 433m): not node-topology closed (node joins 0, coord joins 0); raceway_ways loop (746m, gap 712m): not node-topology closed (node joins 0, coord joins 0); raceway_ways loop (775m, gap 492m): not node-topology closed (node joins 0, coord joins 0))",
         "attempted": "osm"
       },
       {

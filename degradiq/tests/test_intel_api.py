@@ -434,7 +434,42 @@ class RelationTypeFilterTests(unittest.TestCase):
         rels = [s for s in srcs if s["kind"] == "relation"]
         self.assertEqual(len(rels), 1)
         self.assertEqual(rels[0]["rel_type"], "route")
-        self.assertGreaterEqual(rels[0]["racing_evidence"]["raceway_member_fraction"], 0.6)
+        ev = rels[0]["racing_evidence"]
+        self.assertGreaterEqual(ev["raceway_by_count"]["fraction"], 0.8)
+        self.assertGreaterEqual(ev["raceway_by_length"]["fraction"], 0.8)
+
+    def test_bus_route_rejected(self):
+        srcs = self._candidates()(self._data("route", ["", "forward"], raceway_member_ids=(10, 11),
+                                             rel_tags={"route": "bus"}), 2000)
+        self.assertFalse(any(s["kind"] == "relation" for s in srcs))
+
+    def test_generic_sport_motor_without_route_rejected(self):
+        # type absent, sport=motor, but members are not raceway -> no positive evidence
+        srcs = self._candidates()(self._data(None, ["", "forward"], raceway_member_ids=()), 2000)
+        self.assertFalse(any(s["kind"] == "relation" for s in srcs))
+
+    def test_proposed_circuit_rejected_when_flag_off(self):
+        import importlib
+        m = importlib.import_module("degradiq.scripts.build_intel_data")
+        self.assertFalse(m.ALLOW_PROPOSED_CIRCUIT_RELATIONS)
+        srcs = self._candidates()(self._data("circuit", ["", "forward"], raceway_member_ids=(10, 11)), 2000)
+        self.assertFalse(any(s["kind"] == "relation" for s in srcs))
+
+    def test_high_count_but_insufficient_length_rejected(self):
+        # 2 of 2 eligible members are raceway by COUNT impossible to fail; craft 4 short raceway +
+        # 1 long non-raceway -> count 0.8 but length < 0.8 -> rejected
+        members = []
+        for i in range(4):  # short raceway members (role "")
+            members.append({"type": "way", "ref": 20 + i, "role": "",
+                            "geometry": [{"lat": 0.0, "lon": float(i) * 0.001}, {"lat": 0.0, "lon": float(i) * 0.001 + 0.0005}]})
+        members.append({"type": "way", "ref": 99, "role": "",   # long NON-raceway member
+                        "geometry": [{"lat": 0.0, "lon": 0.0}, {"lat": 0.05, "lon": 0.0}]})
+        els = [{"type": "relation", "id": 1, "tags": {"type": "route", "sport": "motor", "name": "X"}, "members": members}]
+        for wid in (20, 21, 22, 23):  # only the short ways are highway=raceway
+            els.append({"type": "way", "id": wid, "tags": {"highway": "raceway"}, "nodes": [wid, wid + 1],
+                        "geometry": [{"lat": 0.0, "lon": 0.0}, {"lat": 0.0, "lon": 0.0005}]})
+        srcs = self._candidates()({"elements": els}, 2000)
+        self.assertFalse(any(s["kind"] == "relation" for s in srcs))
 
 
 class ClosureAndStartValidationTests(unittest.TestCase):
@@ -492,6 +527,30 @@ class PromotionRollbackTests(unittest.TestCase):
                 "circuits": {"event_to_circuit": {"A Grand Prix": "a"}}, "coverage": {}}))
             probs = m._validate_dataset(root, [{"circuit_id": "a"}], {"A Grand Prix": "a"})
             self.assertTrue(any("file missing" in p for p in probs))
+
+    def test_fault_injection_post_promotion_failure_rolls_back(self):
+        # Full flow: a good promoted dataset + backup; inject a post-promotion failure (delete a
+        # circuit file the index references); detect it; auto-rollback; revalidate clean.
+        import tempfile, json as _json
+        m = self._mod()
+        good_geom = {"circuit_id": "a", "name": "A", "events": ["A Grand Prix"],
+                     "outline": [[i, i] for i in range(0, 600, 20)], "corners": [], "geometry_type": "osm_centreline",
+                     "source_dataset": "openstreetmap", "coordinate_reference": "x", "licence": "ODbL",
+                     "osm": {"way_ids": [1]}}
+        idx = {"circuits": {"event_to_circuit": {"A Grand Prix": "a"}}, "coverage": {}}
+        cindex = [{"circuit_id": "a"}]
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            for sub in ("circuits", "_backup/circuits"):
+                (root / sub).mkdir(parents=True)
+            for base in (root, root / "_backup"):
+                (base / "circuits" / "a.json").write_text(_json.dumps(good_geom))
+                (base / "index.json").write_text(_json.dumps(idx))
+            # inject failure: promoted circuit file goes missing
+            (root / "circuits" / "a.json").unlink()
+            self.assertTrue(m._validate_dataset(root, cindex, {"A Grand Prix": "a"}))   # detected
+            self.assertTrue(m._rollback(root))                                          # auto-rollback
+            self.assertEqual(m._validate_dataset(root, cindex, {"A Grand Prix": "a"}), [])  # clean again
 
 
 if __name__ == "__main__":
