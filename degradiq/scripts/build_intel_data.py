@@ -79,16 +79,25 @@ CIRCUITS = [
     {"id": "suzuka", "name": "Suzuka International Racing Course", "location": "Suzuka", "country": "Japan",
      "events": ["Japanese Grand Prix"], "osm": (34.8431, 136.5407)},
     {"id": "shanghai", "name": "Shanghai International Circuit", "location": "Shanghai", "country": "China",
-     "events": ["Chinese Grand Prix"], "osm": (31.3389, 121.2197)},
+     "events": ["Chinese Grand Prix"], "osm": (31.3389, 121.2197),
+     "osm_identity": {"name_aliases": ["shanghai international circuit"], "reviewed_way_ids": [156328670],
+                      "review_note": "OSM way 156328670 is the unnamed Shanghai International Circuit F1 track loop, "
+                                     "independently reviewed (openstreetmap.org/way/156328670)"}},
     {"id": "miami", "name": "Miami International Autodrome", "location": "Miami Gardens", "country": "United States",
      "events": ["Miami Grand Prix"], "osm": (25.9581, -80.2389)},
     {"id": "imola", "name": "Autodromo Enzo e Dino Ferrari", "location": "Imola", "country": "Italy",
-     "events": ["Emilia Romagna Grand Prix"], "osm": (44.3439, 11.7167)},
+     "events": ["Emilia Romagna Grand Prix"], "osm": (44.3439, 11.7167),
+     "osm_identity": {"name_aliases": ["autodromo enzo e dino ferrari", "imola",
+                                       "variante tamburello", "variante villeneuve", "tosa", "piratella",
+                                       "acque minerali", "rivazza", "gresini"],
+                      "review_note": "member ways carry Imola's distinctive corner names (Tosa, Piratella, "
+                                     "Rivazza, Acque Minerali, Variante Tamburello/Villeneuve) — reviewed as Imola"}},
     {"id": "monaco", "name": "Circuit de Monaco", "location": "Monte Carlo", "country": "Monaco",
      "events": ["Monaco Grand Prix"], "osm": (43.7347, 7.4206),
      "config_note": "Street circuit — OSM raceway coverage is partial for public-road circuits."},
     {"id": "montreal", "name": "Circuit Gilles-Villeneuve", "location": "Montréal", "country": "Canada",
-     "events": ["Canadian Grand Prix"], "osm": (45.5000, -73.5228)},
+     "events": ["Canadian Grand Prix"], "osm": (45.5000, -73.5228),
+     "osm_identity": {"name_aliases": ["circuit gilles-villeneuve", "gilles-villeneuve", "gilles villeneuve"]}},
     {"id": "barcelona", "name": "Circuit de Barcelona-Catalunya", "location": "Montmeló", "country": "Spain",
      "events": ["Barcelona Grand Prix"], "fastf1": (2024, "Spanish Grand Prix"), "osm": (41.5700, 2.2611),
      "config_note": "The 2024 'Spanish Grand Prix' was held here at Barcelona-Catalunya; in 2026 it is the Barcelona GP."},
@@ -118,7 +127,8 @@ CIRCUITS = [
     {"id": "cota", "name": "Circuit of the Americas", "location": "Austin", "country": "United States",
      "events": ["United States Grand Prix"], "osm": (30.1328, -97.6411)},
     {"id": "mexico", "name": "Autódromo Hermanos Rodríguez", "location": "Mexico City", "country": "Mexico",
-     "events": ["Mexico City Grand Prix"], "osm": (19.4042, -99.0907)},
+     "events": ["Mexico City Grand Prix"], "osm": (19.4042, -99.0907),
+     "osm_identity": {"name_aliases": ["autodromo hermanos rodriguez", "hermanos rodriguez"]}},
     {"id": "interlagos", "name": "Autódromo José Carlos Pace (Interlagos)", "location": "São Paulo", "country": "Brazil",
      "events": ["São Paulo Grand Prix"], "osm": (-23.7036, -46.6997)},
     {"id": "las-vegas", "name": "Las Vegas Strip Circuit", "location": "Las Vegas", "country": "United States",
@@ -498,6 +508,44 @@ def _relation_racing_evidence(tags, members, raceway_ids):
     return ok, evidence
 
 
+def _norm_name(s):
+    """Lowercase, strip accents and collapse spaces for alias matching."""
+    import unicodedata
+    s = unicodedata.normalize("NFKD", str(s or "")).encode("ascii", "ignore").decode("ascii")
+    return " ".join(s.lower().split())
+
+
+def _identity_evidence(cfg, names, way_ids, rel_id):
+    """Independent circuit-identity gate: a candidate's OSM NAME or reviewed source ID must match
+    THIS circuit's configured identity. Geographic proximity, length and node closure are NOT
+    accepted as identity on their own. Returns a machine-readable evidence dict."""
+    ident = cfg.get("osm_identity") or {}
+    base = {"matched_circuit_id": cfg["id"], "expected_venue": cfg.get("location"),
+            "candidate_names": list(names or []), "candidate_way_ids": list(way_ids or [])[:12]}
+    if not ident:
+        return {**base, "accepted": False, "rejection_reason": "no osm_identity configured for this circuit"}
+    aliases = [_norm_name(a) for a in ident.get("name_aliases", []) if a]
+    norm_names = [_norm_name(n) for n in (names or [])]
+    for nn in norm_names:
+        for a in aliases:
+            if a and a in nn:
+                return {**base, "accepted": True, "identity_basis": "name_alias",
+                        "matched_alias": a, "matched_name": nn, "matched_via": "osm_name"}
+    reviewed_ways = set(ident.get("reviewed_way_ids", []))
+    hit = next((w for w in (way_ids or []) if w in reviewed_ways), None)
+    if hit is not None:
+        return {**base, "accepted": True, "identity_basis": "reviewed_way_id", "matched_way_id": hit,
+                "matched_via": "reviewed_unnamed_source_id",
+                "review_note": ident.get("review_note", "source id independently reviewed as this circuit")}
+    if rel_id is not None and rel_id in set(ident.get("reviewed_relation_ids", [])):
+        return {**base, "accepted": True, "identity_basis": "reviewed_relation_id", "matched_relation_id": rel_id,
+                "matched_via": "reviewed_source_id"}
+    return {**base, "accepted": False,
+            "rejection_reason": "OSM geometry identity does not match the configured circuit "
+                                "(no name alias, reviewed way id or reviewed relation id matched); "
+                                "proximity/length/closure are not accepted as identity"}
+
+
 def _candidate_sources(data, radius):
     """Build candidate way-sets: standalone highway=raceway ways, plus each relation's member ways
     that passes POSITIVE racing-route validation. Area/boundary relations and relations without
@@ -628,6 +676,15 @@ def build_circuit_osm(cfg) -> tuple[dict | None, str | None]:
     ids = [i for i in comp["ids"] if i is not None][:40]
     way_urls = [f"https://www.openstreetmap.org/way/{i}" for i in ids[:20]]
     rel_url = [f"https://www.openstreetmap.org/relation/{src['rel_id']}"] if src.get("rel_id") else []
+    # INDEPENDENT circuit-identity gate: the candidate's OSM name or a reviewed source id must
+    # match THIS circuit's configured identity. Proximity + closure are not identity.
+    cand_names = list(comp["names"]) + ([src["rel_name"]] if src.get("rel_name") else [])
+    identity = _identity_evidence(cfg, cand_names, comp["ids"], src.get("rel_id"))
+    identity["route_semantic_evidence"] = src.get("racing_evidence")
+    identity["source_kind"] = src["kind"]
+    identity["actual_source"] = f"OpenStreetMap near {lat:.4f},{lon:.4f} (within {radius} m of the configured centre)"
+    if not identity.get("accepted"):
+        return None, "identity: " + identity.get("rejection_reason", "OSM circuit identity not established")
     # A relation is treated as candidate discovery, not proof of identity: it is accepted only
     # because its member ways chain into a validated closed loop near the known circuit centre.
     rel_validation = None
@@ -692,16 +749,7 @@ def build_circuit_osm(cfg) -> tuple[dict | None, str | None]:
                        "within_expected_window": bool(in_range), "named": bool(named),
                        "from_relation": src["kind"] == "relation", "relation_type": src.get("rel_type"),
                        "accepted_reason": accepted_reason, "start_node": start_validation},
-        "identity_validation": {
-            "accepted": True, "matched_circuit_id": cfg["id"],
-            "expected_venue": cfg.get("location"), "expected_country": cfg.get("country"),
-            "actual_source": f"OpenStreetMap near {lat:.4f},{lon:.4f} (within {radius} m of the configured circuit centre)",
-            "identity_basis": ("validated racing-route relation (route semantics + >=80% raceway members by count & length) "
-                               "forming a node-topology closed loop at the configured circuit centre"
-                               if src["kind"] == "relation" else
-                               "standalone highway=raceway ways at the configured circuit centre, node-topology closed loop"),
-            "source_kind": src["kind"], "route_semantic_evidence": src.get("racing_evidence"),
-            "member_way_ids": ids[:12]},
+        "identity_validation": identity,
         "coordinate_system": "normalised 0-1000 viewBox (equirectangular projection), Y flipped for SVG",
         "available": {"outline": True, "corners": False, "marshal_sectors": False, "pit_lane": False,
                       "start_finish": start_finish is not None, "pit_lane_known_in_osm": pit_lane_present},

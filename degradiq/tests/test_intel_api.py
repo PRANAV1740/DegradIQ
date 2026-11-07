@@ -185,6 +185,11 @@ class IntelMappingTests(unittest.TestCase):
                 self.assertTrue(v.get("closed_by_node_topology") or joins.get("node", 0) == 0,
                                 f"{c['circuit_id']} multi-way loop not closed by node topology")
                 self.assertIn("loop_gap_ratio", v)          # absolute + ratio both recorded
+                # identity must be a concrete match (name alias / reviewed source id), not proximity
+                iv = d.get("identity_validation") or {}
+                self.assertTrue(iv.get("accepted"), f"{c['circuit_id']} identity not accepted")
+                self.assertIn(iv.get("identity_basis"), ("name_alias", "reviewed_way_id", "reviewed_relation_id"),
+                              f"{c['circuit_id']} identity basis is not a concrete match")
 
     def test_coverage_counts_consistent(self):
         cov = self.idx["coverage"]
@@ -470,6 +475,45 @@ class RelationTypeFilterTests(unittest.TestCase):
                         "geometry": [{"lat": 0.0, "lon": 0.0}, {"lat": 0.0, "lon": 0.0005}]})
         srcs = self._candidates()({"elements": els}, 2000)
         self.assertFalse(any(s["kind"] == "relation" for s in srcs))
+
+
+class IdentityGateTests(unittest.TestCase):
+    """Circuit identity must be a real gate — proximity/closure are not identity."""
+
+    def _ev(self):
+        import importlib
+        return importlib.import_module("degradiq.scripts.build_intel_data")._identity_evidence
+
+    CFG_SH = {"id": "shanghai", "location": "Shanghai",
+              "osm_identity": {"name_aliases": ["shanghai international circuit"], "reviewed_way_ids": [156328670]}}
+    CFG_MT = {"id": "montreal", "location": "Montreal",
+              "osm_identity": {"name_aliases": ["circuit gilles-villeneuve", "gilles-villeneuve"]}}
+
+    def test_reviewed_unnamed_way_id_accepted(self):
+        r = self._ev()(self.CFG_SH, [], [156328670], None)
+        self.assertTrue(r["accepted"]); self.assertEqual(r["identity_basis"], "reviewed_way_id")
+
+    def test_closed_loop_of_different_circuit_rejected(self):
+        # a perfectly valid closed raceway loop near Shanghai but a DIFFERENT, unreviewed source
+        r = self._ev()(self.CFG_SH, ["Some Other Circuit"], [999999], None)
+        self.assertFalse(r["accepted"]); self.assertIn("does not match", r["rejection_reason"])
+
+    def test_name_alias_accepted(self):
+        r = self._ev()(self.CFG_MT, ["Circuit Gilles-Villeneuve"], [111], None)
+        self.assertTrue(r["accepted"]); self.assertEqual(r["identity_basis"], "name_alias")
+
+    def test_unknown_name_rejected(self):
+        r = self._ev()(self.CFG_MT, ["Parc Jean-Drapeau Service Road"], [111], None)
+        self.assertFalse(r["accepted"])
+
+    def test_conflicting_identity_rejected(self):
+        # a name that belongs to a DIFFERENT circuit must not validate this one
+        r = self._ev()(self.CFG_SH, ["Circuit Gilles-Villeneuve"], [111], None)
+        self.assertFalse(r["accepted"])
+
+    def test_no_osm_identity_config_rejected(self):
+        r = self._ev()({"id": "x", "location": "Y"}, ["Anything"], [1], None)
+        self.assertFalse(r["accepted"]); self.assertIn("no osm_identity", r["rejection_reason"])
 
 
 class ClosureAndStartValidationTests(unittest.TestCase):
