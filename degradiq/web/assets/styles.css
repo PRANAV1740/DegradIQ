@@ -251,6 +251,11 @@ table.data tr.sel{background:rgba(79,214,221,.05)}
 .chip-btn:hover{border-color:var(--cyan);color:var(--grey)}
 .chip-btn.active{color:var(--ivory);border-color:var(--cyan-deep);background:var(--raised)}
 .circ-ctl,.tyre-ctl{display:flex;gap:6px;flex-wrap:wrap}
+.tag.ok{color:var(--cyan);border-color:var(--cyan-deep)}
+.tag.warn{color:var(--amber);border-color:var(--amber-deep)}
+.tag.approx{color:#b79bff;border-color:#4a3d72}
+.osm-attr{color:var(--faint);font-size:9.5px}
+.avail-note{display:block;margin-top:8px;color:var(--faint);font-size:10px;line-height:1.6}
 
 .circuit-wrap,.tyre-wrap{display:grid;grid-template-columns:1fr 320px;gap:var(--sp);align-items:start}
 .map-stage{position:relative;background:var(--obsidian);border:1px solid var(--line);border-radius:10px;overflow:hidden}
@@ -258,6 +263,8 @@ table.data tr.sel{background:rgba(79,214,221,.05)}
 #circ-svg:active{cursor:grabbing}
 #circ-svg:focus-visible{outline:2px solid var(--cyan);outline-offset:-2px}
 .map-empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:24px}
+.map-attrib{position:absolute;right:8px;bottom:8px;font-family:var(--mono);font-size:9px;letter-spacing:.03em;
+  color:var(--grey);background:rgba(7,10,17,.72);border:1px solid var(--line);padding:3px 7px;border-radius:5px;pointer-events:none}
 .track-base{fill:none;stroke:var(--line2);stroke-width:14;stroke-linejoin:round;stroke-linecap:round;opacity:.5}
 .track-sec{fill:none;stroke-width:6;stroke-linejoin:round;stroke-linecap:round;
   stroke-dasharray:4000;stroke-dashoffset:4000;animation:draw 1.3s var(--ease) forwards}
