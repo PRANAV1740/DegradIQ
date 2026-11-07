@@ -174,6 +174,18 @@ class IntelMappingTests(unittest.TestCase):
                 self.assertTrue(d.get("attribution"))
                 self.assertEqual(d["corners"], [])          # OSM has no corner numbers
 
+    def test_osm_loops_closed_by_topology_not_coord_stitching(self):
+        # Every available OSM loop must be node-topology closed or a single closed way —
+        # never bridged across distinct ways by coordinate proximity.
+        for c in self.idx["circuits"]["available"]:
+            if c.get("geometry_type") == "osm_centreline":
+                d = self.c.get(f"/api/intel/circuit/{c['circuit_id']}").json()
+                v = d["validation"]; joins = v.get("chain_joins") or {}
+                self.assertEqual(joins.get("coord", 0), 0, f"{c['circuit_id']} relied on coordinate joins")
+                self.assertTrue(v.get("closed_by_node_topology") or joins.get("node", 0) == 0,
+                                f"{c['circuit_id']} multi-way loop not closed by node topology")
+                self.assertIn("loop_gap_ratio", v)          # absolute + ratio both recorded
+
     def test_coverage_counts_consistent(self):
         cov = self.idx["coverage"]
         self.assertEqual(cov["verified"] + cov["partial"] + cov["unavailable"] + cov["failed"],
@@ -305,6 +317,111 @@ class OSMRelationMemberTests(unittest.TestCase):
         self.assertTrue(src["start_way_present"])
         self.assertIsNone(src["start"])                        # never a point from an arbitrary way
         self.assertEqual([w["id"] for w in src["ways"]], [10])  # start way not stitched into loop
+
+
+class NodeTopologyChainingTests(unittest.TestCase):
+    """Ways chain by exact shared node ids; coordinate proximity never bridges unrelated ways."""
+
+    def _chain(self):
+        import importlib
+        return importlib.import_module("degradiq.scripts.build_intel_data")._components_with_ids
+
+    def test_shared_node_connects(self):
+        ways = [{"id": 1, "tags": {}, "nodes": [10, 11, 12], "pts": [(0, 0), (0, 1), (0, 2)]},
+                {"id": 2, "tags": {}, "nodes": [12, 13, 14], "pts": [(0, 2), (0, 3), (0, 4)]}]
+        comps = self._chain()(ways)
+        self.assertEqual(len(comps), 1)
+        self.assertEqual(comps[0]["joins"]["node"], 1)
+        self.assertEqual(comps[0]["joins"]["coord"], 0)
+
+    def test_nearby_endpoints_different_nodes_do_not_connect(self):
+        # identical endpoint COORDINATE but different node ids -> must stay separate
+        ways = [{"id": 1, "tags": {}, "nodes": [10, 11, 12], "pts": [(0, 0), (0, 1), (0, 2.0)]},
+                {"id": 2, "tags": {}, "nodes": [90, 91, 92], "pts": [(0, 2.0), (0, 3), (0, 4)]}]
+        comps = self._chain()(ways)
+        self.assertEqual(len(comps), 2)
+
+    def test_coord_fallback_only_without_node_ids(self):
+        ways = [{"id": 1, "tags": {}, "nodes": None, "pts": [(0, 0), (0, 1), (0, 2)]},
+                {"id": 2, "tags": {}, "nodes": None, "pts": [(0, 2), (0, 3), (0, 4)]}]
+        comps = self._chain()(ways)
+        self.assertEqual(len(comps), 1)
+        self.assertEqual(comps[0]["joins"]["coord"], 1)
+
+    def test_reversed_misordered_members_close_by_topology(self):
+        # square loop nodes 1-2-3-4-1, members given reversed / out of order
+        ways = [{"id": 1, "tags": {}, "nodes": [1, 2], "pts": [(0, 0), (1, 0)]},
+                {"id": 2, "tags": {}, "nodes": [3, 2], "pts": [(1, 1), (1, 0)]},
+                {"id": 3, "tags": {}, "nodes": [3, 4], "pts": [(1, 1), (0, 1)]},
+                {"id": 4, "tags": {}, "nodes": [1, 4], "pts": [(0, 0), (0, 1)]}]
+        comps = self._chain()(ways)
+        self.assertEqual(len(comps), 1)
+        self.assertTrue(comps[0]["closed_topology"])
+
+
+class ClosureAndStartValidationTests(unittest.TestCase):
+    """Tight OSM closure + metric start-node validation."""
+
+    def _mod(self):
+        import importlib
+        return importlib.import_module("degradiq.scripts.build_intel_data")
+
+    def test_large_closure_gap_rejected(self):
+        m = self._mod()
+        self.assertTrue(m._is_closed(0, 2000))          # perfectly closed
+        self.assertTrue(m._is_closed(26, 1464))         # lusail (1.8%) — accepted
+        self.assertFalse(m._is_closed(230, 1253))       # red-bull-ring (18.4%) — rejected
+        self.assertFalse(m._is_closed(232, 2069))       # spa (11.2%) — rejected
+        self.assertFalse(m._is_closed(224, 1724))       # yas-marina (13%) — rejected
+
+    def test_start_node_distance_projection(self):
+        m = self._mod()
+        loop = [(x, 0.0) for x in range(0, 1001, 50)] + [(1000.0, y) for y in range(0, 1001, 50)]
+        on_loop = m._project_point_metric(loop, 500.0, 0.0)[0]
+        self.assertLess(on_loop, 1.0)                   # a point on the loop snaps tight
+        far = m._project_point_metric(loop, 500.0, 400.0)[0]
+        self.assertGreater(far, m.START_SNAP_M)          # 400 m away exceeds the snap threshold
+
+
+class PromotionRollbackTests(unittest.TestCase):
+    """Failed post-promotion validation must restore the last known-good dataset."""
+
+    def _mod(self):
+        import importlib
+        return importlib.import_module("degradiq.scripts.build_intel_data")
+
+    def test_rollback_restores_backup(self):
+        import tempfile, json as _json, shutil
+        m = self._mod()
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            (root / "circuits").mkdir(); (root / "_backup" / "circuits").mkdir(parents=True)
+            good = {"circuit_id": "x", "outline": [[1, 1]] * 30, "geometry_type": "fastlap_trace"}
+            # known-good backup
+            (root / "_backup" / "circuits" / "x.json").write_text(_json.dumps(good))
+            (root / "_backup" / "index.json").write_text('{"ok": true}')
+            # a broken "promoted" state (x.json missing, index corrupted)
+            (root / "index.json").write_text("CORRUPT")
+            self.assertTrue(m._rollback(root))
+            self.assertTrue((root / "circuits" / "x.json").is_file())      # restored
+            self.assertEqual(_json.loads((root / "index.json").read_text())["ok"], True)
+
+    def test_rollback_without_backup_returns_false(self):
+        import tempfile
+        m = self._mod()
+        with tempfile.TemporaryDirectory() as td:
+            (Path(td) / "circuits").mkdir()
+            self.assertFalse(m._rollback(Path(td)))
+
+    def test_validate_dataset_flags_missing_file(self):
+        import tempfile, json as _json
+        m = self._mod()
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td); (root / "circuits").mkdir()
+            (root / "index.json").write_text(_json.dumps({
+                "circuits": {"event_to_circuit": {"A Grand Prix": "a"}}, "coverage": {}}))
+            probs = m._validate_dataset(root, [{"circuit_id": "a"}], {"A Grand Prix": "a"})
+            self.assertTrue(any("file missing" in p for p in probs))
 
 
 if __name__ == "__main__":
