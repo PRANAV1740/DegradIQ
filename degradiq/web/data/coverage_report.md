@@ -11,7 +11,7 @@ Four classifications — a PARTIAL map is never treated as complete:
 
 - Supported events: **23**
 - Circuit configurations: **25**
-- VERIFIED: **21**  ·  PARTIAL: **2**  ·  UNAVAILABLE: **2**  ·  FAILED: **0**
+- VERIFIED: **21**  ·  PARTIAL: **3**  ·  UNAVAILABLE: **1**  ·  FAILED: **0**
 
 ## Per-circuit status
 
@@ -27,7 +27,7 @@ Four classifications — a PARTIAL map is never treated as complete:
 | monaco | VERIFIED | fastlap_trace |  |
 | montreal | VERIFIED | fastlap_trace |  |
 | barcelona | VERIFIED | fastlap_trace |  |
-| madring | UNAVAILABLE | — | FastF1 not accessible (DataNotLoadedError; e.g. 403/not cached); no validated circuit geometry in OpenStreetMap (raceway_ways loop (2187m, gap 579m): not node-topology closed (node joins 0, coord joins 0)) |
+| madring | PARTIAL | osm_centreline | 5437 m loop |
 | red-bull-ring | VERIFIED | fastlap_trace |  |
 | silverstone | VERIFIED | fastlap_trace |  |
 | spa | VERIFIED | fastlap_trace |  |
@@ -60,7 +60,7 @@ Four classifications — a PARTIAL map is never treated as complete:
 | 11 | Hungarian Grand Prix | hungaroring | VERIFIED | fastlap_trace |
 | 12 | Dutch Grand Prix | zandvoort | VERIFIED | fastlap_trace |
 | 13 | Italian Grand Prix | monza | VERIFIED | fastlap_trace |
-| 14 | Spanish Grand Prix | madring | UNAVAILABLE | — |
+| 14 | Spanish Grand Prix | madring | PARTIAL | osm_centreline |
 | 15 | Azerbaijan Grand Prix | baku | VERIFIED | fastlap_trace |
 | 16 | Bahrain Grand Prix | bahrain | PARTIAL | osm_centreline |
 | 17 | Singapore Grand Prix | marina-bay | VERIFIED | fastlap_trace |

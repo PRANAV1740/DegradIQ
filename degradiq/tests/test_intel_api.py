@@ -171,7 +171,7 @@ class IntelMappingTests(unittest.TestCase):
 
     def test_osm_circuits_carry_attribution(self):
         for c in self.idx["circuits"]["available"]:
-            if c.get("geometry_type") == "osm_centreline":
+            if c.get("source_dataset") == "openstreetmap":
                 d = self.c.get(f"/api/intel/circuit/{c['circuit_id']}").json()
                 self.assertIn("openstreetmap", (d.get("licence") or "").lower())
                 self.assertTrue(d.get("attribution"))
@@ -182,7 +182,7 @@ class IntelMappingTests(unittest.TestCase):
         # across distinct ways by coordinate proximity. Non-approximate loops must also be
         # node-topology closed; approximate ones may be open but are still coordinate-join-free.
         for c in self.idx["circuits"]["available"]:
-            if c.get("geometry_type") == "osm_centreline":
+            if c.get("source_dataset") == "openstreetmap":
                 d = self.c.get(f"/api/intel/circuit/{c['circuit_id']}").json()
                 v = d["validation"]; joins = v.get("chain_joins") or {}
                 self.assertEqual(joins.get("coord", 0), 0, f"{c['circuit_id']} relied on coordinate joins")
@@ -218,7 +218,7 @@ class IntelMappingTests(unittest.TestCase):
     def test_osm_circuits_have_no_cross_frame_marshal_markers(self):
         # OSM geometry must never carry FastF1 marshal markers projected across frames.
         for c in self.idx["circuits"]["available"]:
-            if c.get("geometry_type") == "osm_centreline":
+            if c.get("source_dataset") == "openstreetmap":
                 d = self.c.get(f"/api/intel/circuit/{c['circuit_id']}").json()
                 self.assertEqual(d.get("marshal_sectors", []), [])
                 self.assertEqual(d.get("coordinate_system", "").count("FastF1"), 0)

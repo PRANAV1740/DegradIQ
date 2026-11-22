@@ -406,9 +406,11 @@ function setCircuitAttribution(text) {
 function renderCircuit() {
   const d = state.circuit, svg = $("#circ-svg"), empty = $("#circ-empty");
   const osm = d.geometry_type === "osm_centreline";
-  empty.hidden = true; $("#circ-ctx-tag").textContent = osm ? "OSM OUTLINE" : "CIRCUIT";
+  const srcLabel = d.source_dataset === "openstreetmap" ? "OPENSTREETMAP"
+    : d.source_dataset === "f1-circuits-geojson" ? "F1-CIRCUITS (MIT)" : "OUTLINE";
+  empty.hidden = true; $("#circ-ctx-tag").textContent = osm ? "APPROX OUTLINE" : "CIRCUIT";
   $("#circ-avail").className = "tag " + (osm ? "approx" : "ok");
-  $("#circ-avail").textContent = osm ? "APPROX · OPENSTREETMAP" : "VERIFIED GEOMETRY";
+  $("#circ-avail").textContent = osm ? "APPROX · " + srcLabel : "VERIFIED GEOMETRY";
   $("#circ-legend").hidden = false;
   $("#circ-sectors").style.display = osm ? "none" : "";   // no verified sectors for OSM outlines
   $("#circ-corners").style.display = osm ? "none" : "";
@@ -422,9 +424,10 @@ function renderCircuit() {
     // Single-colour outline only — never invent sector shading on an OSM centreline.
     h += `<path class="track-sec s1" d="${line(ol)}" style="stroke:var(--cyan)"/>`;
     if (d.start_finish) h += `<g class="startfin"><circle cx="${d.start_finish[0]}" cy="${d.start_finish[1]}" r="11"/><circle cx="${d.start_finish[0]}" cy="${d.start_finish[1]}" r="5"/></g>`;
+    const attribText = d.attribution || "© OpenStreetMap contributors";
     $("#circ-legend").innerHTML = `<span class="it"><i class="sw s1"></i>Circuit outline</span>
-      ${d.start_finish ? '<span class="it"><i class="sw sf"></i>Start / finish (OSM)</span>' : ""}
-      <span class="it osm-attr">© OpenStreetMap contributors</span>`;
+      ${d.start_finish ? '<span class="it"><i class="sw sf"></i>Start / finish</span>' : ""}
+      <span class="it osm-attr">${esc(attribText)}</span>`;
   } else {
     const showSec = $("#circ-sectors").classList.contains("active");
     const showCor = $("#circ-corners").classList.contains("active");
@@ -463,11 +466,12 @@ function renderCircuit() {
   setCircuitAttribution(osm ? (d.attribution || "© OpenStreetMap contributors") : "");
   $("#circ-loc").textContent = [d.location, d.country].filter(Boolean).join(", ") + (d.source_event ? "  ·  " + d.source_event : "");
   const val = d.validation || {}, mp = d.marshal_projection || {};
+  const isOsmSrc = d.source_dataset === "openstreetmap";
   const facts = osm
-    ? [["Geometry", d.approximate ? "approximate outline" : "centreline outline"], ["Corners", "not in OSM data"],
-       ["Track length", d.track_length_m ? d.track_length_m + " m (OSM)" : "—"],
-       ["Loop", d.loop_closed ? "node-closed" : (d.approximate ? `approximate · ${d.loop_gap_m ?? "?"} m gap` : "open / partial")],
-       ["Source", val.from_relation ? "OSM relation" : "raceway ways"]]
+    ? [["Geometry", d.approximate ? "approximate outline" : "centreline outline"], ["Corners", "not provided"],
+       ["Track length", d.track_length_m ? d.track_length_m + " m" : "—"],
+       ["Loop", d.loop_closed ? (isOsmSrc ? "node-closed" : "closed") : (d.approximate ? `approximate · ${d.loop_gap_m ?? "?"} m gap` : "open / partial")],
+       ["Source", isOsmSrc ? (val.from_relation ? "OSM relation" : "OSM raceway ways") : (d.data_provider || d.source_dataset || "—")]]
     : [["Corners", (d.corners || []).length],
        ["Marshal sectors", mp.n_accepted != null ? `${mp.n_accepted} accepted${mp.n_rejected ? ` · ${mp.n_rejected} rejected` : ""}` : (d.marshal_sectors || []).length],
        ["Official S1/S2/S3", "unavailable"],

@@ -112,10 +112,9 @@ CIRCUITS = [
      "events": ["Barcelona Grand Prix"], "fastf1": (2024, "Spanish Grand Prix"), "osm": (41.5700, 2.2611),
      "config_note": "The 2024 'Spanish Grand Prix' was held here at Barcelona-Catalunya; in 2026 it is the Barcelona GP."},
     {"id": "madring", "circuit_key": 153, "name": "Madring (Madrid Street Circuit)", "location": "Madrid", "country": "Spain",
-     "events": ["Spanish Grand Prix"], "fastf1": (2026, "Spanish Grand Prix"), "osm": (40.4650, -3.6120),
-     "config_note": "New-for-2026 Madrid circuit; hosted the 2026 Spanish GP (11-13 Sep 2026), construction completed "
-                    "19 Oct 2026. Distinct circuit identity from Barcelona. Validated geometry may still be unavailable "
-                    "if FastF1 telemetry is not accessible (403) and OSM lacks a validated raceway loop."},
+     "events": ["Spanish Grand Prix"], "osm": (40.4650, -3.6120), "geojson_id": "es-2026",
+     "config_note": "New-for-2026 Madrid circuit, distinct from Barcelona. No MultiViewer/FastF1/OSM racetrack geometry "
+                    "yet (brand-new circuit); outline sourced from the MIT-licensed bacinger/f1-circuits GeoJSON."},
     {"id": "red-bull-ring", "circuit_key": 19, "name": "Red Bull Ring", "location": "Spielberg", "country": "Austria",
      "events": ["Austrian Grand Prix"], "osm": (47.2197, 14.7647),
      "osm_identity": {"name_aliases": ["red bull ring", "red-bull-ring", "spielberg", "a1-ring"]}},
@@ -433,6 +432,83 @@ def build_circuit_mvt(cfg):
         "notes": f"Circuit map from the MultiViewer circuit API (layout year {layout_year}). Outline is the reference "
                  f"lap's path; corner numbers and marshal sectors are from the circuit-info payload, in the SAME "
                  f"coordinate frame. Shaded zones are MARSHAL sectors, NOT official S1/S2/S3 timing sectors.",
+    }, None
+
+
+BACINGER_URL = "https://raw.githubusercontent.com/bacinger/f1-circuits/master/f1-circuits.geojson"
+BACINGER_LICENCE = ("bacinger/f1-circuits, MIT licence. The collection is traced from Google My Maps / Wikipedia, so it "
+                    "is an approximate outline, not a surveyed centreline. Used for a non-commercial portfolio demo.")
+
+
+def build_circuit_geojson(cfg):
+    """Fallback provider: the MIT-licensed bacinger/f1-circuits GeoJSON (closed circuit outlines).
+
+    Used only for circuits with no MultiViewer/FastF1/OSM geometry (e.g. the brand-new Madrid
+    circuit). Outline only — no corners, marshal sectors or official timing. Identity is matched
+    by the feature's circuit id/name against the config.
+    """
+    want = cfg.get("geojson_id")
+    if not want:
+        return None, "no geojson_id configured"
+    cache_dir = PACKAGE_DIR / "cache" / "geojson"
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    cache_f = cache_dir / "bacinger_f1-circuits.geojson"
+    coll = None
+    if cache_f.is_file():
+        try:
+            coll = json.loads(cache_f.read_text(encoding="utf-8"))
+        except Exception:
+            coll = None
+    if coll is None:
+        try:
+            coll = _http_json(BACINGER_URL, timeout=40)
+            cache_f.write_text(json.dumps(coll), encoding="utf-8")
+        except Exception as e:
+            return None, f"bacinger GeoJSON fetch failed: {type(e).__name__}"
+    feat = next((f for f in coll.get("features", []) if (f.get("properties") or {}).get("id") == want), None)
+    if not feat:
+        return None, f"bacinger GeoJSON has no feature id {want}"
+    g = feat["geometry"]; props = feat.get("properties", {})
+    pts = g["coordinates"] if g["type"] == "LineString" else g["coordinates"][0]  # [lon,lat]
+    if len(pts) < 30:
+        return None, "bacinger geometry too short"
+    lat0 = pts[0][1]; mperlon = 111320 * math.cos(math.radians(lat0))
+    metric = [(p[0] * mperlon, p[1] * 111320) for p in pts]
+    span, length, gap = _path_metrics([(p[1], p[0]) for p in pts], lat0)
+    nm, _ = _normalise(metric)
+    outline = [nm(x, y) for x, y in metric]
+    closed = gap <= max(CLOSURE_ABS_M, span * 0.03)
+    name = props.get("Name") or cfg.get("name")
+    return {
+        "geometry_type": "osm_centreline", "geometry_label": "F1-circuits GeoJSON outline (approximate)",
+        "source_dataset": "f1-circuits-geojson", "geometry_source": "bacinger_f1_circuits",
+        "source": f"bacinger/f1-circuits GeoJSON (feature {want}: {name})", "source_event": None,
+        "data_provider": "bacinger/f1-circuits (MIT)", "session": None,
+        "licence": BACINGER_LICENCE, "attribution": "© bacinger/f1-circuits (MIT) · OpenStreetMap/Wikipedia",
+        "licence_compliance": "MIT licence permits reuse with attribution; attribution shown in the UI.",
+        "osm": {"way_ids": [], "relation_id": None, "names": [name],
+                "source_urls": [f"https://github.com/bacinger/f1-circuits ({want})"], "query": want,
+                "retrieved_utc": datetime.now(timezone.utc).isoformat()},
+        "validation": {"length_m": round(length), "span_m": round(span), "loop_gap_m": round(gap),
+                       "loop_gap_ratio": round(gap / max(span, 1), 4), "loop_closed": bool(closed),
+                       "approximate": True, "closed_by_node_topology": False, "node_ids_available": False,
+                       "closure_basis": "f1-circuits GeoJSON closed outline" if closed else "f1-circuits GeoJSON (open)",
+                       "chain_joins": {"node": 0, "coord": 0}, "from_relation": False,
+                       "published_length_m": props.get("length")},
+        "identity_validation": {"accepted": True, "matched_circuit_id": cfg["id"], "identity_basis": "geojson_feature_id",
+                                "matched_feature_id": want, "expected_venue": cfg.get("location"),
+                                "actual_source": "bacinger/f1-circuits GeoJSON"},
+        "coordinate_system": "normalised 0-1000 viewBox (equirectangular projection), Y flipped for SVG",
+        "coordinate_reference": "WGS84 lat/lon → local equirectangular metres → normalised 0-1000 viewBox",
+        "construction_method": "MIT GeoJSON circuit outline, normalised",
+        "available": {"outline": True, "corners": False, "marshal_sectors": False, "pit_lane": False, "start_finish": False},
+        "missing": ["corner numbers", "sector boundaries", "pit lane", "racing direction", "start/finish line"],
+        "outline": outline, "corners": [], "marshal_sectors": [], "approximate": True,
+        "start_finish": None, "n_outline_points": len(outline),
+        "track_length_m": round(length), "loop_closed": bool(closed), "loop_gap_m": round(gap),
+        "notes": f"Approximate circuit outline from the MIT-licensed bacinger/f1-circuits GeoJSON (feature {want}). "
+                 f"Traced from Google My Maps / Wikipedia — a surveyed outline, NOT a racing line and NOT official "
+                 f"geometry. Corners, sectors, pit lane and start/finish are not available.",
     }, None
 
 
@@ -953,7 +1029,7 @@ def schema_ok(d) -> list[str]:
     for key in ("source_dataset", "coordinate_reference", "licence"):
         if not d.get(key):
             probs.append(f"missing {key} (pre-current-schema artifact)")
-    if d.get("geometry_type") == "osm_centreline" and not (d.get("osm") or {}).get("way_ids"):
+    if d.get("source_dataset") == "openstreetmap" and not (d.get("osm") or {}).get("way_ids"):
         probs.append("OSM file missing way-id provenance")
     return probs
 
@@ -1045,11 +1121,26 @@ def build_one_circuit(cfg) -> tuple[dict | None, dict]:
                                "osm_way_ids": g["osm"]["way_ids"][:8], "osm_relation_id": g["osm"].get("relation_id"),
                                "missing": g.get("missing")}
                 return None, {"status": "FAILED", "reason": "OSM geometry invalid: " + "; ".join(probs), "attempted": "osm"}
-            full = (ff1_note + "; " if ff1_note else "") + reason
-            return None, {"status": "UNAVAILABLE", "reason": full, "attempted": ("fastf1+osm" if ff1_note else "osm")}
+            fail_reason = (ff1_note + "; " if ff1_note else "") + reason
         except Exception as e:
-            return None, {"status": "FAILED", "reason": f"OSM acquisition failed: {type(e).__name__}", "attempted": "osm"}
-    return None, {"status": "UNAVAILABLE", "reason": "no data source configured"}
+            fail_reason = f"OSM acquisition failed: {type(e).__name__}"
+    else:
+        fail_reason = ff1_note
+    # 3) GeoJSON fallback (MIT bacinger/f1-circuits) — only for circuits with no telemetry/OSM
+    #    geometry (e.g. the brand-new Madrid circuit). Outline only, clearly approximate.
+    if cfg.get("geojson_id"):
+        try:
+            g, greason = build_circuit_geojson(cfg)
+            if g:
+                g.update(base)
+                if not validate_geometry(g):
+                    return g, {"status": "PARTIAL", "geometry_type": "osm_centreline", "has_corners": False,
+                               "source_dataset": "f1-circuits-geojson", "track_length_m": g.get("track_length_m"),
+                               "approximate": True, "loop_closed": bool(g.get("loop_closed")), "missing": g.get("missing")}
+            fail_reason = ((fail_reason + "; ") if fail_reason else "") + (greason or "GeoJSON unavailable")
+        except Exception as e:
+            fail_reason = ((fail_reason + "; ") if fail_reason else "") + f"GeoJSON failed: {type(e).__name__}"
+    return None, {"status": "UNAVAILABLE", "reason": fail_reason or "no data source configured"}
 
 
 # ----------------------------------- tyre (unchanged) ----------------------------------
@@ -1319,7 +1410,7 @@ def _validate_dataset(root, circuits_index, event_to_circuit) -> list[str]:
             problems.append(f"{c['circuit_id']}: unreadable ({e})"); continue
         for p in validate_geometry(d):
             problems.append(f"{c['circuit_id']}: {p}")
-        if d.get("geometry_type") == "osm_centreline" and not (d.get("osm") or {}).get("way_ids"):
+        if d.get("source_dataset") == "openstreetmap" and not (d.get("osm") or {}).get("way_ids"):
             problems.append(f"{c['circuit_id']}: OSM geometry missing way-id provenance")
     return problems
 

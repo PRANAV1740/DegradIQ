@@ -21,3 +21,4 @@ FastF1-derived outlines are a separate source and are **not** OSM data.
 
 - **Sepang International Circuit** (`bahrain`) — see the file's `osm.way_ids` / `osm.source_urls`.
 - **Autodromo Enzo e Dino Ferrari** (`imola`) — see the file's `osm.way_ids` / `osm.source_urls`.
+- **Madring (Madrid Street Circuit)** (`madring`) — see the file's `osm.way_ids` / `osm.source_urls`.

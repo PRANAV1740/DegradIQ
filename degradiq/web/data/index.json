@@ -1,7 +1,7 @@
 {
   "generated": "2026-11-22",
-  "build_id": "20261122T173756Z-ea088c",
-  "build_utc": "2026-11-22T17:37:56.631077+00:00",
+  "build_id": "20261122T175102Z-91112e",
+  "build_utc": "2026-11-22T17:51:02.835988+00:00",
   "sources": {
     "fastf1": "FastF1 session telemetry (cached)",
     "osm": "OpenStreetMap via Overpass API (ODbL)"
@@ -212,6 +212,27 @@
           "start_finish": true
         },
         "config_note": "The 2024 'Spanish Grand Prix' was held here at Barcelona-Catalunya; in 2026 it is the Barcelona GP."
+      },
+      {
+        "circuit_id": "madring",
+        "name": "Madring (Madrid Street Circuit)",
+        "events": [
+          "Spanish Grand Prix"
+        ],
+        "available": true,
+        "geometry_type": "osm_centreline",
+        "source_dataset": "f1-circuits-geojson",
+        "geometry_source": "bacinger_f1_circuits",
+        "has_corners": false,
+        "approximate": true,
+        "availability": {
+          "outline": true,
+          "corners": false,
+          "marshal_sectors": false,
+          "pit_lane": false,
+          "start_finish": false
+        },
+        "config_note": "New-for-2026 Madrid circuit, distinct from Barcelona. No MultiViewer/FastF1/OSM racetrack geometry yet (brand-new circuit); outline sourced from the MIT-licensed bacinger/f1-circuits GeoJSON."
       },
       {
         "circuit_id": "red-bull-ring",
@@ -569,8 +590,8 @@
     "supported_events": 23,
     "circuits_total": 25,
     "verified": 21,
-    "partial": 2,
-    "unavailable": 2,
+    "partial": 3,
+    "unavailable": 1,
     "failed": 0,
     "classifications": [
       "VERIFIED",
@@ -579,8 +600,8 @@
       "FAILED"
     ],
     "build": {
-      "build_id": "20261122T173756Z-ea088c",
-      "build_utc": "2026-11-22T17:37:56.631077+00:00",
+      "build_id": "20261122T175102Z-91112e",
+      "build_utc": "2026-11-22T17:51:02.835988+00:00",
       "source_failures": [],
       "served_from_previous": []
     },
@@ -624,8 +645,7 @@
           "Saudi Arabian Grand Prix"
         ],
         "status": "UNAVAILABLE",
-        "reason": "identity: no osm_identity configured for this circuit",
-        "attempted": "osm"
+        "reason": "identity: no osm_identity configured for this circuit"
       },
       {
         "circuit_id": "albert-park",
@@ -756,9 +776,20 @@
         "events": [
           "Spanish Grand Prix"
         ],
-        "status": "UNAVAILABLE",
-        "reason": "FastF1 not accessible (DataNotLoadedError; e.g. 403/not cached); no validated circuit geometry in OpenStreetMap (raceway_ways loop (2187m, gap 579m): not node-topology closed (node joins 0, coord joins 0))",
-        "attempted": "fastf1+osm"
+        "status": "PARTIAL",
+        "geometry_type": "osm_centreline",
+        "has_corners": false,
+        "source_dataset": "f1-circuits-geojson",
+        "track_length_m": 5437,
+        "approximate": true,
+        "loop_closed": true,
+        "missing": [
+          "corner numbers",
+          "sector boundaries",
+          "pit lane",
+          "racing direction",
+          "start/finish line"
+        ]
       },
       {
         "circuit_id": "red-bull-ring",
@@ -1039,8 +1070,8 @@
         "round": 14,
         "event": "Spanish Grand Prix",
         "circuit_id": "madring",
-        "status": "UNAVAILABLE",
-        "geometry_type": null
+        "status": "PARTIAL",
+        "geometry_type": "osm_centreline"
       },
       {
         "round": 15,
