@@ -1,4 +1,4 @@
 # Offline research, data ingestion, and training dependencies.
 -r requirements.txt
-fastf1>=3.3
+fastf1==3.9.2
 matplotlib>=3.7
