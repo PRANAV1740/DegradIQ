@@ -19,18 +19,5 @@ FastF1-derived outlines are a separate source and are **not** OSM data.
 
 ## Circuits using OpenStreetMap geometry
 
-- **Suzuka International Racing Course** (`suzuka`) — see the file's `osm.way_ids` / `osm.source_urls`.
-- **Shanghai International Circuit** (`shanghai`) — see the file's `osm.way_ids` / `osm.source_urls`.
-- **Miami International Autodrome** (`miami`) — see the file's `osm.way_ids` / `osm.source_urls`.
+- **Sepang International Circuit** (`bahrain`) — see the file's `osm.way_ids` / `osm.source_urls`.
 - **Autodromo Enzo e Dino Ferrari** (`imola`) — see the file's `osm.way_ids` / `osm.source_urls`.
-- **Circuit Gilles-Villeneuve** (`montreal`) — see the file's `osm.way_ids` / `osm.source_urls`.
-- **Red Bull Ring** (`red-bull-ring`) — see the file's `osm.way_ids` / `osm.source_urls`.
-- **Silverstone Circuit** (`silverstone`) — see the file's `osm.way_ids` / `osm.source_urls`.
-- **Circuit de Spa-Francorchamps** (`spa`) — see the file's `osm.way_ids` / `osm.source_urls`.
-- **Hungaroring** (`hungaroring`) — see the file's `osm.way_ids` / `osm.source_urls`.
-- **Circuit Zandvoort** (`zandvoort`) — see the file's `osm.way_ids` / `osm.source_urls`.
-- **Circuit of the Americas** (`cota`) — see the file's `osm.way_ids` / `osm.source_urls`.
-- **Autódromo Hermanos Rodríguez** (`mexico`) — see the file's `osm.way_ids` / `osm.source_urls`.
-- **Autódromo José Carlos Pace (Interlagos)** (`interlagos`) — see the file's `osm.way_ids` / `osm.source_urls`.
-- **Lusail International Circuit** (`lusail`) — see the file's `osm.way_ids` / `osm.source_urls`.
-- **Yas Marina Circuit** (`yas-marina`) — see the file's `osm.way_ids` / `osm.source_urls`.

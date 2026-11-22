@@ -1,7 +1,7 @@
 {
   "generated": "2026-11-22",
-  "build_id": "20261122T141103Z-44391d",
-  "build_utc": "2026-11-22T14:11:03.063338+00:00",
+  "build_id": "20261122T173756Z-ea088c",
+  "build_utc": "2026-11-22T17:37:56.631077+00:00",
   "sources": {
     "fastf1": "FastF1 session telemetry (cached)",
     "osm": "OpenStreetMap via Overpass API (ODbL)"
@@ -10,14 +10,36 @@
     "available": [
       {
         "circuit_id": "bahrain",
-        "name": "Bahrain International Circuit",
+        "name": "Sepang International Circuit",
         "events": [
           "Bahrain Grand Prix"
         ],
         "available": true,
+        "geometry_type": "osm_centreline",
+        "source_dataset": "openstreetmap",
+        "geometry_source": "openstreetmap_overpass",
+        "has_corners": false,
+        "approximate": true,
+        "availability": {
+          "outline": true,
+          "corners": false,
+          "marshal_sectors": false,
+          "pit_lane": false,
+          "start_finish": false,
+          "pit_lane_known_in_osm": false
+        },
+        "config_note": "The 2026 'Bahrain Grand Prix' is held at Sepang International Circuit, Malaysia (F1 confirmed the venue change; OpenF1/MultiViewer circuit_key 12 = Sepang, not Sakhir which is key 63). Geometry resolves to Sepang, never the 2024/25 Sakhir layout."
+      },
+      {
+        "circuit_id": "albert-park",
+        "name": "Albert Park Circuit",
+        "events": [
+          "Australian Grand Prix"
+        ],
+        "available": true,
         "geometry_type": "fastlap_trace",
-        "source_dataset": "fastf1",
-        "geometry_source": "fastf1_telemetry",
+        "source_dataset": "multiviewer",
+        "geometry_source": "multiviewer_circuit_api",
         "has_corners": true,
         "approximate": false,
         "availability": {
@@ -38,18 +60,19 @@
           "Japanese Grand Prix"
         ],
         "available": true,
-        "geometry_type": "osm_centreline",
-        "source_dataset": "openstreetmap",
-        "geometry_source": "openstreetmap_overpass",
-        "has_corners": false,
-        "approximate": true,
+        "geometry_type": "fastlap_trace",
+        "source_dataset": "multiviewer",
+        "geometry_source": "multiviewer_circuit_api",
+        "has_corners": true,
+        "approximate": false,
         "availability": {
+          "racing_loop": true,
           "outline": true,
-          "corners": false,
-          "marshal_sectors": false,
+          "corners": true,
+          "marshal_sectors": true,
+          "official_timing_sectors": false,
           "pit_lane": false,
-          "start_finish": false,
-          "pit_lane_known_in_osm": false
+          "start_finish": true
         },
         "config_note": null
       },
@@ -60,18 +83,19 @@
           "Chinese Grand Prix"
         ],
         "available": true,
-        "geometry_type": "osm_centreline",
-        "source_dataset": "openstreetmap",
-        "geometry_source": "openstreetmap_overpass",
-        "has_corners": false,
+        "geometry_type": "fastlap_trace",
+        "source_dataset": "multiviewer",
+        "geometry_source": "multiviewer_circuit_api",
+        "has_corners": true,
         "approximate": false,
         "availability": {
+          "racing_loop": true,
           "outline": true,
-          "corners": false,
-          "marshal_sectors": false,
+          "corners": true,
+          "marshal_sectors": true,
+          "official_timing_sectors": false,
           "pit_lane": false,
-          "start_finish": false,
-          "pit_lane_known_in_osm": false
+          "start_finish": true
         },
         "config_note": null
       },
@@ -82,18 +106,19 @@
           "Miami Grand Prix"
         ],
         "available": true,
-        "geometry_type": "osm_centreline",
-        "source_dataset": "openstreetmap",
-        "geometry_source": "openstreetmap_overpass",
-        "has_corners": false,
-        "approximate": true,
+        "geometry_type": "fastlap_trace",
+        "source_dataset": "multiviewer",
+        "geometry_source": "multiviewer_circuit_api",
+        "has_corners": true,
+        "approximate": false,
         "availability": {
+          "racing_loop": true,
           "outline": true,
-          "corners": false,
-          "marshal_sectors": false,
+          "corners": true,
+          "marshal_sectors": true,
+          "official_timing_sectors": false,
           "pit_lane": false,
-          "start_finish": false,
-          "pit_lane_known_in_osm": false
+          "start_finish": true
         },
         "config_note": null
       },
@@ -120,24 +145,48 @@
         "config_note": null
       },
       {
+        "circuit_id": "monaco",
+        "name": "Circuit de Monaco",
+        "events": [
+          "Monaco Grand Prix"
+        ],
+        "available": true,
+        "geometry_type": "fastlap_trace",
+        "source_dataset": "multiviewer",
+        "geometry_source": "multiviewer_circuit_api",
+        "has_corners": true,
+        "approximate": false,
+        "availability": {
+          "racing_loop": true,
+          "outline": true,
+          "corners": true,
+          "marshal_sectors": true,
+          "official_timing_sectors": false,
+          "pit_lane": false,
+          "start_finish": true
+        },
+        "config_note": "Street circuit \u2014 OSM raceway coverage is partial for public-road circuits."
+      },
+      {
         "circuit_id": "montreal",
         "name": "Circuit Gilles-Villeneuve",
         "events": [
           "Canadian Grand Prix"
         ],
         "available": true,
-        "geometry_type": "osm_centreline",
-        "source_dataset": "openstreetmap",
-        "geometry_source": "openstreetmap_overpass",
-        "has_corners": false,
+        "geometry_type": "fastlap_trace",
+        "source_dataset": "multiviewer",
+        "geometry_source": "multiviewer_circuit_api",
+        "has_corners": true,
         "approximate": false,
         "availability": {
+          "racing_loop": true,
           "outline": true,
-          "corners": false,
-          "marshal_sectors": false,
+          "corners": true,
+          "marshal_sectors": true,
+          "official_timing_sectors": false,
           "pit_lane": false,
-          "start_finish": false,
-          "pit_lane_known_in_osm": false
+          "start_finish": true
         },
         "config_note": null
       },
@@ -149,8 +198,8 @@
         ],
         "available": true,
         "geometry_type": "fastlap_trace",
-        "source_dataset": "fastf1",
-        "geometry_source": "fastf1_telemetry",
+        "source_dataset": "multiviewer",
+        "geometry_source": "multiviewer_circuit_api",
         "has_corners": true,
         "approximate": false,
         "availability": {
@@ -171,119 +220,9 @@
           "Austrian Grand Prix"
         ],
         "available": true,
-        "geometry_type": "osm_centreline",
-        "source_dataset": "openstreetmap",
-        "geometry_source": "openstreetmap_overpass",
-        "has_corners": false,
-        "approximate": true,
-        "availability": {
-          "outline": true,
-          "corners": false,
-          "marshal_sectors": false,
-          "pit_lane": false,
-          "start_finish": false,
-          "pit_lane_known_in_osm": false
-        },
-        "config_note": null
-      },
-      {
-        "circuit_id": "silverstone",
-        "name": "Silverstone Circuit",
-        "events": [
-          "British Grand Prix"
-        ],
-        "available": true,
-        "geometry_type": "osm_centreline",
-        "source_dataset": "openstreetmap",
-        "geometry_source": "openstreetmap_overpass",
-        "has_corners": false,
-        "approximate": true,
-        "availability": {
-          "outline": true,
-          "corners": false,
-          "marshal_sectors": false,
-          "pit_lane": false,
-          "start_finish": false,
-          "pit_lane_known_in_osm": false
-        },
-        "config_note": null
-      },
-      {
-        "circuit_id": "spa",
-        "name": "Circuit de Spa-Francorchamps",
-        "events": [
-          "Belgian Grand Prix"
-        ],
-        "available": true,
-        "geometry_type": "osm_centreline",
-        "source_dataset": "openstreetmap",
-        "geometry_source": "openstreetmap_overpass",
-        "has_corners": false,
-        "approximate": true,
-        "availability": {
-          "outline": true,
-          "corners": false,
-          "marshal_sectors": false,
-          "pit_lane": false,
-          "start_finish": false,
-          "pit_lane_known_in_osm": false
-        },
-        "config_note": null
-      },
-      {
-        "circuit_id": "hungaroring",
-        "name": "Hungaroring",
-        "events": [
-          "Hungarian Grand Prix"
-        ],
-        "available": true,
-        "geometry_type": "osm_centreline",
-        "source_dataset": "openstreetmap",
-        "geometry_source": "openstreetmap_overpass",
-        "has_corners": false,
-        "approximate": true,
-        "availability": {
-          "outline": true,
-          "corners": false,
-          "marshal_sectors": false,
-          "pit_lane": false,
-          "start_finish": false,
-          "pit_lane_known_in_osm": false
-        },
-        "config_note": null
-      },
-      {
-        "circuit_id": "zandvoort",
-        "name": "Circuit Zandvoort",
-        "events": [
-          "Dutch Grand Prix"
-        ],
-        "available": true,
-        "geometry_type": "osm_centreline",
-        "source_dataset": "openstreetmap",
-        "geometry_source": "openstreetmap_overpass",
-        "has_corners": false,
-        "approximate": true,
-        "availability": {
-          "outline": true,
-          "corners": false,
-          "marshal_sectors": false,
-          "pit_lane": false,
-          "start_finish": false,
-          "pit_lane_known_in_osm": false
-        },
-        "config_note": null
-      },
-      {
-        "circuit_id": "monza",
-        "name": "Autodromo Nazionale Monza",
-        "events": [
-          "Italian Grand Prix"
-        ],
-        "available": true,
         "geometry_type": "fastlap_trace",
-        "source_dataset": "fastf1",
-        "geometry_source": "fastf1_telemetry",
+        "source_dataset": "multiviewer",
+        "geometry_source": "multiviewer_circuit_api",
         "has_corners": true,
         "approximate": false,
         "availability": {
@@ -298,24 +237,186 @@
         "config_note": null
       },
       {
+        "circuit_id": "silverstone",
+        "name": "Silverstone Circuit",
+        "events": [
+          "British Grand Prix"
+        ],
+        "available": true,
+        "geometry_type": "fastlap_trace",
+        "source_dataset": "multiviewer",
+        "geometry_source": "multiviewer_circuit_api",
+        "has_corners": true,
+        "approximate": false,
+        "availability": {
+          "racing_loop": true,
+          "outline": true,
+          "corners": true,
+          "marshal_sectors": true,
+          "official_timing_sectors": false,
+          "pit_lane": false,
+          "start_finish": true
+        },
+        "config_note": null
+      },
+      {
+        "circuit_id": "spa",
+        "name": "Circuit de Spa-Francorchamps",
+        "events": [
+          "Belgian Grand Prix"
+        ],
+        "available": true,
+        "geometry_type": "fastlap_trace",
+        "source_dataset": "multiviewer",
+        "geometry_source": "multiviewer_circuit_api",
+        "has_corners": true,
+        "approximate": false,
+        "availability": {
+          "racing_loop": true,
+          "outline": true,
+          "corners": true,
+          "marshal_sectors": true,
+          "official_timing_sectors": false,
+          "pit_lane": false,
+          "start_finish": true
+        },
+        "config_note": null
+      },
+      {
+        "circuit_id": "hungaroring",
+        "name": "Hungaroring",
+        "events": [
+          "Hungarian Grand Prix"
+        ],
+        "available": true,
+        "geometry_type": "fastlap_trace",
+        "source_dataset": "multiviewer",
+        "geometry_source": "multiviewer_circuit_api",
+        "has_corners": true,
+        "approximate": false,
+        "availability": {
+          "racing_loop": true,
+          "outline": true,
+          "corners": true,
+          "marshal_sectors": true,
+          "official_timing_sectors": false,
+          "pit_lane": false,
+          "start_finish": true
+        },
+        "config_note": null
+      },
+      {
+        "circuit_id": "zandvoort",
+        "name": "Circuit Zandvoort",
+        "events": [
+          "Dutch Grand Prix"
+        ],
+        "available": true,
+        "geometry_type": "fastlap_trace",
+        "source_dataset": "multiviewer",
+        "geometry_source": "multiviewer_circuit_api",
+        "has_corners": true,
+        "approximate": false,
+        "availability": {
+          "racing_loop": true,
+          "outline": true,
+          "corners": true,
+          "marshal_sectors": true,
+          "official_timing_sectors": false,
+          "pit_lane": false,
+          "start_finish": true
+        },
+        "config_note": null
+      },
+      {
+        "circuit_id": "monza",
+        "name": "Autodromo Nazionale Monza",
+        "events": [
+          "Italian Grand Prix"
+        ],
+        "available": true,
+        "geometry_type": "fastlap_trace",
+        "source_dataset": "multiviewer",
+        "geometry_source": "multiviewer_circuit_api",
+        "has_corners": true,
+        "approximate": false,
+        "availability": {
+          "racing_loop": true,
+          "outline": true,
+          "corners": true,
+          "marshal_sectors": true,
+          "official_timing_sectors": false,
+          "pit_lane": false,
+          "start_finish": true
+        },
+        "config_note": null
+      },
+      {
+        "circuit_id": "baku",
+        "name": "Baku City Circuit",
+        "events": [
+          "Azerbaijan Grand Prix"
+        ],
+        "available": true,
+        "geometry_type": "fastlap_trace",
+        "source_dataset": "multiviewer",
+        "geometry_source": "multiviewer_circuit_api",
+        "has_corners": true,
+        "approximate": false,
+        "availability": {
+          "racing_loop": true,
+          "outline": true,
+          "corners": true,
+          "marshal_sectors": true,
+          "official_timing_sectors": false,
+          "pit_lane": false,
+          "start_finish": true
+        },
+        "config_note": "Street circuit \u2014 OSM raceway coverage is partial for public-road circuits."
+      },
+      {
+        "circuit_id": "marina-bay",
+        "name": "Marina Bay Street Circuit",
+        "events": [
+          "Singapore Grand Prix"
+        ],
+        "available": true,
+        "geometry_type": "fastlap_trace",
+        "source_dataset": "multiviewer",
+        "geometry_source": "multiviewer_circuit_api",
+        "has_corners": true,
+        "approximate": false,
+        "availability": {
+          "racing_loop": true,
+          "outline": true,
+          "corners": true,
+          "marshal_sectors": true,
+          "official_timing_sectors": false,
+          "pit_lane": false,
+          "start_finish": true
+        },
+        "config_note": "Street circuit \u2014 OSM raceway coverage is partial for public-road circuits."
+      },
+      {
         "circuit_id": "cota",
         "name": "Circuit of the Americas",
         "events": [
           "United States Grand Prix"
         ],
         "available": true,
-        "geometry_type": "osm_centreline",
-        "source_dataset": "openstreetmap",
-        "geometry_source": "openstreetmap_overpass",
-        "has_corners": false,
-        "approximate": true,
+        "geometry_type": "fastlap_trace",
+        "source_dataset": "multiviewer",
+        "geometry_source": "multiviewer_circuit_api",
+        "has_corners": true,
+        "approximate": false,
         "availability": {
+          "racing_loop": true,
           "outline": true,
-          "corners": false,
-          "marshal_sectors": false,
+          "corners": true,
+          "marshal_sectors": true,
+          "official_timing_sectors": false,
           "pit_lane": false,
-          "start_finish": false,
-          "pit_lane_known_in_osm": false
+          "start_finish": true
         },
         "config_note": null
       },
@@ -326,18 +427,19 @@
           "Mexico City Grand Prix"
         ],
         "available": true,
-        "geometry_type": "osm_centreline",
-        "source_dataset": "openstreetmap",
-        "geometry_source": "openstreetmap_overpass",
-        "has_corners": false,
+        "geometry_type": "fastlap_trace",
+        "source_dataset": "multiviewer",
+        "geometry_source": "multiviewer_circuit_api",
+        "has_corners": true,
         "approximate": false,
         "availability": {
+          "racing_loop": true,
           "outline": true,
-          "corners": false,
-          "marshal_sectors": false,
+          "corners": true,
+          "marshal_sectors": true,
+          "official_timing_sectors": false,
           "pit_lane": false,
-          "start_finish": false,
-          "pit_lane_known_in_osm": false
+          "start_finish": true
         },
         "config_note": null
       },
@@ -348,20 +450,44 @@
           "S\u00e3o Paulo Grand Prix"
         ],
         "available": true,
-        "geometry_type": "osm_centreline",
-        "source_dataset": "openstreetmap",
-        "geometry_source": "openstreetmap_overpass",
-        "has_corners": false,
-        "approximate": true,
+        "geometry_type": "fastlap_trace",
+        "source_dataset": "multiviewer",
+        "geometry_source": "multiviewer_circuit_api",
+        "has_corners": true,
+        "approximate": false,
         "availability": {
+          "racing_loop": true,
           "outline": true,
-          "corners": false,
-          "marshal_sectors": false,
+          "corners": true,
+          "marshal_sectors": true,
+          "official_timing_sectors": false,
           "pit_lane": false,
-          "start_finish": false,
-          "pit_lane_known_in_osm": false
+          "start_finish": true
         },
         "config_note": null
+      },
+      {
+        "circuit_id": "las-vegas",
+        "name": "Las Vegas Strip Circuit",
+        "events": [
+          "Las Vegas Grand Prix"
+        ],
+        "available": true,
+        "geometry_type": "fastlap_trace",
+        "source_dataset": "multiviewer",
+        "geometry_source": "multiviewer_circuit_api",
+        "has_corners": true,
+        "approximate": false,
+        "availability": {
+          "racing_loop": true,
+          "outline": true,
+          "corners": true,
+          "marshal_sectors": true,
+          "official_timing_sectors": false,
+          "pit_lane": false,
+          "start_finish": true
+        },
+        "config_note": "Street circuit \u2014 OSM raceway coverage is partial for public-road circuits."
       },
       {
         "circuit_id": "lusail",
@@ -370,18 +496,19 @@
           "Qatar Grand Prix"
         ],
         "available": true,
-        "geometry_type": "osm_centreline",
-        "source_dataset": "openstreetmap",
-        "geometry_source": "openstreetmap_overpass",
-        "has_corners": false,
-        "approximate": true,
+        "geometry_type": "fastlap_trace",
+        "source_dataset": "multiviewer",
+        "geometry_source": "multiviewer_circuit_api",
+        "has_corners": true,
+        "approximate": false,
         "availability": {
+          "racing_loop": true,
           "outline": true,
-          "corners": false,
-          "marshal_sectors": false,
+          "corners": true,
+          "marshal_sectors": true,
+          "official_timing_sectors": false,
           "pit_lane": false,
-          "start_finish": false,
-          "pit_lane_known_in_osm": false
+          "start_finish": true
         },
         "config_note": null
       },
@@ -392,18 +519,19 @@
           "Abu Dhabi Grand Prix"
         ],
         "available": true,
-        "geometry_type": "osm_centreline",
-        "source_dataset": "openstreetmap",
-        "geometry_source": "openstreetmap_overpass",
-        "has_corners": false,
-        "approximate": true,
+        "geometry_type": "fastlap_trace",
+        "source_dataset": "multiviewer",
+        "geometry_source": "multiviewer_circuit_api",
+        "has_corners": true,
+        "approximate": false,
         "availability": {
+          "racing_loop": true,
           "outline": true,
-          "corners": false,
-          "marshal_sectors": false,
+          "corners": true,
+          "marshal_sectors": true,
+          "official_timing_sectors": false,
           "pit_lane": false,
-          "start_finish": false,
-          "pit_lane_known_in_osm": false
+          "start_finish": true
         },
         "config_note": null
       }
@@ -440,9 +568,9 @@
   "coverage": {
     "supported_events": 23,
     "circuits_total": 25,
-    "verified": 3,
-    "partial": 15,
-    "unavailable": 7,
+    "verified": 21,
+    "partial": 2,
+    "unavailable": 2,
     "failed": 0,
     "classifications": [
       "VERIFIED",
@@ -451,23 +579,43 @@
       "FAILED"
     ],
     "build": {
-      "build_id": "20261122T141103Z-44391d",
-      "build_utc": "2026-11-22T14:11:03.063338+00:00",
+      "build_id": "20261122T173756Z-ea088c",
+      "build_utc": "2026-11-22T17:37:56.631077+00:00",
       "source_failures": [],
       "served_from_previous": []
     },
     "circuits": [
       {
         "circuit_id": "bahrain",
-        "name": "Bahrain International Circuit",
+        "name": "Sepang International Circuit",
         "events": [
           "Bahrain Grand Prix"
         ],
-        "status": "VERIFIED",
-        "geometry_type": "fastlap_trace",
-        "has_corners": true,
-        "source_dataset": "fastf1",
-        "corners": 15
+        "status": "PARTIAL",
+        "geometry_type": "osm_centreline",
+        "has_corners": false,
+        "source_dataset": "openstreetmap",
+        "track_length_m": 4615,
+        "approximate": true,
+        "loop_closed": false,
+        "osm_way_ids": [
+          23410503,
+          107364027,
+          1561055768,
+          1561055767,
+          107364033,
+          144359489,
+          1561055758,
+          1561055757
+        ],
+        "osm_relation_id": null,
+        "missing": [
+          "corner numbers",
+          "sector boundaries",
+          "pit lane",
+          "racing direction",
+          "start/finish line"
+        ]
       },
       {
         "circuit_id": "jeddah",
@@ -485,9 +633,12 @@
         "events": [
           "Australian Grand Prix"
         ],
-        "status": "UNAVAILABLE",
-        "reason": "no highway=raceway ways or motorsport circuit relation in OpenStreetMap here (e.g. an un-mapped street circuit)",
-        "attempted": "osm"
+        "status": "VERIFIED",
+        "geometry_type": "fastlap_trace",
+        "has_corners": true,
+        "source_dataset": "multiviewer",
+        "corners": 14,
+        "layout_year": 2022
       },
       {
         "circuit_id": "suzuka",
@@ -495,31 +646,12 @@
         "events": [
           "Japanese Grand Prix"
         ],
-        "status": "PARTIAL",
-        "geometry_type": "osm_centreline",
-        "has_corners": false,
-        "source_dataset": "openstreetmap",
-        "track_length_m": 6702,
-        "approximate": true,
-        "loop_closed": false,
-        "osm_way_ids": [
-          120917578,
-          183391643,
-          183391645,
-          183391644,
-          183391657,
-          183391636,
-          183391635,
-          183391628
-        ],
-        "osm_relation_id": null,
-        "missing": [
-          "corner numbers",
-          "sector boundaries",
-          "pit lane",
-          "racing direction",
-          "start/finish line"
-        ]
+        "status": "VERIFIED",
+        "geometry_type": "fastlap_trace",
+        "has_corners": true,
+        "source_dataset": "multiviewer",
+        "corners": 18,
+        "layout_year": 2025
       },
       {
         "circuit_id": "shanghai",
@@ -527,24 +659,12 @@
         "events": [
           "Chinese Grand Prix"
         ],
-        "status": "PARTIAL",
-        "geometry_type": "osm_centreline",
-        "has_corners": false,
-        "source_dataset": "openstreetmap",
-        "track_length_m": 5465,
-        "approximate": false,
-        "loop_closed": true,
-        "osm_way_ids": [
-          156328670
-        ],
-        "osm_relation_id": null,
-        "missing": [
-          "corner numbers",
-          "sector boundaries",
-          "pit lane",
-          "racing direction",
-          "start/finish line"
-        ]
+        "status": "VERIFIED",
+        "geometry_type": "fastlap_trace",
+        "has_corners": true,
+        "source_dataset": "multiviewer",
+        "corners": 16,
+        "layout_year": 2019
       },
       {
         "circuit_id": "miami",
@@ -552,30 +672,12 @@
         "events": [
           "Miami Grand Prix"
         ],
-        "status": "PARTIAL",
-        "geometry_type": "osm_centreline",
-        "has_corners": false,
-        "source_dataset": "openstreetmap",
-        "track_length_m": 5691,
-        "approximate": true,
-        "loop_closed": false,
-        "osm_way_ids": [
-          1017340351,
-          1485453197,
-          1485453201,
-          1485453204,
-          1233165737,
-          1472684485,
-          1472686141
-        ],
-        "osm_relation_id": null,
-        "missing": [
-          "corner numbers",
-          "sector boundaries",
-          "pit lane",
-          "racing direction",
-          "start/finish line"
-        ]
+        "status": "VERIFIED",
+        "geometry_type": "fastlap_trace",
+        "has_corners": true,
+        "source_dataset": "multiviewer",
+        "corners": 19,
+        "layout_year": 2022
       },
       {
         "circuit_id": "imola",
@@ -615,9 +717,12 @@
         "events": [
           "Monaco Grand Prix"
         ],
-        "status": "UNAVAILABLE",
-        "reason": "no validated circuit geometry in OpenStreetMap (raceway_ways loop (251m, gap 0m): length 251m outside expected window; raceway_ways loop (408m, gap 324m): not node-topology closed (node joins 1, coord joins 0); raceway_ways loop (234m, gap 200m): not node-topology closed (node joins 0, coord joins 0))",
-        "attempted": "osm"
+        "status": "VERIFIED",
+        "geometry_type": "fastlap_trace",
+        "has_corners": true,
+        "source_dataset": "multiviewer",
+        "corners": 19,
+        "layout_year": 2022
       },
       {
         "circuit_id": "montreal",
@@ -625,24 +730,12 @@
         "events": [
           "Canadian Grand Prix"
         ],
-        "status": "PARTIAL",
-        "geometry_type": "osm_centreline",
-        "has_corners": false,
-        "source_dataset": "openstreetmap",
-        "track_length_m": 4367,
-        "approximate": false,
-        "loop_closed": true,
-        "osm_way_ids": [
-          136717490
-        ],
-        "osm_relation_id": null,
-        "missing": [
-          "corner numbers",
-          "sector boundaries",
-          "pit lane",
-          "racing direction",
-          "start/finish line"
-        ]
+        "status": "VERIFIED",
+        "geometry_type": "fastlap_trace",
+        "has_corners": true,
+        "source_dataset": "multiviewer",
+        "corners": 14,
+        "layout_year": 2022
       },
       {
         "circuit_id": "barcelona",
@@ -653,8 +746,9 @@
         "status": "VERIFIED",
         "geometry_type": "fastlap_trace",
         "has_corners": true,
-        "source_dataset": "fastf1",
-        "corners": 14
+        "source_dataset": "multiviewer",
+        "corners": 14,
+        "layout_year": 2023
       },
       {
         "circuit_id": "madring",
@@ -672,31 +766,12 @@
         "events": [
           "Austrian Grand Prix"
         ],
-        "status": "PARTIAL",
-        "geometry_type": "osm_centreline",
-        "has_corners": false,
-        "source_dataset": "openstreetmap",
-        "track_length_m": 4587,
-        "approximate": true,
-        "loop_closed": false,
-        "osm_way_ids": [
-          84416610,
-          822592402,
-          822592401,
-          822592400,
-          822592399,
-          822592398,
-          347958266,
-          822592404
-        ],
-        "osm_relation_id": null,
-        "missing": [
-          "corner numbers",
-          "sector boundaries",
-          "pit lane",
-          "racing direction",
-          "start/finish line"
-        ]
+        "status": "VERIFIED",
+        "geometry_type": "fastlap_trace",
+        "has_corners": true,
+        "source_dataset": "multiviewer",
+        "corners": 10,
+        "layout_year": 2022
       },
       {
         "circuit_id": "silverstone",
@@ -704,31 +779,12 @@
         "events": [
           "British Grand Prix"
         ],
-        "status": "PARTIAL",
-        "geometry_type": "osm_centreline",
-        "has_corners": false,
-        "source_dataset": "openstreetmap",
-        "track_length_m": 7016,
-        "approximate": true,
-        "loop_closed": false,
-        "osm_way_ids": [
-          3571477,
-          169730585,
-          169730587,
-          169730588,
-          169733768,
-          169609611,
-          169618245,
-          169730586
-        ],
-        "osm_relation_id": null,
-        "missing": [
-          "corner numbers",
-          "sector boundaries",
-          "pit lane",
-          "racing direction",
-          "start/finish line"
-        ]
+        "status": "VERIFIED",
+        "geometry_type": "fastlap_trace",
+        "has_corners": true,
+        "source_dataset": "multiviewer",
+        "corners": 18,
+        "layout_year": 2022
       },
       {
         "circuit_id": "spa",
@@ -736,31 +792,12 @@
         "events": [
           "Belgian Grand Prix"
         ],
-        "status": "PARTIAL",
-        "geometry_type": "osm_centreline",
-        "has_corners": false,
-        "source_dataset": "openstreetmap",
-        "track_length_m": 7239,
-        "approximate": true,
-        "loop_closed": false,
-        "osm_way_ids": [
-          24449918,
-          126807113,
-          175195997,
-          1430527230,
-          126807111,
-          126807112,
-          126835638,
-          1359025268
-        ],
-        "osm_relation_id": null,
-        "missing": [
-          "corner numbers",
-          "sector boundaries",
-          "pit lane",
-          "racing direction",
-          "start/finish line"
-        ]
+        "status": "VERIFIED",
+        "geometry_type": "fastlap_trace",
+        "has_corners": true,
+        "source_dataset": "multiviewer",
+        "corners": 19,
+        "layout_year": 2021
       },
       {
         "circuit_id": "hungaroring",
@@ -768,26 +805,12 @@
         "events": [
           "Hungarian Grand Prix"
         ],
-        "status": "PARTIAL",
-        "geometry_type": "osm_centreline",
-        "has_corners": false,
-        "source_dataset": "openstreetmap",
-        "track_length_m": 5440,
-        "approximate": true,
-        "loop_closed": false,
-        "osm_way_ids": [
-          231328650,
-          231417580,
-          1333262244
-        ],
-        "osm_relation_id": null,
-        "missing": [
-          "corner numbers",
-          "sector boundaries",
-          "pit lane",
-          "racing direction",
-          "start/finish line"
-        ]
+        "status": "VERIFIED",
+        "geometry_type": "fastlap_trace",
+        "has_corners": true,
+        "source_dataset": "multiviewer",
+        "corners": 16,
+        "layout_year": 2021
       },
       {
         "circuit_id": "zandvoort",
@@ -795,31 +818,12 @@
         "events": [
           "Dutch Grand Prix"
         ],
-        "status": "PARTIAL",
-        "geometry_type": "osm_centreline",
-        "has_corners": false,
-        "source_dataset": "openstreetmap",
-        "track_length_m": 5016,
-        "approximate": true,
-        "loop_closed": false,
-        "osm_way_ids": [
-          24626850,
-          1311710253,
-          1311765615,
-          1311802779,
-          1311822339,
-          1311822340,
-          1311822341,
-          1311879069
-        ],
-        "osm_relation_id": null,
-        "missing": [
-          "corner numbers",
-          "sector boundaries",
-          "pit lane",
-          "racing direction",
-          "start/finish line"
-        ]
+        "status": "VERIFIED",
+        "geometry_type": "fastlap_trace",
+        "has_corners": true,
+        "source_dataset": "multiviewer",
+        "corners": 14,
+        "layout_year": 2021
       },
       {
         "circuit_id": "monza",
@@ -830,8 +834,9 @@
         "status": "VERIFIED",
         "geometry_type": "fastlap_trace",
         "has_corners": true,
-        "source_dataset": "fastf1",
-        "corners": 11
+        "source_dataset": "multiviewer",
+        "corners": 11,
+        "layout_year": 2021
       },
       {
         "circuit_id": "baku",
@@ -839,9 +844,12 @@
         "events": [
           "Azerbaijan Grand Prix"
         ],
-        "status": "UNAVAILABLE",
-        "reason": "no validated circuit geometry in OpenStreetMap (no candidate loops)",
-        "attempted": "osm"
+        "status": "VERIFIED",
+        "geometry_type": "fastlap_trace",
+        "has_corners": true,
+        "source_dataset": "multiviewer",
+        "corners": 20,
+        "layout_year": 2022
       },
       {
         "circuit_id": "marina-bay",
@@ -849,9 +857,12 @@
         "events": [
           "Singapore Grand Prix"
         ],
-        "status": "UNAVAILABLE",
-        "reason": "no validated circuit geometry in OpenStreetMap (raceway_ways loop (1223m, gap 575m): not node-topology closed (node joins 3, coord joins 0))",
-        "attempted": "osm"
+        "status": "VERIFIED",
+        "geometry_type": "fastlap_trace",
+        "has_corners": true,
+        "source_dataset": "multiviewer",
+        "corners": 19,
+        "layout_year": 2023
       },
       {
         "circuit_id": "cota",
@@ -859,31 +870,12 @@
         "events": [
           "United States Grand Prix"
         ],
-        "status": "PARTIAL",
-        "geometry_type": "osm_centreline",
-        "has_corners": false,
-        "source_dataset": "openstreetmap",
-        "track_length_m": 5785,
-        "approximate": true,
-        "loop_closed": false,
-        "osm_way_ids": [
-          118256423,
-          118258957,
-          118258959,
-          514836011,
-          118258939,
-          118258950,
-          118258952,
-          118258954
-        ],
-        "osm_relation_id": null,
-        "missing": [
-          "corner numbers",
-          "sector boundaries",
-          "pit lane",
-          "racing direction",
-          "start/finish line"
-        ]
+        "status": "VERIFIED",
+        "geometry_type": "fastlap_trace",
+        "has_corners": true,
+        "source_dataset": "multiviewer",
+        "corners": 20,
+        "layout_year": 2021
       },
       {
         "circuit_id": "mexico",
@@ -891,28 +883,12 @@
         "events": [
           "Mexico City Grand Prix"
         ],
-        "status": "PARTIAL",
-        "geometry_type": "osm_centreline",
-        "has_corners": false,
-        "source_dataset": "openstreetmap",
-        "track_length_m": 3552,
-        "approximate": false,
-        "loop_closed": true,
-        "osm_way_ids": [
-          772754604,
-          772754605,
-          772754609,
-          1313598528,
-          772754606
-        ],
-        "osm_relation_id": null,
-        "missing": [
-          "corner numbers",
-          "sector boundaries",
-          "pit lane",
-          "racing direction",
-          "start/finish line"
-        ]
+        "status": "VERIFIED",
+        "geometry_type": "fastlap_trace",
+        "has_corners": true,
+        "source_dataset": "multiviewer",
+        "corners": 17,
+        "layout_year": 2021
       },
       {
         "circuit_id": "interlagos",
@@ -920,31 +896,12 @@
         "events": [
           "S\u00e3o Paulo Grand Prix"
         ],
-        "status": "PARTIAL",
-        "geometry_type": "osm_centreline",
-        "has_corners": false,
-        "source_dataset": "openstreetmap",
-        "track_length_m": 5692,
-        "approximate": true,
-        "loop_closed": false,
-        "osm_way_ids": [
-          33779109,
-          138567234,
-          138567239,
-          190164737,
-          138567242,
-          190164736,
-          189535472,
-          138567236
-        ],
-        "osm_relation_id": null,
-        "missing": [
-          "corner numbers",
-          "sector boundaries",
-          "pit lane",
-          "racing direction",
-          "start/finish line"
-        ]
+        "status": "VERIFIED",
+        "geometry_type": "fastlap_trace",
+        "has_corners": true,
+        "source_dataset": "multiviewer",
+        "corners": 15,
+        "layout_year": 2023
       },
       {
         "circuit_id": "las-vegas",
@@ -952,9 +909,12 @@
         "events": [
           "Las Vegas Grand Prix"
         ],
-        "status": "UNAVAILABLE",
-        "reason": "no validated circuit geometry in OpenStreetMap (raceway_ways loop (863m, gap 355m): not node-topology closed (node joins 5, coord joins 0))",
-        "attempted": "osm"
+        "status": "VERIFIED",
+        "geometry_type": "fastlap_trace",
+        "has_corners": true,
+        "source_dataset": "multiviewer",
+        "corners": 17,
+        "layout_year": 2023
       },
       {
         "circuit_id": "lusail",
@@ -962,27 +922,12 @@
         "events": [
           "Qatar Grand Prix"
         ],
-        "status": "PARTIAL",
-        "geometry_type": "osm_centreline",
-        "has_corners": false,
-        "source_dataset": "openstreetmap",
-        "track_length_m": 5434,
-        "approximate": true,
-        "loop_closed": false,
-        "osm_way_ids": [
-          152483595,
-          196193732,
-          1004121314,
-          1037707300
-        ],
-        "osm_relation_id": null,
-        "missing": [
-          "corner numbers",
-          "sector boundaries",
-          "pit lane",
-          "racing direction",
-          "start/finish line"
-        ]
+        "status": "VERIFIED",
+        "geometry_type": "fastlap_trace",
+        "has_corners": true,
+        "source_dataset": "multiviewer",
+        "corners": 16,
+        "layout_year": 2023
       },
       {
         "circuit_id": "yas-marina",
@@ -990,30 +935,12 @@
         "events": [
           "Abu Dhabi Grand Prix"
         ],
-        "status": "PARTIAL",
-        "geometry_type": "osm_centreline",
-        "has_corners": false,
-        "source_dataset": "openstreetmap",
-        "track_length_m": 5597,
-        "approximate": true,
-        "loop_closed": false,
-        "osm_way_ids": [
-          168477013,
-          188337195,
-          1255169704,
-          1469184731,
-          1255169703,
-          188337196,
-          1469184732
-        ],
-        "osm_relation_id": null,
-        "missing": [
-          "corner numbers",
-          "sector boundaries",
-          "pit lane",
-          "racing direction",
-          "start/finish line"
-        ]
+        "status": "VERIFIED",
+        "geometry_type": "fastlap_trace",
+        "has_corners": true,
+        "source_dataset": "multiviewer",
+        "corners": 16,
+        "layout_year": 2021
       }
     ],
     "events": [
@@ -1021,43 +948,43 @@
         "round": 1,
         "event": "Australian Grand Prix",
         "circuit_id": "albert-park",
-        "status": "UNAVAILABLE",
-        "geometry_type": null
+        "status": "VERIFIED",
+        "geometry_type": "fastlap_trace"
       },
       {
         "round": 2,
         "event": "Chinese Grand Prix",
         "circuit_id": "shanghai",
-        "status": "PARTIAL",
-        "geometry_type": "osm_centreline"
+        "status": "VERIFIED",
+        "geometry_type": "fastlap_trace"
       },
       {
         "round": 3,
         "event": "Japanese Grand Prix",
         "circuit_id": "suzuka",
-        "status": "PARTIAL",
-        "geometry_type": "osm_centreline"
+        "status": "VERIFIED",
+        "geometry_type": "fastlap_trace"
       },
       {
         "round": 4,
         "event": "Miami Grand Prix",
         "circuit_id": "miami",
-        "status": "PARTIAL",
-        "geometry_type": "osm_centreline"
+        "status": "VERIFIED",
+        "geometry_type": "fastlap_trace"
       },
       {
         "round": 5,
         "event": "Canadian Grand Prix",
         "circuit_id": "montreal",
-        "status": "PARTIAL",
-        "geometry_type": "osm_centreline"
+        "status": "VERIFIED",
+        "geometry_type": "fastlap_trace"
       },
       {
         "round": 6,
         "event": "Monaco Grand Prix",
         "circuit_id": "monaco",
-        "status": "UNAVAILABLE",
-        "geometry_type": null
+        "status": "VERIFIED",
+        "geometry_type": "fastlap_trace"
       },
       {
         "round": 7,
@@ -1070,36 +997,36 @@
         "round": 8,
         "event": "Austrian Grand Prix",
         "circuit_id": "red-bull-ring",
-        "status": "PARTIAL",
-        "geometry_type": "osm_centreline"
+        "status": "VERIFIED",
+        "geometry_type": "fastlap_trace"
       },
       {
         "round": 9,
         "event": "British Grand Prix",
         "circuit_id": "silverstone",
-        "status": "PARTIAL",
-        "geometry_type": "osm_centreline"
+        "status": "VERIFIED",
+        "geometry_type": "fastlap_trace"
       },
       {
         "round": 10,
         "event": "Belgian Grand Prix",
         "circuit_id": "spa",
-        "status": "PARTIAL",
-        "geometry_type": "osm_centreline"
+        "status": "VERIFIED",
+        "geometry_type": "fastlap_trace"
       },
       {
         "round": 11,
         "event": "Hungarian Grand Prix",
         "circuit_id": "hungaroring",
-        "status": "PARTIAL",
-        "geometry_type": "osm_centreline"
+        "status": "VERIFIED",
+        "geometry_type": "fastlap_trace"
       },
       {
         "round": 12,
         "event": "Dutch Grand Prix",
         "circuit_id": "zandvoort",
-        "status": "PARTIAL",
-        "geometry_type": "osm_centreline"
+        "status": "VERIFIED",
+        "geometry_type": "fastlap_trace"
       },
       {
         "round": 13,
@@ -1119,64 +1046,64 @@
         "round": 15,
         "event": "Azerbaijan Grand Prix",
         "circuit_id": "baku",
-        "status": "UNAVAILABLE",
-        "geometry_type": null
+        "status": "VERIFIED",
+        "geometry_type": "fastlap_trace"
       },
       {
         "round": 16,
         "event": "Bahrain Grand Prix",
         "circuit_id": "bahrain",
-        "status": "VERIFIED",
-        "geometry_type": "fastlap_trace"
+        "status": "PARTIAL",
+        "geometry_type": "osm_centreline"
       },
       {
         "round": 17,
         "event": "Singapore Grand Prix",
         "circuit_id": "marina-bay",
-        "status": "UNAVAILABLE",
-        "geometry_type": null
+        "status": "VERIFIED",
+        "geometry_type": "fastlap_trace"
       },
       {
         "round": 18,
         "event": "United States Grand Prix",
         "circuit_id": "cota",
-        "status": "PARTIAL",
-        "geometry_type": "osm_centreline"
+        "status": "VERIFIED",
+        "geometry_type": "fastlap_trace"
       },
       {
         "round": 19,
         "event": "Mexico City Grand Prix",
         "circuit_id": "mexico",
-        "status": "PARTIAL",
-        "geometry_type": "osm_centreline"
+        "status": "VERIFIED",
+        "geometry_type": "fastlap_trace"
       },
       {
         "round": 20,
         "event": "S\u00e3o Paulo Grand Prix",
         "circuit_id": "interlagos",
-        "status": "PARTIAL",
-        "geometry_type": "osm_centreline"
+        "status": "VERIFIED",
+        "geometry_type": "fastlap_trace"
       },
       {
         "round": 21,
         "event": "Las Vegas Grand Prix",
         "circuit_id": "las-vegas",
-        "status": "UNAVAILABLE",
-        "geometry_type": null
+        "status": "VERIFIED",
+        "geometry_type": "fastlap_trace"
       },
       {
         "round": 22,
         "event": "Qatar Grand Prix",
         "circuit_id": "lusail",
-        "status": "PARTIAL",
-        "geometry_type": "osm_centreline"
+        "status": "VERIFIED",
+        "geometry_type": "fastlap_trace"
       },
       {
         "round": 23,
         "event": "Abu Dhabi Grand Prix",
         "circuit_id": "yas-marina",
-        "status": "PARTIAL",
-        "geometry_type": "osm_centreline"
+        "status": "VERIFIED",
+        "geometry_type": "fastlap_trace"
       }
     ]
   },

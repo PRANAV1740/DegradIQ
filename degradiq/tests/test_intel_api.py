@@ -50,7 +50,10 @@ class IntelCircuitTests(unittest.TestCase):
     def test_available_circuit_has_geometry_and_provenance(self):
         avail = self.idx["circuits"]["available"]
         self.assertTrue(avail, "expected at least one verified circuit")
-        cid = avail[0]["circuit_id"]
+        # pick a corners-bearing circuit (FastF1/MultiViewer), not an OSM outline-only one
+        corner_circuits = [c for c in avail if c.get("has_corners")]
+        self.assertTrue(corner_circuits, "expected at least one circuit with corner data")
+        cid = corner_circuits[0]["circuit_id"]
         d = self.c.get(f"/api/intel/circuit/{cid}").json()
         self.assertEqual(d["status"], "ok")
         self.assertGreater(len(d["outline"]), 20)          # real track path
@@ -210,7 +213,7 @@ class IntelMappingTests(unittest.TestCase):
                 self.assertIn("official_timing_sectors", d)
                 mp = d.get("marshal_projection") or {}
                 self.assertTrue(mp.get("frame_compatible"))          # same coordinate frame
-                self.assertIn("FastF1", mp.get("coordinate_reference", ""))
+                self.assertIn("shared", mp.get("coordinate_reference", "").lower())
 
     def test_osm_circuits_have_no_cross_frame_marshal_markers(self):
         # OSM geometry must never carry FastF1 marshal markers projected across frames.

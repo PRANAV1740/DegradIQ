@@ -70,23 +70,28 @@ FF1_LICENCE = "Derived from FastF1-cached F1 timing/telemetry for research use; 
 # gives the Overpass search centre for a centreline trace otherwise.
 # --------------------------------------------------------------------------------------
 CIRCUITS = [
-    {"id": "bahrain", "name": "Bahrain International Circuit", "location": "Sakhir", "country": "Bahrain",
-     "events": ["Bahrain Grand Prix"], "fastf1": (2024, "Bahrain Grand Prix"), "osm": (26.0325, 50.5106)},
+    {"id": "bahrain", "circuit_key": 12, "name": "Sepang International Circuit", "location": "Sepang", "country": "Malaysia",
+     "events": ["Bahrain Grand Prix"], "osm": (2.7603, 101.7382),
+     "osm_identity": {"name_aliases": ["sepang international circuit", "sepang", "genting curve", "klia curve",
+                                       "kenyir lake corner", "berjaya tioman corner"]},
+     "config_note": "The 2026 'Bahrain Grand Prix' is held at Sepang International Circuit, Malaysia (F1 confirmed "
+                    "the venue change; OpenF1/MultiViewer circuit_key 12 = Sepang, not Sakhir which is key 63). "
+                    "Geometry resolves to Sepang, never the 2024/25 Sakhir layout."},
     {"id": "jeddah", "name": "Jeddah Corniche Circuit", "location": "Jeddah", "country": "Saudi Arabia",
      "events": ["Saudi Arabian Grand Prix"], "osm": (21.6319, 39.1044)},
-    {"id": "albert-park", "name": "Albert Park Circuit", "location": "Melbourne", "country": "Australia",
+    {"id": "albert-park", "circuit_key": 10, "name": "Albert Park Circuit", "location": "Melbourne", "country": "Australia",
      "events": ["Australian Grand Prix"], "osm": (-37.8497, 144.968),
      "osm_identity": {"name_aliases": ["albert park", "melbourne grand prix circuit"]}},
-    {"id": "suzuka", "name": "Suzuka International Racing Course", "location": "Suzuka", "country": "Japan",
+    {"id": "suzuka", "circuit_key": 46, "name": "Suzuka International Racing Course", "location": "Suzuka", "country": "Japan",
      "events": ["Japanese Grand Prix"], "osm": (34.8431, 136.5407),
      "osm_identity": {"name_aliases": ["suzuka", "degner", "spoon", "130r", "casio triangle",
                                        "dunlop", "crossover", "esses"]}},
-    {"id": "shanghai", "name": "Shanghai International Circuit", "location": "Shanghai", "country": "China",
+    {"id": "shanghai", "circuit_key": 49, "name": "Shanghai International Circuit", "location": "Shanghai", "country": "China",
      "events": ["Chinese Grand Prix"], "osm": (31.3389, 121.2197),
      "osm_identity": {"name_aliases": ["shanghai international circuit"], "reviewed_way_ids": [156328670],
                       "review_note": "OSM way 156328670 is the unnamed Shanghai International Circuit F1 track loop, "
                                      "independently reviewed (openstreetmap.org/way/156328670)"}},
-    {"id": "miami", "name": "Miami International Autodrome", "location": "Miami Gardens", "country": "United States",
+    {"id": "miami", "circuit_key": 151, "name": "Miami International Autodrome", "location": "Miami Gardens", "country": "United States",
      "events": ["Miami Grand Prix"], "osm": (25.9581, -80.2389),
      "osm_identity": {"name_aliases": ["miami international autodrome"]}},
     {"id": "imola", "name": "Autodromo Enzo e Dino Ferrari", "location": "Imola", "country": "Italy",
@@ -96,67 +101,67 @@ CIRCUITS = [
                                        "acque minerali", "rivazza", "gresini"],
                       "review_note": "member ways carry Imola's distinctive corner names (Tosa, Piratella, "
                                      "Rivazza, Acque Minerali, Variante Tamburello/Villeneuve) — reviewed as Imola"}},
-    {"id": "monaco", "name": "Circuit de Monaco", "location": "Monte Carlo", "country": "Monaco",
+    {"id": "monaco", "circuit_key": 22, "name": "Circuit de Monaco", "location": "Monte Carlo", "country": "Monaco",
      "events": ["Monaco Grand Prix"], "osm": (43.7347, 7.4206),
      "osm_identity": {"name_aliases": ["circuit de monaco", "monaco"]},
      "config_note": "Street circuit — OSM raceway coverage is partial for public-road circuits."},
-    {"id": "montreal", "name": "Circuit Gilles-Villeneuve", "location": "Montréal", "country": "Canada",
+    {"id": "montreal", "circuit_key": 23, "name": "Circuit Gilles-Villeneuve", "location": "Montréal", "country": "Canada",
      "events": ["Canadian Grand Prix"], "osm": (45.5000, -73.5228),
      "osm_identity": {"name_aliases": ["circuit gilles-villeneuve", "gilles-villeneuve", "gilles villeneuve"]}},
-    {"id": "barcelona", "name": "Circuit de Barcelona-Catalunya", "location": "Montmeló", "country": "Spain",
+    {"id": "barcelona", "circuit_key": 15, "name": "Circuit de Barcelona-Catalunya", "location": "Montmeló", "country": "Spain",
      "events": ["Barcelona Grand Prix"], "fastf1": (2024, "Spanish Grand Prix"), "osm": (41.5700, 2.2611),
      "config_note": "The 2024 'Spanish Grand Prix' was held here at Barcelona-Catalunya; in 2026 it is the Barcelona GP."},
-    {"id": "madring", "name": "Madring (Madrid Street Circuit)", "location": "Madrid", "country": "Spain",
+    {"id": "madring", "circuit_key": 153, "name": "Madring (Madrid Street Circuit)", "location": "Madrid", "country": "Spain",
      "events": ["Spanish Grand Prix"], "fastf1": (2026, "Spanish Grand Prix"), "osm": (40.4650, -3.6120),
      "config_note": "New-for-2026 Madrid circuit; hosted the 2026 Spanish GP (11-13 Sep 2026), construction completed "
                     "19 Oct 2026. Distinct circuit identity from Barcelona. Validated geometry may still be unavailable "
                     "if FastF1 telemetry is not accessible (403) and OSM lacks a validated raceway loop."},
-    {"id": "red-bull-ring", "name": "Red Bull Ring", "location": "Spielberg", "country": "Austria",
+    {"id": "red-bull-ring", "circuit_key": 19, "name": "Red Bull Ring", "location": "Spielberg", "country": "Austria",
      "events": ["Austrian Grand Prix"], "osm": (47.2197, 14.7647),
      "osm_identity": {"name_aliases": ["red bull ring", "red-bull-ring", "spielberg", "a1-ring"]}},
-    {"id": "silverstone", "name": "Silverstone Circuit", "location": "Silverstone", "country": "United Kingdom",
+    {"id": "silverstone", "circuit_key": 2, "name": "Silverstone Circuit", "location": "Silverstone", "country": "United Kingdom",
      "events": ["British Grand Prix"], "osm": (52.0733, -1.0147),
      "osm_identity": {"name_aliases": ["silverstone", "becketts", "brooklands", "copse", "maggotts",
                                        "stowe", "woodcote", "luffield", "abbey", "chapel curve", "aintree", "hangar straight"]}},
-    {"id": "spa", "name": "Circuit de Spa-Francorchamps", "location": "Spa", "country": "Belgium",
+    {"id": "spa", "circuit_key": 7, "name": "Circuit de Spa-Francorchamps", "location": "Spa", "country": "Belgium",
      "events": ["Belgian Grand Prix"], "osm": (50.4372, 5.9714),
      "osm_identity": {"name_aliases": ["spa-francorchamps", "spa francorchamps", "eau rouge", "raidillon",
                                        "pouhon", "blanchimont", "la source", "kemmel", "stavelot", "les combes", "malmedy"]}},
-    {"id": "hungaroring", "name": "Hungaroring", "location": "Budapest", "country": "Hungary",
+    {"id": "hungaroring", "circuit_key": 4, "name": "Hungaroring", "location": "Budapest", "country": "Hungary",
      "events": ["Hungarian Grand Prix"], "osm": (47.5789, 19.2486),
      "osm_identity": {"name_aliases": ["hungaroring"]}},
-    {"id": "zandvoort", "name": "Circuit Zandvoort", "location": "Zandvoort", "country": "Netherlands",
+    {"id": "zandvoort", "circuit_key": 55, "name": "Circuit Zandvoort", "location": "Zandvoort", "country": "Netherlands",
      "events": ["Dutch Grand Prix"], "osm": (52.3888, 4.5409),
      "osm_identity": {"name_aliases": ["zandvoort"]}},
-    {"id": "monza", "name": "Autodromo Nazionale Monza", "location": "Monza", "country": "Italy",
+    {"id": "monza", "circuit_key": 39, "name": "Autodromo Nazionale Monza", "location": "Monza", "country": "Italy",
      "events": ["Italian Grand Prix"], "fastf1": (2024, "Italian Grand Prix"), "osm": (45.6156, 9.2811)},
-    {"id": "baku", "name": "Baku City Circuit", "location": "Baku", "country": "Azerbaijan",
+    {"id": "baku", "circuit_key": 144, "name": "Baku City Circuit", "location": "Baku", "country": "Azerbaijan",
      "events": ["Azerbaijan Grand Prix"], "osm": (40.3725, 49.8533),
      "osm_identity": {"name_aliases": ["baku city circuit"]},
      "config_note": "Street circuit — OSM raceway coverage is partial for public-road circuits."},
-    {"id": "marina-bay", "name": "Marina Bay Street Circuit", "location": "Marina Bay", "country": "Singapore",
+    {"id": "marina-bay", "circuit_key": 61, "name": "Marina Bay Street Circuit", "location": "Marina Bay", "country": "Singapore",
      "events": ["Singapore Grand Prix"], "osm": (1.2914, 103.8640),
      "osm_identity": {"name_aliases": ["marina bay street circuit", "singapore street circuit"]},
      "config_note": "Street circuit — OSM raceway coverage is partial for public-road circuits."},
-    {"id": "cota", "name": "Circuit of the Americas", "location": "Austin", "country": "United States",
+    {"id": "cota", "circuit_key": 9, "name": "Circuit of the Americas", "location": "Austin", "country": "United States",
      "events": ["United States Grand Prix"], "osm": (30.1328, -97.6411),
      "osm_identity": {"name_aliases": ["circuit of the americas", "cota"]}},
-    {"id": "mexico", "name": "Autódromo Hermanos Rodríguez", "location": "Mexico City", "country": "Mexico",
+    {"id": "mexico", "circuit_key": 65, "name": "Autódromo Hermanos Rodríguez", "location": "Mexico City", "country": "Mexico",
      "events": ["Mexico City Grand Prix"], "osm": (19.4042, -99.0907),
      "osm_identity": {"name_aliases": ["autodromo hermanos rodriguez", "hermanos rodriguez"]}},
-    {"id": "interlagos", "name": "Autódromo José Carlos Pace (Interlagos)", "location": "São Paulo", "country": "Brazil",
+    {"id": "interlagos", "circuit_key": 14, "name": "Autódromo José Carlos Pace (Interlagos)", "location": "São Paulo", "country": "Brazil",
      "events": ["São Paulo Grand Prix"], "osm": (-23.7036, -46.6997),
      "osm_identity": {"name_aliases": ["interlagos", "jose carlos pace", "carlos pace", "curva do sol",
                                        "bico de pato", "descida do lago", "curva do laranjinha", "reta oposta",
                                        "mergulho", "pinheirinho", "ferradura", "juncao"]}},
-    {"id": "las-vegas", "name": "Las Vegas Strip Circuit", "location": "Las Vegas", "country": "United States",
+    {"id": "las-vegas", "circuit_key": 152, "name": "Las Vegas Strip Circuit", "location": "Las Vegas", "country": "United States",
      "events": ["Las Vegas Grand Prix"], "osm": (36.1147, -115.1730),
      "osm_identity": {"name_aliases": ["las vegas strip circuit"]},
      "config_note": "Street circuit — OSM raceway coverage is partial for public-road circuits."},
-    {"id": "lusail", "name": "Lusail International Circuit", "location": "Lusail", "country": "Qatar",
+    {"id": "lusail", "circuit_key": 150, "name": "Lusail International Circuit", "location": "Lusail", "country": "Qatar",
      "events": ["Qatar Grand Prix"], "osm": (25.4900, 51.4542),
      "osm_identity": {"name_aliases": ["lusail", "losail", "lusail international circuit"]}},
-    {"id": "yas-marina", "name": "Yas Marina Circuit", "location": "Yas Island", "country": "United Arab Emirates",
+    {"id": "yas-marina", "circuit_key": 70, "name": "Yas Marina Circuit", "location": "Yas Island", "country": "United Arab Emirates",
      "events": ["Abu Dhabi Grand Prix"], "osm": (24.4672, 54.6031),
      "osm_identity": {"name_aliases": ["yas marina", "yas marina circuit"]}},
 ]
@@ -250,7 +255,7 @@ def _project_markers(outline, markers, threshold=MARSHAL_SNAP_THRESHOLD):
     acc.sort(key=lambda r: r["cumulative_distance_units"])
     boundaries = sorted({min(range(len(cum)), key=lambda k: abs(cum[k] - r["cumulative_distance_units"])) for r in acc})
     snaps = [r["snap_distance_units"] for r in acc]
-    summary = {"coordinate_reference": "FastF1 local XY (shared frame with outline & corners), normalised",
+    summary = {"coordinate_reference": "shared circuit XY frame (outline + corners + markers), normalised",
                "frame_compatible": True, "method": "nearest-segment projection with cumulative lap distance",
                "snap_threshold_units": round(threshold, 1),
                "max_snap_units": round(max(snaps), 2) if snaps else None,
@@ -322,6 +327,113 @@ def build_circuit_fastf1(cfg) -> dict | None:
                  "(nearest-segment projection, validated), NOT the three official timing sectors, whose boundary "
                  "distances are not available.",
     }
+
+
+MVT_BASE = "https://api.multiviewer.app/api/v1/circuits"
+MVT_YEARS = [2026, 2025, 2024, 2023]  # try the requested season first, fall back to the latest available
+MVT_LICENCE = ("Circuit geometry from the MultiViewer circuit API (fan-made, non-commercial). Used here only for a "
+               "non-commercial research / portfolio demonstration. Underlying F1 timing/telemetry is subject to F1's "
+               "rights; not redistributed as raw data — only a normalised outline + corner/marshal annotations.")
+
+
+def _http_json(url, timeout=30):
+    req = urllib.request.Request(url, headers={"User-Agent": "DegradIQ-research/1.0 (portfolio)"})
+    with urllib.request.urlopen(req, timeout=timeout) as r:
+        return json.load(r)
+
+
+def build_circuit_mvt(cfg):
+    """Primary provider: MultiViewer circuit API (the same source FastF1's circuit_info uses).
+
+    Returns a VERIFIED-quality geometry with the real circuit outline, corner numbers, marshal
+    sectors and rotation — for permanent AND street circuits — without needing a cached session.
+    Records the layout year actually served (MVT sometimes returns an older layout) and the
+    candidate-lap provenance. Responses are cached to disk for deterministic rebuilds.
+    """
+    key = cfg.get("circuit_key")
+    if key is None:
+        return None, "no circuit_key configured"
+    cache_dir = PACKAGE_DIR / "cache" / "mvt"
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    data = None
+    for yr in MVT_YEARS:
+        cf = cache_dir / f"{key}_{yr}.json"
+        if cf.is_file():
+            try:
+                d = json.loads(cf.read_text(encoding="utf-8"))
+                if d and d.get("x"):
+                    data = d; break
+            except Exception:
+                pass
+        try:
+            d = _http_json(f"{MVT_BASE}/{key}/{yr}")
+            if d and d.get("x"):
+                try:
+                    cf.write_text(json.dumps(d), encoding="utf-8")
+                except Exception:
+                    pass
+                data = d; break
+        except Exception:
+            continue
+    if not data or not data.get("x"):
+        return None, f"MultiViewer has no circuit data for key {key}"
+
+    X = np.asarray(data["x"], float); Y = np.asarray(data["y"], float)
+    if len(X) < 50:
+        return None, "MultiViewer outline too short"
+    rotation_deg = float(data.get("rotation", 0.0) or 0.0)
+    rot = rotation_deg / 180.0 * np.pi
+
+    def rotate_arr(x, y):
+        return x * np.cos(rot) - y * np.sin(rot), x * np.sin(rot) + y * np.cos(rot)
+
+    Xr, Yr = rotate_arr(X, Y)
+    cs = data.get("corners") or []
+    cxr = cyr = None
+    if cs:
+        cx = np.asarray([c["trackPosition"]["x"] for c in cs], float)
+        cy = np.asarray([c["trackPosition"]["y"] for c in cs], float)
+        cxr, cyr = rotate_arr(cx, cy)
+    nm, tparams = _normalise(np.column_stack([Xr, Yr]),
+                             np.column_stack([cxr, cyr]) if cxr is not None else None)
+    step = max(1, len(Xr) // 360)
+    outline = [nm(Xr[i], Yr[i]) for i in range(0, len(Xr), step)]
+    corners = [{"number": int(c["number"]), "xy": nm(cxr[i], cyr[i])} for i, c in enumerate(cs)] if cs else []
+    raw_markers = []
+    for m in (data.get("marshalSectors") or []):
+        mx, my = rotate_arr(float(m["trackPosition"]["x"]), float(m["trackPosition"]["y"]))
+        raw_markers.append({"number": int(m.get("number", 0)), "xy": nm(mx, my)})
+    proj = _project_markers(outline, raw_markers)
+    cand = data.get("candidateLap") or {}
+    layout_year = data.get("year")
+    return {
+        "geometry_type": "fastlap_trace", "geometry_label": "MultiViewer circuit map (reference-lap path + corners/marshal)",
+        "source_dataset": "multiviewer", "geometry_source": "multiviewer_circuit_api",
+        "source": f"MultiViewer circuit API /circuits/{key}/{layout_year}",
+        "source_event": f"{data.get('meetingName') or cfg.get('name')} · layout {layout_year}",
+        "data_provider": "MultiViewer (fan-made) · F1 timing-derived", "session": cand.get("session"),
+        "licence": MVT_LICENCE,
+        "coordinate_system": "normalised 0-1000 viewBox, circuit rotation applied, Y flipped for SVG",
+        "coordinate_reference": "MultiViewer circuit XY, rotation applied, normalised to 0-1000 viewBox",
+        "construction_method": "MultiViewer reference-lap outline + circuit corners/marshal sectors (one shared transform)",
+        "coordinate_transform": {"rotation_deg": round(rotation_deg, 3), "normalisation": tparams, "shared": True,
+                                 "applies_to": ["outline", "corners", "marshal_markers"]},
+        "mvt": {"circuit_key": key, "requested_season": MVT_YEARS[0], "layout_year": layout_year,
+                "candidate_lap": {k: cand.get(k) for k in ("driverNumber", "lapNumber", "session", "lapTime", "lapStartDate")},
+                "source_url": f"{MVT_BASE}/{key}/{layout_year}", "retrieved_utc": datetime.now(timezone.utc).isoformat()},
+        "available": {"racing_loop": True, "outline": True, "corners": len(corners) > 0,
+                      "marshal_sectors": len(proj["accepted"]) > 0, "official_timing_sectors": False,
+                      "pit_lane": False, "start_finish": bool(outline)},
+        "outline": outline, "corners": corners,
+        "marshal_sectors": proj["accepted"], "marshal_rejected": proj["rejected"],
+        "marshal_boundaries": proj["boundaries"], "marshal_projection": proj["summary"],
+        "start_finish": outline[0] if outline else None, "n_outline_points": len(outline),
+        "official_timing_sectors": "unavailable (circuit-info API does not expose S1/S2/S3 boundary distances)",
+        "layout_year": layout_year,
+        "notes": f"Circuit map from the MultiViewer circuit API (layout year {layout_year}). Outline is the reference "
+                 f"lap's path; corner numbers and marshal sectors are from the circuit-info payload, in the SAME "
+                 f"coordinate frame. Shaded zones are MARSHAL sectors, NOT official S1/S2/S3 timing sectors.",
+    }, None
 
 
 def _overpass(lat, lon, radius):
@@ -873,6 +985,25 @@ def build_one_circuit(cfg) -> tuple[dict | None, dict]:
     base = {"circuit_id": cfg["id"], "name": cfg["name"], "location": cfg.get("location"),
             "country": cfg.get("country"), "retrieved": NOW, "config_note": cfg.get("config_note")}
     ff1_note = None
+    # 0) MultiViewer circuit API (PRIMARY): real outline + corners + marshal sectors for permanent
+    #    AND street circuits. VERIFIED-quality. Falls through to FastF1/OSM if the key has no data.
+    if cfg.get("circuit_key") is not None:
+        try:
+            g, _mvt_reason = build_circuit_mvt(cfg)
+            if g:
+                g.update(base)
+                probs = validate_geometry(g)
+                if not g.get("corners"):
+                    probs.append("MultiViewer returned no corner data")
+                if not probs:
+                    g["identity_validated"] = True
+                    g["identity_basis"] = (f"MultiViewer circuit_key {cfg['circuit_key']} (layout {g.get('layout_year')}) "
+                                           f"mapped to {cfg['id']} by the fixed event→circuit table")
+                    return g, {"status": "VERIFIED", "geometry_type": "fastlap_trace", "has_corners": True,
+                               "source_dataset": "multiviewer", "corners": len(g["corners"]),
+                               "layout_year": g.get("layout_year")}
+        except Exception:
+            pass  # fall through to FastF1/OSM
     # 1) FastF1 cached telemetry (richest). A controlled single attempt — a 403/not-cached
     #    error does NOT fail the circuit; it falls through to OSM (respecting the 403 limit).
     if cfg.get("fastf1"):
