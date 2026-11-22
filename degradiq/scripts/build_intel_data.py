@@ -75,16 +75,20 @@ CIRCUITS = [
     {"id": "jeddah", "name": "Jeddah Corniche Circuit", "location": "Jeddah", "country": "Saudi Arabia",
      "events": ["Saudi Arabian Grand Prix"], "osm": (21.6319, 39.1044)},
     {"id": "albert-park", "name": "Albert Park Circuit", "location": "Melbourne", "country": "Australia",
-     "events": ["Australian Grand Prix"], "osm": (-37.8497, 144.968)},
+     "events": ["Australian Grand Prix"], "osm": (-37.8497, 144.968),
+     "osm_identity": {"name_aliases": ["albert park", "melbourne grand prix circuit"]}},
     {"id": "suzuka", "name": "Suzuka International Racing Course", "location": "Suzuka", "country": "Japan",
-     "events": ["Japanese Grand Prix"], "osm": (34.8431, 136.5407)},
+     "events": ["Japanese Grand Prix"], "osm": (34.8431, 136.5407),
+     "osm_identity": {"name_aliases": ["suzuka", "degner", "spoon", "130r", "casio triangle",
+                                       "dunlop", "crossover", "esses"]}},
     {"id": "shanghai", "name": "Shanghai International Circuit", "location": "Shanghai", "country": "China",
      "events": ["Chinese Grand Prix"], "osm": (31.3389, 121.2197),
      "osm_identity": {"name_aliases": ["shanghai international circuit"], "reviewed_way_ids": [156328670],
                       "review_note": "OSM way 156328670 is the unnamed Shanghai International Circuit F1 track loop, "
                                      "independently reviewed (openstreetmap.org/way/156328670)"}},
     {"id": "miami", "name": "Miami International Autodrome", "location": "Miami Gardens", "country": "United States",
-     "events": ["Miami Grand Prix"], "osm": (25.9581, -80.2389)},
+     "events": ["Miami Grand Prix"], "osm": (25.9581, -80.2389),
+     "osm_identity": {"name_aliases": ["miami international autodrome"]}},
     {"id": "imola", "name": "Autodromo Enzo e Dino Ferrari", "location": "Imola", "country": "Italy",
      "events": ["Emilia Romagna Grand Prix"], "osm": (44.3439, 11.7167),
      "osm_identity": {"name_aliases": ["autodromo enzo e dino ferrari", "imola",
@@ -94,6 +98,7 @@ CIRCUITS = [
                                      "Rivazza, Acque Minerali, Variante Tamburello/Villeneuve) — reviewed as Imola"}},
     {"id": "monaco", "name": "Circuit de Monaco", "location": "Monte Carlo", "country": "Monaco",
      "events": ["Monaco Grand Prix"], "osm": (43.7347, 7.4206),
+     "osm_identity": {"name_aliases": ["circuit de monaco", "monaco"]},
      "config_note": "Street circuit — OSM raceway coverage is partial for public-road circuits."},
     {"id": "montreal", "name": "Circuit Gilles-Villeneuve", "location": "Montréal", "country": "Canada",
      "events": ["Canadian Grand Prix"], "osm": (45.5000, -73.5228),
@@ -107,37 +112,53 @@ CIRCUITS = [
                     "19 Oct 2026. Distinct circuit identity from Barcelona. Validated geometry may still be unavailable "
                     "if FastF1 telemetry is not accessible (403) and OSM lacks a validated raceway loop."},
     {"id": "red-bull-ring", "name": "Red Bull Ring", "location": "Spielberg", "country": "Austria",
-     "events": ["Austrian Grand Prix"], "osm": (47.2197, 14.7647)},
+     "events": ["Austrian Grand Prix"], "osm": (47.2197, 14.7647),
+     "osm_identity": {"name_aliases": ["red bull ring", "red-bull-ring", "spielberg", "a1-ring"]}},
     {"id": "silverstone", "name": "Silverstone Circuit", "location": "Silverstone", "country": "United Kingdom",
-     "events": ["British Grand Prix"], "osm": (52.0733, -1.0147)},
+     "events": ["British Grand Prix"], "osm": (52.0733, -1.0147),
+     "osm_identity": {"name_aliases": ["silverstone", "becketts", "brooklands", "copse", "maggotts",
+                                       "stowe", "woodcote", "luffield", "abbey", "chapel curve", "aintree", "hangar straight"]}},
     {"id": "spa", "name": "Circuit de Spa-Francorchamps", "location": "Spa", "country": "Belgium",
-     "events": ["Belgian Grand Prix"], "osm": (50.4372, 5.9714)},
+     "events": ["Belgian Grand Prix"], "osm": (50.4372, 5.9714),
+     "osm_identity": {"name_aliases": ["spa-francorchamps", "spa francorchamps", "eau rouge", "raidillon",
+                                       "pouhon", "blanchimont", "la source", "kemmel", "stavelot", "les combes", "malmedy"]}},
     {"id": "hungaroring", "name": "Hungaroring", "location": "Budapest", "country": "Hungary",
-     "events": ["Hungarian Grand Prix"], "osm": (47.5789, 19.2486)},
+     "events": ["Hungarian Grand Prix"], "osm": (47.5789, 19.2486),
+     "osm_identity": {"name_aliases": ["hungaroring"]}},
     {"id": "zandvoort", "name": "Circuit Zandvoort", "location": "Zandvoort", "country": "Netherlands",
-     "events": ["Dutch Grand Prix"], "osm": (52.3888, 4.5409)},
+     "events": ["Dutch Grand Prix"], "osm": (52.3888, 4.5409),
+     "osm_identity": {"name_aliases": ["zandvoort"]}},
     {"id": "monza", "name": "Autodromo Nazionale Monza", "location": "Monza", "country": "Italy",
      "events": ["Italian Grand Prix"], "fastf1": (2024, "Italian Grand Prix"), "osm": (45.6156, 9.2811)},
     {"id": "baku", "name": "Baku City Circuit", "location": "Baku", "country": "Azerbaijan",
      "events": ["Azerbaijan Grand Prix"], "osm": (40.3725, 49.8533),
+     "osm_identity": {"name_aliases": ["baku city circuit"]},
      "config_note": "Street circuit — OSM raceway coverage is partial for public-road circuits."},
     {"id": "marina-bay", "name": "Marina Bay Street Circuit", "location": "Marina Bay", "country": "Singapore",
      "events": ["Singapore Grand Prix"], "osm": (1.2914, 103.8640),
+     "osm_identity": {"name_aliases": ["marina bay street circuit", "singapore street circuit"]},
      "config_note": "Street circuit — OSM raceway coverage is partial for public-road circuits."},
     {"id": "cota", "name": "Circuit of the Americas", "location": "Austin", "country": "United States",
-     "events": ["United States Grand Prix"], "osm": (30.1328, -97.6411)},
+     "events": ["United States Grand Prix"], "osm": (30.1328, -97.6411),
+     "osm_identity": {"name_aliases": ["circuit of the americas", "cota"]}},
     {"id": "mexico", "name": "Autódromo Hermanos Rodríguez", "location": "Mexico City", "country": "Mexico",
      "events": ["Mexico City Grand Prix"], "osm": (19.4042, -99.0907),
      "osm_identity": {"name_aliases": ["autodromo hermanos rodriguez", "hermanos rodriguez"]}},
     {"id": "interlagos", "name": "Autódromo José Carlos Pace (Interlagos)", "location": "São Paulo", "country": "Brazil",
-     "events": ["São Paulo Grand Prix"], "osm": (-23.7036, -46.6997)},
+     "events": ["São Paulo Grand Prix"], "osm": (-23.7036, -46.6997),
+     "osm_identity": {"name_aliases": ["interlagos", "jose carlos pace", "carlos pace", "curva do sol",
+                                       "bico de pato", "descida do lago", "curva do laranjinha", "reta oposta",
+                                       "mergulho", "pinheirinho", "ferradura", "juncao"]}},
     {"id": "las-vegas", "name": "Las Vegas Strip Circuit", "location": "Las Vegas", "country": "United States",
      "events": ["Las Vegas Grand Prix"], "osm": (36.1147, -115.1730),
+     "osm_identity": {"name_aliases": ["las vegas strip circuit"]},
      "config_note": "Street circuit — OSM raceway coverage is partial for public-road circuits."},
     {"id": "lusail", "name": "Lusail International Circuit", "location": "Lusail", "country": "Qatar",
-     "events": ["Qatar Grand Prix"], "osm": (25.4900, 51.4542)},
+     "events": ["Qatar Grand Prix"], "osm": (25.4900, 51.4542),
+     "osm_identity": {"name_aliases": ["lusail", "losail", "lusail international circuit"]}},
     {"id": "yas-marina", "name": "Yas Marina Circuit", "location": "Yas Island", "country": "United Arab Emirates",
-     "events": ["Abu Dhabi Grand Prix"], "osm": (24.4672, 54.6031)},
+     "events": ["Abu Dhabi Grand Prix"], "osm": (24.4672, 54.6031),
+     "osm_identity": {"name_aliases": ["yas marina", "yas marina circuit"]}},
 ]
 
 # Tyre observations: 2024 cached races (unchanged — labelled by their historical season).
@@ -318,16 +339,41 @@ def _overpass(lat, lon, radius):
          f'relation["highway"="raceway"](around:{radius},{lat},{lon});'
          f'relation["sport"="motor"](around:{radius},{lat},{lon});'
          f');out geom;')
-    last = None
+    # Disk cache: once a non-empty response is fetched for a venue it is reused on later builds,
+    # so the dataset is deterministic and immune to the public mirrors' transient flakiness.
+    cache_dir = PACKAGE_DIR / "cache" / "overpass"
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    cache_f = cache_dir / f"{round(lat, 4)}_{round(lon, 4)}_{radius}.json"
+    if cache_f.is_file():
+        try:
+            cached = json.loads(cache_f.read_text(encoding="utf-8"))
+            if cached.get("elements"):
+                return cached, q
+        except Exception:
+            pass
+    # Overloaded public mirrors sometimes return an EMPTY element list instead of an error. For a
+    # known circuit that is a transient failure, not 'no raceway' — so an empty response is
+    # treated as retryable across all mirrors, and an empty result is only accepted once every
+    # mirror has been tried (then it is genuinely un-mapped).
+    last, empty_seen = None, False
     for base in OVERPASS_MIRRORS:
         for attempt in range(2):
             try:
                 req = urllib.request.Request(base, data=q.encode(),
                                              headers={"User-Agent": "DegradIQ-research/1.0 (circuit geometry)"})
                 with urllib.request.urlopen(req, timeout=60) as r:
-                    return json.load(r), q
+                    data = json.load(r)
+                if data.get("elements"):
+                    try:
+                        cache_f.write_text(json.dumps(data), encoding="utf-8")   # cache good responses
+                    except Exception:
+                        pass
+                    return data, q
+                empty_seen = True; time.sleep(1.5); break   # empty → try the next mirror
             except Exception as e:  # 502s and timeouts are common on public mirrors
                 last = e; time.sleep(2 + attempt * 2)
+    if empty_seen:
+        return {"elements": []}, q   # every mirror reachable but returned nothing → genuinely un-mapped
     raise last if last else RuntimeError("overpass failed")
 
 
@@ -430,6 +476,11 @@ EXPECTED_MIN_M, EXPECTED_MAX_M = 2800, 8000  # heuristic F1 circuit-length windo
 # (never 3% of the bounding span — proximity is not topology).
 CLOSURE_ABS_M = 40.0
 START_SNAP_M = 60.0  # a relation start node must lie within this of the racing-loop polyline
+# Approximate tier: when no perfectly node-closed loop exists, an identity-verified, node-chained
+# highway=raceway component of plausible circuit length may be shown as an APPROXIMATE outline
+# (loop not fully closed). Still never coordinate-stitches distinct ways (cj must be 0).
+ALLOW_APPROXIMATE_OSM = True
+APPROX_MIN_M, APPROX_MAX_M, APPROX_MIN_SPAN_M = 2500, 9500, 500
 
 
 def _project_point_metric(pts, px, py):
@@ -608,11 +659,17 @@ def build_circuit_osm(cfg) -> tuple[dict | None, str | None]:
     lat, lon = cfg["osm"]
     radius = cfg.get("osm_radius", 2800)
     data, query = _overpass(lat, lon, radius)
+    # Names of ALL highway=raceway ways at this venue — used to confirm circuit IDENTITY (a
+    # nearby raceway way carrying the circuit's name or a distinctive corner name establishes
+    # that this venue is the configured circuit, even if the rendered loop's own ways are unnamed).
+    venue_raceway_names = sorted({el.get("tags", {}).get("name") for el in data.get("elements", [])
+                                  if el.get("type") == "way" and (el.get("tags") or {}).get("name")})
     sources = _candidate_sources(data, radius)
     if not sources:
         return None, "no highway=raceway ways or motorsport circuit relation in OpenStreetMap here (e.g. an un-mapped street circuit)"
 
     rejects, best, best_score = [], None, -1e9
+    approx, approx_score = None, -1e9
     for src in sources:
         for comp in _components_with_ids(src["ways"]):
             path = comp["pts"]
@@ -642,31 +699,37 @@ def build_circuit_osm(cfg) -> tuple[dict | None, str | None]:
             in_range = EXPECTED_MIN_M <= length <= EXPECTED_MAX_M
             named = bool(comp["names"]) or bool(src.get("rel_name"))
             rel = src["kind"] == "relation"
-            accept = geom_ok and (in_range or (rel and named and 2000 <= length <= 9000))
-            if not accept:
-                if not geom_ok:
-                    if nia:
-                        why = f"not node-topology closed (node joins {nj}, coord joins {cj})"
-                    elif not single_way:
-                        why = f"multi-way loop with no node ids ({cj} coordinate joins) — cannot verify topology"
-                    else:
-                        why = f"closure gap {round(gap)}m exceeds absolute tolerance {round(CLOSURE_ABS_M)}m"
-                else:
-                    why = "length %dm outside expected window" % length
-                rejects.append(f"{src['kind']} loop ({round(length)}m, gap {round(gap)}m): {why}")
+            closed_accept = geom_ok and (in_range or (rel and named and 2000 <= length <= 9000))
+            if closed_accept:
+                score = length - gap * 4 + (1500 if topo_closed else 0) + (800 if rel else 0) \
+                    + (400 if named else 0) + 20 * nj - 80 * cj
+                if score > best_score:
+                    best = (comp, src, span, length, gap, named, in_range, closure_basis, False); best_score = score
                 continue
-            # Prefer node-topology closed loops and node joins; penalise any coordinate joins.
-            score = length - gap * 4 + (1500 if topo_closed else 0) + (800 if rel else 0) \
-                + (400 if named else 0) + 20 * nj - 80 * cj
-            if score > best_score:
-                best = (comp, src, span, length, gap, named, in_range, closure_basis); best_score = score
-    if best is None:
+            # Approximate tier: a node-chained (no coordinate joins) highway=raceway component of
+            # plausible circuit length, even if the loop is not fully closed. This is the real
+            # circuit geometry with a small gap — never a coordinate-stitched road network.
+            if ALLOW_APPROXIMATE_OSM and cj == 0 and APPROX_MIN_M <= length <= APPROX_MAX_M and span >= APPROX_MIN_SPAN_M:
+                abasis = f"approximate: node-chained highway=raceway, loop not fully closed (endpoint gap {round(gap)} m)"
+                ascore = length - gap * 2 + 30 * nj
+                if ascore > approx_score:
+                    approx = (comp, src, span, length, gap, named, in_range, abasis, True); approx_score = ascore
+                continue
+            if not geom_ok:
+                why = (f"not node-topology closed (node joins {nj}, coord joins {cj})" if nia
+                       else (f"multi-way loop with no node ids ({cj} coordinate joins) — cannot verify topology"
+                             if not single_way else f"closure gap {round(gap)}m exceeds absolute tolerance {round(CLOSURE_ABS_M)}m"))
+            else:
+                why = "length %dm outside expected window" % length
+            rejects.append(f"{src['kind']} loop ({round(length)}m, gap {round(gap)}m): {why}")
+    chosen = best if best is not None else (approx if approx is not None else None)
+    if chosen is None:
         detail = "; ".join(rejects[:4]) if rejects else "no candidate loops"
-        return None, f"no validated closed circuit loop in OpenStreetMap ({detail})"
+        return None, f"no validated circuit geometry in OpenStreetMap ({detail})"
 
-    comp, src, span, length, gap, named, in_range, closure_basis = best
+    comp, src, span, length, gap, named, in_range, closure_basis, approximate = chosen
     accepted_reason = (closure_basis or "") + ("" if in_range else
-                      f" · length {round(length)}m accepted on validated circuit-route identity")
+                      f" · length {round(length)}m accepted on validated circuit identity")
     mperlon = 111320 * math.cos(math.radians(lat))
     pts = [(p[1] * mperlon, p[0] * 111320) for p in comp["pts"]]
     stepn = max(1, len(pts) // 360)
@@ -678,7 +741,7 @@ def build_circuit_osm(cfg) -> tuple[dict | None, str | None]:
     rel_url = [f"https://www.openstreetmap.org/relation/{src['rel_id']}"] if src.get("rel_id") else []
     # INDEPENDENT circuit-identity gate: the candidate's OSM name or a reviewed source id must
     # match THIS circuit's configured identity. Proximity + closure are not identity.
-    cand_names = list(comp["names"]) + ([src["rel_name"]] if src.get("rel_name") else [])
+    cand_names = list(comp["names"]) + ([src["rel_name"]] if src.get("rel_name") else []) + venue_raceway_names
     identity = _identity_evidence(cfg, cand_names, comp["ids"], src.get("rel_id"))
     identity["route_semantic_evidence"] = src.get("racing_evidence")
     identity["source_kind"] = src["kind"]
@@ -741,7 +804,8 @@ def build_circuit_osm(cfg) -> tuple[dict | None, str | None]:
                 "retrieved_utc": datetime.now(timezone.utc).isoformat()},
         "validation": {"length_m": round(length), "span_m": round(span), "loop_gap_m": round(gap),
                        "loop_gap_ratio": round(gap / max(span, 1), 4),
-                       "loop_closed": True, "closed_by_node_topology": bool(comp.get("closed_topology")),
+                       "loop_closed": bool(comp.get("closed_topology")), "approximate": bool(approximate),
+                       "closed_by_node_topology": bool(comp.get("closed_topology")),
                        "node_ids_available": bool(comp.get("node_ids_available")),
                        "closure_basis": closure_basis, "closure_abs_tolerance_m": round(CLOSURE_ABS_M),
                        "chain_joins": comp.get("joins"),
@@ -755,13 +819,16 @@ def build_circuit_osm(cfg) -> tuple[dict | None, str | None]:
                       "start_finish": start_finish is not None, "pit_lane_known_in_osm": pit_lane_present},
         "missing": [m for m in ["corner numbers", "sector boundaries", "pit lane", "racing direction", "start/finish line"]
                     if not (m == "start/finish line" and start_finish)],
-        "outline": outline, "corners": [], "marshal_sectors": [],
+        "outline": outline, "corners": [], "marshal_sectors": [], "approximate": bool(approximate),
         "start_finish": start_finish, "n_outline_points": len(outline),
-        "track_length_m": round(length), "loop_closed": True, "loop_gap_m": round(gap),
-        "notes": "Approximate circuit centreline from OpenStreetMap (© OpenStreetMap contributors, ODbL). It is a "
-                 "validated CLOSED raceway loop — a surveyed outline, NOT a racing line and NOT official timing "
-                 "geometry. Corner numbers, sector boundaries, pit lane, start/finish and racing direction are not "
-                 "available from this source and are not shown.",
+        "track_length_m": round(length), "loop_closed": bool(comp.get("closed_topology")), "loop_gap_m": round(gap),
+        "notes": ("Approximate circuit outline from OpenStreetMap (© OpenStreetMap contributors, ODbL): identity-verified "
+                  "highway=raceway geometry, node-chained but the loop is NOT fully closed in OSM (a small gap remains). "
+                  if approximate else
+                  "Circuit outline from OpenStreetMap (© OpenStreetMap contributors, ODbL): a validated node-closed "
+                  "highway=raceway loop. ") +
+                 "A surveyed outline, NOT a racing line and NOT official timing geometry. Corner numbers, sector "
+                 "boundaries, pit lane, start/finish and racing direction are not available from this source.",
     }
     return geom, None
 
@@ -843,6 +910,7 @@ def build_one_circuit(cfg) -> tuple[dict | None, dict]:
                 if not probs:
                     return g, {"status": "PARTIAL", "geometry_type": "osm_centreline", "has_corners": False,
                                "source_dataset": "openstreetmap", "track_length_m": g.get("track_length_m"),
+                               "approximate": bool(g.get("approximate")), "loop_closed": bool(g.get("loop_closed")),
                                "osm_way_ids": g["osm"]["way_ids"][:8], "osm_relation_id": g["osm"].get("relation_id"),
                                "missing": g.get("missing")}
                 return None, {"status": "FAILED", "reason": "OSM geometry invalid: " + "; ".join(probs), "attempted": "osm"}
@@ -945,7 +1013,8 @@ def main(circuits_only=False):
                 "circuit_id": cfg["id"], "name": cfg["name"], "events": cfg["events"], "available": True,
                 "geometry_type": geom["geometry_type"], "source_dataset": geom.get("source_dataset"),
                 "geometry_source": geom.get("geometry_source"), "has_corners": geom["available"].get("corners", False),
-                "availability": geom.get("available"), "config_note": cfg.get("config_note"),
+                "approximate": bool(geom.get("approximate")), "availability": geom.get("available"),
+                "config_note": cfg.get("config_note"),
             })
         coverage.append(rec)
         print(f"[circuit] {cfg['id']:14} {status['status']:11} "

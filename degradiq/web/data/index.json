@@ -1,7 +1,7 @@
 {
-  "generated": "2026-11-07",
-  "build_id": "20261107T134256Z-5a2554",
-  "build_utc": "2026-11-07T13:42:56.034792+00:00",
+  "generated": "2026-11-22",
+  "build_id": "20261122T141103Z-44391d",
+  "build_utc": "2026-11-22T14:11:03.063338+00:00",
   "sources": {
     "fastf1": "FastF1 session telemetry (cached)",
     "osm": "OpenStreetMap via Overpass API (ODbL)"
@@ -19,6 +19,7 @@
         "source_dataset": "fastf1",
         "geometry_source": "fastf1_telemetry",
         "has_corners": true,
+        "approximate": false,
         "availability": {
           "racing_loop": true,
           "outline": true,
@@ -27,6 +28,28 @@
           "official_timing_sectors": false,
           "pit_lane": false,
           "start_finish": true
+        },
+        "config_note": null
+      },
+      {
+        "circuit_id": "suzuka",
+        "name": "Suzuka International Racing Course",
+        "events": [
+          "Japanese Grand Prix"
+        ],
+        "available": true,
+        "geometry_type": "osm_centreline",
+        "source_dataset": "openstreetmap",
+        "geometry_source": "openstreetmap_overpass",
+        "has_corners": false,
+        "approximate": true,
+        "availability": {
+          "outline": true,
+          "corners": false,
+          "marshal_sectors": false,
+          "pit_lane": false,
+          "start_finish": false,
+          "pit_lane_known_in_osm": false
         },
         "config_note": null
       },
@@ -41,6 +64,29 @@
         "source_dataset": "openstreetmap",
         "geometry_source": "openstreetmap_overpass",
         "has_corners": false,
+        "approximate": false,
+        "availability": {
+          "outline": true,
+          "corners": false,
+          "marshal_sectors": false,
+          "pit_lane": false,
+          "start_finish": false,
+          "pit_lane_known_in_osm": false
+        },
+        "config_note": null
+      },
+      {
+        "circuit_id": "miami",
+        "name": "Miami International Autodrome",
+        "events": [
+          "Miami Grand Prix"
+        ],
+        "available": true,
+        "geometry_type": "osm_centreline",
+        "source_dataset": "openstreetmap",
+        "geometry_source": "openstreetmap_overpass",
+        "has_corners": false,
+        "approximate": true,
         "availability": {
           "outline": true,
           "corners": false,
@@ -62,6 +108,7 @@
         "source_dataset": "openstreetmap",
         "geometry_source": "openstreetmap_overpass",
         "has_corners": false,
+        "approximate": false,
         "availability": {
           "outline": true,
           "corners": false,
@@ -83,6 +130,7 @@
         "source_dataset": "openstreetmap",
         "geometry_source": "openstreetmap_overpass",
         "has_corners": false,
+        "approximate": false,
         "availability": {
           "outline": true,
           "corners": false,
@@ -104,6 +152,7 @@
         "source_dataset": "fastf1",
         "geometry_source": "fastf1_telemetry",
         "has_corners": true,
+        "approximate": false,
         "availability": {
           "racing_loop": true,
           "outline": true,
@@ -116,6 +165,116 @@
         "config_note": "The 2024 'Spanish Grand Prix' was held here at Barcelona-Catalunya; in 2026 it is the Barcelona GP."
       },
       {
+        "circuit_id": "red-bull-ring",
+        "name": "Red Bull Ring",
+        "events": [
+          "Austrian Grand Prix"
+        ],
+        "available": true,
+        "geometry_type": "osm_centreline",
+        "source_dataset": "openstreetmap",
+        "geometry_source": "openstreetmap_overpass",
+        "has_corners": false,
+        "approximate": true,
+        "availability": {
+          "outline": true,
+          "corners": false,
+          "marshal_sectors": false,
+          "pit_lane": false,
+          "start_finish": false,
+          "pit_lane_known_in_osm": false
+        },
+        "config_note": null
+      },
+      {
+        "circuit_id": "silverstone",
+        "name": "Silverstone Circuit",
+        "events": [
+          "British Grand Prix"
+        ],
+        "available": true,
+        "geometry_type": "osm_centreline",
+        "source_dataset": "openstreetmap",
+        "geometry_source": "openstreetmap_overpass",
+        "has_corners": false,
+        "approximate": true,
+        "availability": {
+          "outline": true,
+          "corners": false,
+          "marshal_sectors": false,
+          "pit_lane": false,
+          "start_finish": false,
+          "pit_lane_known_in_osm": false
+        },
+        "config_note": null
+      },
+      {
+        "circuit_id": "spa",
+        "name": "Circuit de Spa-Francorchamps",
+        "events": [
+          "Belgian Grand Prix"
+        ],
+        "available": true,
+        "geometry_type": "osm_centreline",
+        "source_dataset": "openstreetmap",
+        "geometry_source": "openstreetmap_overpass",
+        "has_corners": false,
+        "approximate": true,
+        "availability": {
+          "outline": true,
+          "corners": false,
+          "marshal_sectors": false,
+          "pit_lane": false,
+          "start_finish": false,
+          "pit_lane_known_in_osm": false
+        },
+        "config_note": null
+      },
+      {
+        "circuit_id": "hungaroring",
+        "name": "Hungaroring",
+        "events": [
+          "Hungarian Grand Prix"
+        ],
+        "available": true,
+        "geometry_type": "osm_centreline",
+        "source_dataset": "openstreetmap",
+        "geometry_source": "openstreetmap_overpass",
+        "has_corners": false,
+        "approximate": true,
+        "availability": {
+          "outline": true,
+          "corners": false,
+          "marshal_sectors": false,
+          "pit_lane": false,
+          "start_finish": false,
+          "pit_lane_known_in_osm": false
+        },
+        "config_note": null
+      },
+      {
+        "circuit_id": "zandvoort",
+        "name": "Circuit Zandvoort",
+        "events": [
+          "Dutch Grand Prix"
+        ],
+        "available": true,
+        "geometry_type": "osm_centreline",
+        "source_dataset": "openstreetmap",
+        "geometry_source": "openstreetmap_overpass",
+        "has_corners": false,
+        "approximate": true,
+        "availability": {
+          "outline": true,
+          "corners": false,
+          "marshal_sectors": false,
+          "pit_lane": false,
+          "start_finish": false,
+          "pit_lane_known_in_osm": false
+        },
+        "config_note": null
+      },
+      {
         "circuit_id": "monza",
         "name": "Autodromo Nazionale Monza",
         "events": [
@@ -126,6 +285,7 @@
         "source_dataset": "fastf1",
         "geometry_source": "fastf1_telemetry",
         "has_corners": true,
+        "approximate": false,
         "availability": {
           "racing_loop": true,
           "outline": true,
@@ -134,6 +294,28 @@
           "official_timing_sectors": false,
           "pit_lane": false,
           "start_finish": true
+        },
+        "config_note": null
+      },
+      {
+        "circuit_id": "cota",
+        "name": "Circuit of the Americas",
+        "events": [
+          "United States Grand Prix"
+        ],
+        "available": true,
+        "geometry_type": "osm_centreline",
+        "source_dataset": "openstreetmap",
+        "geometry_source": "openstreetmap_overpass",
+        "has_corners": false,
+        "approximate": true,
+        "availability": {
+          "outline": true,
+          "corners": false,
+          "marshal_sectors": false,
+          "pit_lane": false,
+          "start_finish": false,
+          "pit_lane_known_in_osm": false
         },
         "config_note": null
       },
@@ -148,6 +330,73 @@
         "source_dataset": "openstreetmap",
         "geometry_source": "openstreetmap_overpass",
         "has_corners": false,
+        "approximate": false,
+        "availability": {
+          "outline": true,
+          "corners": false,
+          "marshal_sectors": false,
+          "pit_lane": false,
+          "start_finish": false,
+          "pit_lane_known_in_osm": false
+        },
+        "config_note": null
+      },
+      {
+        "circuit_id": "interlagos",
+        "name": "Aut\u00f3dromo Jos\u00e9 Carlos Pace (Interlagos)",
+        "events": [
+          "S\u00e3o Paulo Grand Prix"
+        ],
+        "available": true,
+        "geometry_type": "osm_centreline",
+        "source_dataset": "openstreetmap",
+        "geometry_source": "openstreetmap_overpass",
+        "has_corners": false,
+        "approximate": true,
+        "availability": {
+          "outline": true,
+          "corners": false,
+          "marshal_sectors": false,
+          "pit_lane": false,
+          "start_finish": false,
+          "pit_lane_known_in_osm": false
+        },
+        "config_note": null
+      },
+      {
+        "circuit_id": "lusail",
+        "name": "Lusail International Circuit",
+        "events": [
+          "Qatar Grand Prix"
+        ],
+        "available": true,
+        "geometry_type": "osm_centreline",
+        "source_dataset": "openstreetmap",
+        "geometry_source": "openstreetmap_overpass",
+        "has_corners": false,
+        "approximate": true,
+        "availability": {
+          "outline": true,
+          "corners": false,
+          "marshal_sectors": false,
+          "pit_lane": false,
+          "start_finish": false,
+          "pit_lane_known_in_osm": false
+        },
+        "config_note": null
+      },
+      {
+        "circuit_id": "yas-marina",
+        "name": "Yas Marina Circuit",
+        "events": [
+          "Abu Dhabi Grand Prix"
+        ],
+        "available": true,
+        "geometry_type": "osm_centreline",
+        "source_dataset": "openstreetmap",
+        "geometry_source": "openstreetmap_overpass",
+        "has_corners": false,
+        "approximate": true,
         "availability": {
           "outline": true,
           "corners": false,
@@ -192,8 +441,8 @@
     "supported_events": 23,
     "circuits_total": 25,
     "verified": 3,
-    "partial": 4,
-    "unavailable": 18,
+    "partial": 15,
+    "unavailable": 7,
     "failed": 0,
     "classifications": [
       "VERIFIED",
@@ -202,8 +451,8 @@
       "FAILED"
     ],
     "build": {
-      "build_id": "20261107T134256Z-5a2554",
-      "build_utc": "2026-11-07T13:42:56.034792+00:00",
+      "build_id": "20261122T141103Z-44391d",
+      "build_utc": "2026-11-22T14:11:03.063338+00:00",
       "source_failures": [],
       "served_from_previous": []
     },
@@ -227,7 +476,7 @@
           "Saudi Arabian Grand Prix"
         ],
         "status": "UNAVAILABLE",
-        "reason": "no validated closed circuit loop in OpenStreetMap (raceway_ways loop (284m, gap 0m): length 283m outside expected window; raceway_ways loop (5521m, gap 173m): not node-topology closed (node joins 11, coord joins 0); raceway_ways loop (1693m, gap 1037m): not node-topology closed (node joins 1, coord joins 0))",
+        "reason": "identity: no osm_identity configured for this circuit",
         "attempted": "osm"
       },
       {
@@ -246,9 +495,31 @@
         "events": [
           "Japanese Grand Prix"
         ],
-        "status": "UNAVAILABLE",
-        "reason": "no validated closed circuit loop in OpenStreetMap (raceway_ways loop (6702m, gap 863m): not node-topology closed (node joins 40, coord joins 0); raceway_ways loop (1267m, gap 0m): length 1266m outside expected window; raceway_ways loop (480m, gap 0m): length 479m outside expected window; raceway_ways loop (165m, gap 0m): length 165m outside expected window)",
-        "attempted": "osm"
+        "status": "PARTIAL",
+        "geometry_type": "osm_centreline",
+        "has_corners": false,
+        "source_dataset": "openstreetmap",
+        "track_length_m": 6702,
+        "approximate": true,
+        "loop_closed": false,
+        "osm_way_ids": [
+          120917578,
+          183391643,
+          183391645,
+          183391644,
+          183391657,
+          183391636,
+          183391635,
+          183391628
+        ],
+        "osm_relation_id": null,
+        "missing": [
+          "corner numbers",
+          "sector boundaries",
+          "pit lane",
+          "racing direction",
+          "start/finish line"
+        ]
       },
       {
         "circuit_id": "shanghai",
@@ -261,6 +532,8 @@
         "has_corners": false,
         "source_dataset": "openstreetmap",
         "track_length_m": 5465,
+        "approximate": false,
+        "loop_closed": true,
         "osm_way_ids": [
           156328670
         ],
@@ -279,9 +552,30 @@
         "events": [
           "Miami Grand Prix"
         ],
-        "status": "UNAVAILABLE",
-        "reason": "no validated closed circuit loop in OpenStreetMap (raceway_ways loop (5691m, gap 718m): not node-topology closed (node joins 6, coord joins 0); raceway_ways loop (742m, gap 627m): not node-topology closed (node joins 0, coord joins 0))",
-        "attempted": "osm"
+        "status": "PARTIAL",
+        "geometry_type": "osm_centreline",
+        "has_corners": false,
+        "source_dataset": "openstreetmap",
+        "track_length_m": 5691,
+        "approximate": true,
+        "loop_closed": false,
+        "osm_way_ids": [
+          1017340351,
+          1485453197,
+          1485453201,
+          1485453204,
+          1233165737,
+          1472684485,
+          1472686141
+        ],
+        "osm_relation_id": null,
+        "missing": [
+          "corner numbers",
+          "sector boundaries",
+          "pit lane",
+          "racing direction",
+          "start/finish line"
+        ]
       },
       {
         "circuit_id": "imola",
@@ -294,6 +588,8 @@
         "has_corners": false,
         "source_dataset": "openstreetmap",
         "track_length_m": 4910,
+        "approximate": false,
+        "loop_closed": true,
         "osm_way_ids": [
           7920430,
           1021771393,
@@ -320,7 +616,7 @@
           "Monaco Grand Prix"
         ],
         "status": "UNAVAILABLE",
-        "reason": "no validated closed circuit loop in OpenStreetMap (raceway_ways loop (251m, gap 0m): length 251m outside expected window; raceway_ways loop (408m, gap 324m): not node-topology closed (node joins 1, coord joins 0); raceway_ways loop (234m, gap 200m): not node-topology closed (node joins 0, coord joins 0))",
+        "reason": "no validated circuit geometry in OpenStreetMap (raceway_ways loop (251m, gap 0m): length 251m outside expected window; raceway_ways loop (408m, gap 324m): not node-topology closed (node joins 1, coord joins 0); raceway_ways loop (234m, gap 200m): not node-topology closed (node joins 0, coord joins 0))",
         "attempted": "osm"
       },
       {
@@ -334,6 +630,8 @@
         "has_corners": false,
         "source_dataset": "openstreetmap",
         "track_length_m": 4367,
+        "approximate": false,
+        "loop_closed": true,
         "osm_way_ids": [
           136717490
         ],
@@ -365,7 +663,7 @@
           "Spanish Grand Prix"
         ],
         "status": "UNAVAILABLE",
-        "reason": "FastF1 not accessible (DataNotLoadedError; e.g. 403/not cached); no validated closed circuit loop in OpenStreetMap (raceway_ways loop (2187m, gap 579m): not node-topology closed (node joins 0, coord joins 0))",
+        "reason": "FastF1 not accessible (DataNotLoadedError; e.g. 403/not cached); no validated circuit geometry in OpenStreetMap (raceway_ways loop (2187m, gap 579m): not node-topology closed (node joins 0, coord joins 0))",
         "attempted": "fastf1+osm"
       },
       {
@@ -374,9 +672,31 @@
         "events": [
           "Austrian Grand Prix"
         ],
-        "status": "UNAVAILABLE",
-        "reason": "no validated closed circuit loop in OpenStreetMap (raceway_ways loop (305m, gap 44m): not node-topology closed (node joins 2, coord joins 0); raceway_ways loop (229m, gap 116m): not node-topology closed (node joins 2, coord joins 0); raceway_ways loop (4587m, gap 230m): not node-topology closed (node joins 12, coord joins 0); raceway_ways loop (1018m, gap 23m): not node-topology closed (node joins 2, coord joins 0))",
-        "attempted": "osm"
+        "status": "PARTIAL",
+        "geometry_type": "osm_centreline",
+        "has_corners": false,
+        "source_dataset": "openstreetmap",
+        "track_length_m": 4587,
+        "approximate": true,
+        "loop_closed": false,
+        "osm_way_ids": [
+          84416610,
+          822592402,
+          822592401,
+          822592400,
+          822592399,
+          822592398,
+          347958266,
+          822592404
+        ],
+        "osm_relation_id": null,
+        "missing": [
+          "corner numbers",
+          "sector boundaries",
+          "pit lane",
+          "racing direction",
+          "start/finish line"
+        ]
       },
       {
         "circuit_id": "silverstone",
@@ -384,9 +704,31 @@
         "events": [
           "British Grand Prix"
         ],
-        "status": "UNAVAILABLE",
-        "reason": "no validated closed circuit loop in OpenStreetMap (raceway_ways loop (7016m, gap 786m): not node-topology closed (node joins 27, coord joins 0); raceway_ways loop (1842m, gap 84m): not node-topology closed (node joins 5, coord joins 0); raceway_ways loop (1062m, gap 0m): length 1061m outside expected window; raceway_ways loop (203m, gap 142m): not node-topology closed (node joins 1, coord joins 0))",
-        "attempted": "osm"
+        "status": "PARTIAL",
+        "geometry_type": "osm_centreline",
+        "has_corners": false,
+        "source_dataset": "openstreetmap",
+        "track_length_m": 7016,
+        "approximate": true,
+        "loop_closed": false,
+        "osm_way_ids": [
+          3571477,
+          169730585,
+          169730587,
+          169730588,
+          169733768,
+          169609611,
+          169618245,
+          169730586
+        ],
+        "osm_relation_id": null,
+        "missing": [
+          "corner numbers",
+          "sector boundaries",
+          "pit lane",
+          "racing direction",
+          "start/finish line"
+        ]
       },
       {
         "circuit_id": "spa",
@@ -394,9 +736,31 @@
         "events": [
           "Belgian Grand Prix"
         ],
-        "status": "UNAVAILABLE",
-        "reason": "no validated closed circuit loop in OpenStreetMap (raceway_ways loop (7239m, gap 232m): not node-topology closed (node joins 30, coord joins 0); raceway_ways loop (1089m, gap 0m): length 1088m outside expected window; raceway_ways loop (1203m, gap 1163m): not node-topology closed (node joins 0, coord joins 0); raceway_ways loop (720m, gap 470m): not node-topology closed (node joins 0, coord joins 0))",
-        "attempted": "osm"
+        "status": "PARTIAL",
+        "geometry_type": "osm_centreline",
+        "has_corners": false,
+        "source_dataset": "openstreetmap",
+        "track_length_m": 7239,
+        "approximate": true,
+        "loop_closed": false,
+        "osm_way_ids": [
+          24449918,
+          126807113,
+          175195997,
+          1430527230,
+          126807111,
+          126807112,
+          126835638,
+          1359025268
+        ],
+        "osm_relation_id": null,
+        "missing": [
+          "corner numbers",
+          "sector boundaries",
+          "pit lane",
+          "racing direction",
+          "start/finish line"
+        ]
       },
       {
         "circuit_id": "hungaroring",
@@ -404,9 +768,26 @@
         "events": [
           "Hungarian Grand Prix"
         ],
-        "status": "UNAVAILABLE",
-        "reason": "no highway=raceway ways or motorsport circuit relation in OpenStreetMap here (e.g. an un-mapped street circuit)",
-        "attempted": "osm"
+        "status": "PARTIAL",
+        "geometry_type": "osm_centreline",
+        "has_corners": false,
+        "source_dataset": "openstreetmap",
+        "track_length_m": 5440,
+        "approximate": true,
+        "loop_closed": false,
+        "osm_way_ids": [
+          231328650,
+          231417580,
+          1333262244
+        ],
+        "osm_relation_id": null,
+        "missing": [
+          "corner numbers",
+          "sector boundaries",
+          "pit lane",
+          "racing direction",
+          "start/finish line"
+        ]
       },
       {
         "circuit_id": "zandvoort",
@@ -414,9 +795,31 @@
         "events": [
           "Dutch Grand Prix"
         ],
-        "status": "UNAVAILABLE",
-        "reason": "no validated closed circuit loop in OpenStreetMap (raceway_ways loop (156m, gap 119m): not node-topology closed (node joins 0, coord joins 0); raceway_ways loop (5016m, gap 459m): not node-topology closed (node joins 24, coord joins 0))",
-        "attempted": "osm"
+        "status": "PARTIAL",
+        "geometry_type": "osm_centreline",
+        "has_corners": false,
+        "source_dataset": "openstreetmap",
+        "track_length_m": 5016,
+        "approximate": true,
+        "loop_closed": false,
+        "osm_way_ids": [
+          24626850,
+          1311710253,
+          1311765615,
+          1311802779,
+          1311822339,
+          1311822340,
+          1311822341,
+          1311879069
+        ],
+        "osm_relation_id": null,
+        "missing": [
+          "corner numbers",
+          "sector boundaries",
+          "pit lane",
+          "racing direction",
+          "start/finish line"
+        ]
       },
       {
         "circuit_id": "monza",
@@ -437,7 +840,7 @@
           "Azerbaijan Grand Prix"
         ],
         "status": "UNAVAILABLE",
-        "reason": "no validated closed circuit loop in OpenStreetMap (no candidate loops)",
+        "reason": "no validated circuit geometry in OpenStreetMap (no candidate loops)",
         "attempted": "osm"
       },
       {
@@ -447,7 +850,7 @@
           "Singapore Grand Prix"
         ],
         "status": "UNAVAILABLE",
-        "reason": "no validated closed circuit loop in OpenStreetMap (raceway_ways loop (1223m, gap 575m): not node-topology closed (node joins 3, coord joins 0))",
+        "reason": "no validated circuit geometry in OpenStreetMap (raceway_ways loop (1223m, gap 575m): not node-topology closed (node joins 3, coord joins 0))",
         "attempted": "osm"
       },
       {
@@ -456,9 +859,31 @@
         "events": [
           "United States Grand Prix"
         ],
-        "status": "UNAVAILABLE",
-        "reason": "no validated closed circuit loop in OpenStreetMap (raceway_ways loop (5785m, gap 271m): not node-topology closed (node joins 32, coord joins 0); raceway_ways loop (247m, gap 202m): not node-topology closed (node joins 0, coord joins 0); raceway_ways loop (950m, gap 718m): not node-topology closed (node joins 0, coord joins 0); raceway_ways loop (981m, gap 0m): length 981m outside expected window)",
-        "attempted": "osm"
+        "status": "PARTIAL",
+        "geometry_type": "osm_centreline",
+        "has_corners": false,
+        "source_dataset": "openstreetmap",
+        "track_length_m": 5785,
+        "approximate": true,
+        "loop_closed": false,
+        "osm_way_ids": [
+          118256423,
+          118258957,
+          118258959,
+          514836011,
+          118258939,
+          118258950,
+          118258952,
+          118258954
+        ],
+        "osm_relation_id": null,
+        "missing": [
+          "corner numbers",
+          "sector boundaries",
+          "pit lane",
+          "racing direction",
+          "start/finish line"
+        ]
       },
       {
         "circuit_id": "mexico",
@@ -471,6 +896,8 @@
         "has_corners": false,
         "source_dataset": "openstreetmap",
         "track_length_m": 3552,
+        "approximate": false,
+        "loop_closed": true,
         "osm_way_ids": [
           772754604,
           772754605,
@@ -493,9 +920,31 @@
         "events": [
           "S\u00e3o Paulo Grand Prix"
         ],
-        "status": "UNAVAILABLE",
-        "reason": "no validated closed circuit loop in OpenStreetMap (raceway_ways loop (5692m, gap 657m): not node-topology closed (node joins 25, coord joins 0); raceway_ways loop (736m, gap 80m): not node-topology closed (node joins 4, coord joins 0); raceway_ways loop (443m, gap 283m): not node-topology closed (node joins 2, coord joins 0); raceway_ways loop (155m, gap 133m): not node-topology closed (node joins 0, coord joins 0))",
-        "attempted": "osm"
+        "status": "PARTIAL",
+        "geometry_type": "osm_centreline",
+        "has_corners": false,
+        "source_dataset": "openstreetmap",
+        "track_length_m": 5692,
+        "approximate": true,
+        "loop_closed": false,
+        "osm_way_ids": [
+          33779109,
+          138567234,
+          138567239,
+          190164737,
+          138567242,
+          190164736,
+          189535472,
+          138567236
+        ],
+        "osm_relation_id": null,
+        "missing": [
+          "corner numbers",
+          "sector boundaries",
+          "pit lane",
+          "racing direction",
+          "start/finish line"
+        ]
       },
       {
         "circuit_id": "las-vegas",
@@ -504,7 +953,7 @@
           "Las Vegas Grand Prix"
         ],
         "status": "UNAVAILABLE",
-        "reason": "no validated closed circuit loop in OpenStreetMap (raceway_ways loop (863m, gap 355m): not node-topology closed (node joins 5, coord joins 0))",
+        "reason": "no validated circuit geometry in OpenStreetMap (raceway_ways loop (863m, gap 355m): not node-topology closed (node joins 5, coord joins 0))",
         "attempted": "osm"
       },
       {
@@ -513,9 +962,27 @@
         "events": [
           "Qatar Grand Prix"
         ],
-        "status": "UNAVAILABLE",
-        "reason": "no validated closed circuit loop in OpenStreetMap (raceway_ways loop (5434m, gap 26m): not node-topology closed (node joins 3, coord joins 0); raceway_ways loop (529m, gap 433m): not node-topology closed (node joins 0, coord joins 0); raceway_ways loop (746m, gap 712m): not node-topology closed (node joins 0, coord joins 0); raceway_ways loop (775m, gap 492m): not node-topology closed (node joins 0, coord joins 0))",
-        "attempted": "osm"
+        "status": "PARTIAL",
+        "geometry_type": "osm_centreline",
+        "has_corners": false,
+        "source_dataset": "openstreetmap",
+        "track_length_m": 5434,
+        "approximate": true,
+        "loop_closed": false,
+        "osm_way_ids": [
+          152483595,
+          196193732,
+          1004121314,
+          1037707300
+        ],
+        "osm_relation_id": null,
+        "missing": [
+          "corner numbers",
+          "sector boundaries",
+          "pit lane",
+          "racing direction",
+          "start/finish line"
+        ]
       },
       {
         "circuit_id": "yas-marina",
@@ -523,9 +990,30 @@
         "events": [
           "Abu Dhabi Grand Prix"
         ],
-        "status": "UNAVAILABLE",
-        "reason": "no validated closed circuit loop in OpenStreetMap (raceway_ways loop (5597m, gap 224m): not node-topology closed (node joins 6, coord joins 0); raceway_ways loop (1130m, gap 620m): not node-topology closed (node joins 2, coord joins 0); raceway_ways loop (1023m, gap 749m): not node-topology closed (node joins 1, coord joins 0); raceway_ways loop (237m, gap 218m): not node-topology closed (node joins 0, coord joins 0))",
-        "attempted": "osm"
+        "status": "PARTIAL",
+        "geometry_type": "osm_centreline",
+        "has_corners": false,
+        "source_dataset": "openstreetmap",
+        "track_length_m": 5597,
+        "approximate": true,
+        "loop_closed": false,
+        "osm_way_ids": [
+          168477013,
+          188337195,
+          1255169704,
+          1469184731,
+          1255169703,
+          188337196,
+          1469184732
+        ],
+        "osm_relation_id": null,
+        "missing": [
+          "corner numbers",
+          "sector boundaries",
+          "pit lane",
+          "racing direction",
+          "start/finish line"
+        ]
       }
     ],
     "events": [
@@ -547,15 +1035,15 @@
         "round": 3,
         "event": "Japanese Grand Prix",
         "circuit_id": "suzuka",
-        "status": "UNAVAILABLE",
-        "geometry_type": null
+        "status": "PARTIAL",
+        "geometry_type": "osm_centreline"
       },
       {
         "round": 4,
         "event": "Miami Grand Prix",
         "circuit_id": "miami",
-        "status": "UNAVAILABLE",
-        "geometry_type": null
+        "status": "PARTIAL",
+        "geometry_type": "osm_centreline"
       },
       {
         "round": 5,
@@ -582,36 +1070,36 @@
         "round": 8,
         "event": "Austrian Grand Prix",
         "circuit_id": "red-bull-ring",
-        "status": "UNAVAILABLE",
-        "geometry_type": null
+        "status": "PARTIAL",
+        "geometry_type": "osm_centreline"
       },
       {
         "round": 9,
         "event": "British Grand Prix",
         "circuit_id": "silverstone",
-        "status": "UNAVAILABLE",
-        "geometry_type": null
+        "status": "PARTIAL",
+        "geometry_type": "osm_centreline"
       },
       {
         "round": 10,
         "event": "Belgian Grand Prix",
         "circuit_id": "spa",
-        "status": "UNAVAILABLE",
-        "geometry_type": null
+        "status": "PARTIAL",
+        "geometry_type": "osm_centreline"
       },
       {
         "round": 11,
         "event": "Hungarian Grand Prix",
         "circuit_id": "hungaroring",
-        "status": "UNAVAILABLE",
-        "geometry_type": null
+        "status": "PARTIAL",
+        "geometry_type": "osm_centreline"
       },
       {
         "round": 12,
         "event": "Dutch Grand Prix",
         "circuit_id": "zandvoort",
-        "status": "UNAVAILABLE",
-        "geometry_type": null
+        "status": "PARTIAL",
+        "geometry_type": "osm_centreline"
       },
       {
         "round": 13,
@@ -652,8 +1140,8 @@
         "round": 18,
         "event": "United States Grand Prix",
         "circuit_id": "cota",
-        "status": "UNAVAILABLE",
-        "geometry_type": null
+        "status": "PARTIAL",
+        "geometry_type": "osm_centreline"
       },
       {
         "round": 19,
@@ -666,8 +1154,8 @@
         "round": 20,
         "event": "S\u00e3o Paulo Grand Prix",
         "circuit_id": "interlagos",
-        "status": "UNAVAILABLE",
-        "geometry_type": null
+        "status": "PARTIAL",
+        "geometry_type": "osm_centreline"
       },
       {
         "round": 21,
@@ -680,15 +1168,15 @@
         "round": 22,
         "event": "Qatar Grand Prix",
         "circuit_id": "lusail",
-        "status": "UNAVAILABLE",
-        "geometry_type": null
+        "status": "PARTIAL",
+        "geometry_type": "osm_centreline"
       },
       {
         "round": 23,
         "event": "Abu Dhabi Grand Prix",
         "circuit_id": "yas-marina",
-        "status": "UNAVAILABLE",
-        "geometry_type": null
+        "status": "PARTIAL",
+        "geometry_type": "osm_centreline"
       }
     ]
   },

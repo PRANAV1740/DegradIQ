@@ -464,9 +464,9 @@ function renderCircuit() {
   $("#circ-loc").textContent = [d.location, d.country].filter(Boolean).join(", ") + (d.source_event ? "  ·  " + d.source_event : "");
   const val = d.validation || {}, mp = d.marshal_projection || {};
   const facts = osm
-    ? [["Geometry", "centreline outline"], ["Corners", "not in OSM data"],
+    ? [["Geometry", d.approximate ? "approximate outline" : "centreline outline"], ["Corners", "not in OSM data"],
        ["Track length", d.track_length_m ? d.track_length_m + " m (OSM)" : "—"],
-       ["Loop", d.loop_closed ? "closed" : "open / partial"],
+       ["Loop", d.loop_closed ? "node-closed" : (d.approximate ? `approximate · ${d.loop_gap_m ?? "?"} m gap` : "open / partial")],
        ["Source", val.from_relation ? "OSM relation" : "raceway ways"]]
     : [["Corners", (d.corners || []).length],
        ["Marshal sectors", mp.n_accepted != null ? `${mp.n_accepted} accepted${mp.n_rejected ? ` · ${mp.n_rejected} rejected` : ""}` : (d.marshal_sectors || []).length],

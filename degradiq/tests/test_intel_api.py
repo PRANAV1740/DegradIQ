@@ -175,15 +175,17 @@ class IntelMappingTests(unittest.TestCase):
                 self.assertEqual(d["corners"], [])          # OSM has no corner numbers
 
     def test_osm_loops_closed_by_topology_not_coord_stitching(self):
-        # Every available OSM loop must be node-topology closed or a single closed way —
-        # never bridged across distinct ways by coordinate proximity.
+        # Every available OSM loop — closed or approximate — must be node-chained, NEVER bridged
+        # across distinct ways by coordinate proximity. Non-approximate loops must also be
+        # node-topology closed; approximate ones may be open but are still coordinate-join-free.
         for c in self.idx["circuits"]["available"]:
             if c.get("geometry_type") == "osm_centreline":
                 d = self.c.get(f"/api/intel/circuit/{c['circuit_id']}").json()
                 v = d["validation"]; joins = v.get("chain_joins") or {}
                 self.assertEqual(joins.get("coord", 0), 0, f"{c['circuit_id']} relied on coordinate joins")
-                self.assertTrue(v.get("closed_by_node_topology") or joins.get("node", 0) == 0,
-                                f"{c['circuit_id']} multi-way loop not closed by node topology")
+                if not d.get("approximate"):
+                    self.assertTrue(v.get("closed_by_node_topology") or joins.get("node", 0) == 0,
+                                    f"{c['circuit_id']} non-approximate loop not closed by node topology")
                 self.assertIn("loop_gap_ratio", v)          # absolute + ratio both recorded
                 # identity must be a concrete match (name alias / reviewed source id), not proximity
                 iv = d.get("identity_validation") or {}
