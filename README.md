@@ -94,6 +94,8 @@ The suite covers the prediction engine, circuit-geometry integrity gates, proven
 
 Python, scikit-learn, FastF1, Pandas, NumPy, FastAPI, Streamlit, JavaScript, Vercel, GitHub Actions.
 
-## Data sources and licensing
+## License
 
-DegradIQ derives from several sources, each with its own terms: MultiViewer (non-commercial fan app), OpenStreetMap (ODbL), bacinger/f1-circuits (MIT), and FastF1-cached F1 timing and telemetry. Only normalised outlines and derived features are packaged, never raw F1 data. Full details are in [`degradiq/web/data/DATA_SOURCES.md`](degradiq/web/data/DATA_SOURCES.md). Before any commercial use, redistribution rights for the F1-derived sources should be confirmed in writing.
+The DegradIQ source code is released under the **MIT License**. See [`LICENSE`](LICENSE).
+
+The MIT License covers this project's own code only. It does **not** relicense the third-party data the project draws on, which keeps its own terms: MultiViewer (non-commercial fan app), OpenStreetMap (ODbL), bacinger/f1-circuits (MIT), and FastF1-cached F1 timing and telemetry. Only normalised outlines and derived features are packaged, never raw F1 data. Full details are in [`degradiq/web/data/DATA_SOURCES.md`](degradiq/web/data/DATA_SOURCES.md). Before any commercial use, redistribution rights for the F1-derived sources should be confirmed in writing.
